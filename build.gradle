@@ -1,0 +1,31 @@
+plugins {
+    id 'java'
+    id 'com.gradleup.shadow' version '8.3.5'
+}
+
+group = 'fr.giovanni75'
+version = '0.1'
+compileJava.options.encoding = 'UTF-8'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'com.google.code.gson:gson:2.11.0'
+    implementation 'com.formdev:flatlaf:3.5.4'
+}
+
+jar {
+    manifest {
+        attributes(
+                "Implementation-Title": project.name,
+                "Implementation-Version": version,
+                "Main-Class": "fr.giovanni75.tarot.Tarot"
+        )
+    }
+}
+
+shadowJar {
+    archiveFileName = 'Tarot.jar'
+}
