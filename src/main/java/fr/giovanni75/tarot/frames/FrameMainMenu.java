@@ -8,6 +8,7 @@ import fr.giovanni75.tarot.objects.Player;
 import javax.swing.*;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
+import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -102,6 +103,8 @@ public class FrameMainMenu extends JFrame {
 		scrollPane.getVerticalScrollBar().setUnitIncrement(18);
 		add(scrollPane);
 
+		URL url = ClassLoader.getSystemResource("logo.png");
+		setIconImage(new ImageIcon(url).getImage());
 		setVisible(true);
 	}
 
