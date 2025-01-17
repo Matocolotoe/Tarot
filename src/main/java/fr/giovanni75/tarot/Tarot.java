@@ -84,7 +84,7 @@ public final class Tarot {
 				for (int i = 0; i < limit; i++) {
 					writer.write(i < fiveSize ? getLeaderboardEntry(fiveLeaderboard.get(i), dateRecord, 5) : ",,,");
 					writer.write(i < fourSize ? getLeaderboardEntry(fourLeaderboard.get(i), dateRecord, 4) : ",,,");
-					writer.write(i < fourSize ? getLeaderboardEntry(fourLeaderboard.get(i), dateRecord, 3) : ",,,");
+					writer.write(i < threeSize ? getLeaderboardEntry(threeLeaderboard.get(i), dateRecord, 3) : ",,,");
 					writer.write("\n");
 				}
 				writer.close();
