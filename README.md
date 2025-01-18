@@ -32,21 +32,31 @@ Chaque contrat est associé à un multiplicateur de score différent.
 | Garde sans   | 4                   |
 | Garde contre | 6                   |
 
-Ainsi, en notant :
+Nous noterons dans ce qui suit :
 - $a$ le score obtenu par l'attaque,
 - $b$ le score requis en fonction des bouts,
-- $m$ le multiplicateur du contrat,
+- $m$ le multiplicateur du contrat.
 
-alors le nombre de points attribué à l'attaque vaut $(25 + |a - b|) \times m$,
-multiplié par $-1$ lorsque le contrat est chuté. Il est alors possible de retrouver le score obtenu par l'attaque à partir du score
+Les points finalement attribués à l'attaque valent, lorsque $a \geq b$ (contrat _réussi_) :
+$$f = (25 + |a - b|) \times m$$
+
+et $-f$ lorsque $a < b$ (contrat _chuté_). Il est alors possible de retrouver le score obtenu par l'attaque à partir du score
 final $f$ qui lui a été attribué :
 - $f / m + b - 25$ si le contrat a été réussi,
 - $b + 25 - f / m$ si le contrat a été chuté.
 
-À 3 et 4 joueurs, chaque défenseur perd $f$ points et le preneur en gagne $3f$.
+## Attribution des points
 
-À 5 joueurs, chaque défenseur perd $f$ points, le preneur en gagne $2f$ et son allié
-en gagne $f$. Si le preneur s'est appelé tout seul, il obtient $4f$ points.
+À 3 ou 4 joueurs :
+- chaque défenseur obtient $-f$ points,
+- le preneur gagne $3f$ points.
+
+À 5 joueurs :
+- chaque défenseur obtient $-f$ points,
+- le preneur en gagne $2f$,
+- le joueur appelé en gagne $f$.
+
+_NB : si le preneur s'est appelé tout seul à 5 joueurs, il obtient alors $4f$ points._
 
 ## Misères
 
@@ -80,7 +90,7 @@ _NB : la poignée doit nécessairement être annoncée lorsque le joueur pose sa
 
 ## Petit au bout
 
-Lorsque le dernier pli est remporté grâce au Petit par un joueur, une prime de 10 points est
-accordée au camp de ce joueur. Cette prime est affectée par le multiplicateur du contrat,
-et **ne dépend pas du camp** (si le contrat est chuté mais l'attaque mène le Petit au bout,
-la prime reviendra en positif à l'attaque).
+Lorsque le dernier pli contient le Petit, une prime de 10 points est accordée au camp du joueur
+qui remporte le pli. Cette prime est affectée par le multiplicateur du contrat, et **ne dépend
+pas du camp du joueur** (si l'attaque chute mais remporte tout de même le dernier pli grâce
+au Petit, alors la prime reviendra en **positif** à l'attaque).
