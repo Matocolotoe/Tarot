@@ -37,11 +37,9 @@ Nous noterons dans ce qui suit :
 - $b$ le score requis en fonction des bouts,
 - $m$ le multiplicateur du contrat.
 
-Les points finalement attribués à l'attaque valent, lorsque $a \geq b$ (contrat _réussi_) :
-$$f = (25 + |a - b|) \times m$$
-
-et $-f$ lorsque $a < b$ (contrat _chuté_). Il est alors possible de retrouver le score obtenu par l'attaque à partir du score
-final $f$ qui lui a été attribué :
+Les points finalement attribués à l'attaque valent $f = (25 + |a - b|) \times m$ lorsque $a \geq b$
+(contrat _réussi_), et $-f$ lorsque $a < b$ (contrat _chuté_). Il est alors possible de retrouver le
+score obtenu par l'attaque à partir du score final $f$ qui lui a été attribué :
 - $f / m + b - 25$ si le contrat a été réussi,
 - $b + 25 - f / m$ si le contrat a été chuté.
 
@@ -56,7 +54,7 @@ final $f$ qui lui a été attribué :
 - le preneur en gagne $2f$,
 - le joueur appelé en gagne $f$.
 
-_NB : si le preneur s'est appelé tout seul à 5 joueurs, il obtient alors $4f$ points._
+_NB : si le preneur s'est appelé tout seul à 5 joueurs, il obtient alors 4f points._
 
 ## Misères
 
@@ -92,5 +90,5 @@ _NB : la poignée doit nécessairement être annoncée lorsque le joueur pose sa
 
 Lorsque le dernier pli contient le Petit, une prime de 10 points est accordée au camp du joueur
 qui remporte le pli. Cette prime est affectée par le multiplicateur du contrat, et **ne dépend
-pas du camp du joueur** (si l'attaque chute mais remporte tout de même le dernier pli grâce
-au Petit, alors la prime reviendra en **positif** à l'attaque).
+pas du camp du joueur** (si l'attaque chute mais remporte le dernier pli grâce au Petit, alors
+la prime lui reviendra en positif).
