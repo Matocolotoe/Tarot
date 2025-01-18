@@ -125,7 +125,7 @@ class FrameNewGame extends JFrame implements ActionListener {
 		mainPanel.add(sliderPanel);
 
 		JLabel attackLabel = Components.getSimpleText("Score de l'attaque : 51", 14, 160, 340, 200, 50);
-		JLabel defenseLabel = Components.getSimpleText("Score de la défense : 40", 14, 450, 340, 200, 50);
+		JLabel defenseLabel = Components.getSimpleText("Score de la défense : 40", 14, 445, 340, 200, 50);
 		mainPanel.add(attackLabel);
 		mainPanel.add(defenseLabel);
 
