@@ -131,6 +131,8 @@ public final class Tarot {
 	}
 
 	public static void main(String[] args) {
+		createDirectory(""); // Create data directory
+
 		createDirectory("backups");
 		createDirectory("leaderboards");
 		createJsonFile("games");
