@@ -49,6 +49,7 @@ public class FrameMainMenu extends JFrame {
 		setTitle("Tarot");
 
 		JPanel mainPanel = new JPanel();
+		mainPanel.setBorder(BorderFactory.createEmptyBorder(30, 30, 0, 0));
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 
 		JMenuBar menuBar = new JMenuBar();
@@ -84,17 +85,16 @@ public class FrameMainMenu extends JFrame {
 			Components.popup("Données exportées avec succès.");
 		});
 
-		mainPanel.add(Components.getSimpleText(" ", 20));
-		mainPanel.add(Components.getSimpleText("    Historique des parties", 20));
+		mainPanel.add(Components.getSimpleText("Historique des parties", 20));
 		mainPanel.add(Components.getSimpleText(" ", 20));
 
 		for (Map.Entry<DateRecord, List<Game>> entry : Tarot.GAMES.entrySet()) {
 			DateRecord date = entry.getKey();
-			mainPanel.add(Components.getSimpleText("     " + date.month().getName() + " " + date.year(), 18));
-			mainPanel.add(Components.getSimpleText(" ", 16));
+			mainPanel.add(Components.getSimpleText(date.month().getName() + " " + date.year(), 18));
+			mainPanel.add(Components.getSimpleText(" ", 18));
 			for (Game game : entry.getValue()) {
-				mainPanel.add(Components.getSimpleText("      " + game.getDescriptionFirstLine(), 15));
-				mainPanel.add(Components.getSimpleText("      " + game.getDescriptionSecondLine(), 15));
+				mainPanel.add(Components.getSimpleText(game.getDescriptionFirstLine(), 15));
+				mainPanel.add(Components.getSimpleText(game.getDescriptionSecondLine(), 15));
 				mainPanel.add(Components.getSimpleText(" ", 15));
 			}
 		}
