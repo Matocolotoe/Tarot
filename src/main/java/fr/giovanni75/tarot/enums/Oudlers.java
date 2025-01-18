@@ -1,8 +1,5 @@
 package fr.giovanni75.tarot.enums;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public enum Oudlers {
 
 	ZERO("Pas de bouts", 56),
@@ -24,13 +21,6 @@ public enum Oudlers {
 
 	public int getRequiredScore() {
 		return score;
-	}
-
-	public static final Map<String, Oudlers> BY_NAME = new HashMap<>();
-
-	static {
-		for (Oudlers oudlers : values())
-			BY_NAME.put(oudlers.display, oudlers);
 	}
 
 }
