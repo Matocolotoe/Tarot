@@ -42,7 +42,7 @@ public class Game implements Serializable {
 		this.attackScore = json.get("attack_score").getAsInt();
 		this.oudlers = Oudlers.valueOf(json.get("oudlers").getAsString());
 
-		JsonElement element = json.get("petit");
+		JsonElement element = json.get("petit_au_bout");
 		this.petitAuBout = element == null ? PetitAuBout.NONE : PetitAuBout.valueOf(element.getAsString());
 
 		JsonArray playersArray = json.get("players").getAsJsonArray();
