@@ -46,7 +46,7 @@ public class FrameMainMenu extends JFrame {
 		setBounds(300, 90, 800, 600);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setResizable(false);
-		setTitle("Tarot");
+		setTitle("Tarot – Compteur de points");
 
 		JPanel mainPanel = new JPanel();
 		mainPanel.setBorder(BorderFactory.createEmptyBorder(30, 30, 0, 0));
