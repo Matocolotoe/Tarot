@@ -50,10 +50,13 @@ class FrameGlobalStats extends JFrame {
 		}
 
 		for (Contract contract : Contract.ALL_CONTRACTS) {
-			int amount = maxAmounts.getOrDefault(contract, 0);
 			Player player = maxPlayers.get(contract);
-			String name = player == null ? "–" : player.getName();
-			panel.add(Components.getSimpleText(" ‣ " + contract.getName() + " : " + String.format(details, name, amount), 15));
+			if (player == null) {
+				panel.add(Components.getSimpleText(" ‣ " + contract.getName() + " : " + Tarot.NONE_STRING, 15));
+			} else {
+				panel.add(Components.getSimpleText(" ‣ " + contract.getName() + " : "
+						+ String.format(details, player.getName(), maxAmounts.getOrDefault(contract, 0)), 15));
+			}
 		}
 
 		panel.add(Components.getSimpleText(" ", 25));
