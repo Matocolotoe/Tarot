@@ -56,7 +56,8 @@ public class Game implements Serializable {
 		for (int i = 0; i < size; i++) {
 			JsonObject object = playersArray.get(i).getAsJsonObject();
 			UUID uuid = UUID.fromString(object.get("uuid").getAsString());
-			Side side = Side.valueOf(object.get("side").getAsString());
+			element = object.get("side");
+			Side side = element == null ? Side.DEFENSE : Side.valueOf(element.getAsString());
 			element = object.get("handful");
 			Handful handful = element == null ? Handful.NONE : Handful.valueOf(element.getAsString());
 			element = object.get("misery");

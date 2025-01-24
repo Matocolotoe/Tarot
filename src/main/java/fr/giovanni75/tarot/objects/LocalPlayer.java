@@ -18,7 +18,8 @@ public record LocalPlayer(UUID uuid, Side side, Handful handful, Misery misery) 
 	public JsonObject toJson() {
 		JsonObject object = new JsonObject();
 		object.addProperty("uuid", uuid.toString());
-		object.addProperty("side", side.toString());
+		if (side != Side.DEFENSE)
+			object.addProperty("side", side.toString());
 		if (handful != Handful.NONE)
 			object.addProperty("handful", handful.name());
 		if (misery != Misery.NONE)
