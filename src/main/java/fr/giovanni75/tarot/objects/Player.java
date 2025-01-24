@@ -74,6 +74,7 @@ public class Player implements Serializable {
 			return List.of();
 
 		List<String> result = new ArrayList<>();
+		result.add("Score total : " + stats.totalScore);
 		result.add("Parties jouées : " + Maps.sum(stats.playedGames));
 		for (Contract contract : Contract.ALL_CONTRACTS)
 			result.add(" ‣ " + contract.getName() + " : " + stats.playedGames.getOrDefault(contract, 0));
