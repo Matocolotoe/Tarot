@@ -145,7 +145,6 @@ public class Game implements Serializable {
 		}
 
 		Player.LocalStats stats = attacker.getStats(date, numberOfPlayers);
-		Maps.increment(contract, stats.playedGames);
 		Maps.increment(contract, diff >= 0 ? stats.successfulTakes : stats.failedTakes);
 
 		if (ally != null) {
@@ -154,13 +153,7 @@ public class Game implements Serializable {
 			} else {
 				stats = ally.getStats(date, numberOfPlayers);
 				Maps.increment(contract, stats.calledTimes);
-				Maps.increment(contract, stats.playedGames);
 			}
-		}
-
-		for (Player defender : defenders) {
-			stats = defender.getStats(date, numberOfPlayers);
-			Maps.increment(contract, stats.playedGames);
 		}
 
 		for (Map.Entry<Player, Integer> entry : finalScores.entrySet()) {
@@ -169,6 +162,7 @@ public class Game implements Serializable {
 			stats = player.getStats(date, numberOfPlayers);
 			Maps.computeIfHigher(contract, score, stats.bestTurns, 1);
 			Maps.computeIfHigher(contract, score, stats.worstTurns, -1);
+			Maps.increment(contract, stats.playedGames);
 			stats.totalScore += score;
 		}
 
