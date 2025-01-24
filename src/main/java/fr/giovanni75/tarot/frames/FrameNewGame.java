@@ -31,7 +31,7 @@ class FrameNewGame extends JFrame implements ActionListener {
 
 	private final JRadioButton[] attackerButtons = new JRadioButton[5];
 	private final JRadioButton[] calledButtons = new JRadioButton[5];
-	private final JRadioButton[] contractButtons = new JRadioButton[Contract.values().length];
+	private final JRadioButton[] contractButtons = new JRadioButton[Contract.ALL_CONTRACTS.length];
 	private final JRadioButton[] oudlersButtons = new JRadioButton[Oudlers.values().length];
 
 	private final JButton submitButton;
@@ -68,11 +68,11 @@ class FrameNewGame extends JFrame implements ActionListener {
 
 		JPanel mainPanel = new JPanel();
 		mainPanel.setLayout(null);
-		getContentPane().add(mainPanel);
+		add(mainPanel);
 
 		final List<String> names = new ArrayList<>(Tarot.PLAYER_NAMES);
 		names.sort(String::compareTo);
-		names.addFirst(Tarot.NO_OPTION_SELECTED);
+		names.addFirst(Tarot.NONE_STRING);
 
 		mainPanel.add(Components.getSimpleText("Joueurs", 18, COMBO_BOX_BASE_X - 80, COMBO_BOX_BASE_Y - 20, 140, 60));
 		mainPanel.add(Components.getSimpleText("Misères", 18, COMBO_BOX_BASE_X - 80, COMBO_BOX_BASE_Y + 20, 140, 60));
@@ -137,7 +137,7 @@ class FrameNewGame extends JFrame implements ActionListener {
 		});
 
 		mainPanel.add(Components.getSimpleText("Contrat", 18, 100, 400, 100, 60));
-		for (Contract contract : Contract.values()) {
+		for (Contract contract : Contract.ALL_CONTRACTS) {
 			JRadioButton button = new JRadioButton(contract.getName());
 			contractButtons[contract.ordinal()] = button;
 			button.setLocation(SECONDARY_BUTTON_BASE_X + contract.ordinal() * 120, 420);
@@ -176,7 +176,7 @@ class FrameNewGame extends JFrame implements ActionListener {
 
 		int numberOfPlayers = 0;
 		for (int i = 0; i < 5; i++)
-			if (!Tarot.NO_OPTION_SELECTED.equals(playerNameBoxes[i].getSelectedItem()))
+			if (!Tarot.NONE_STRING.equals(playerNameBoxes[i].getSelectedItem()))
 				numberOfPlayers++;
 
 		if (numberOfPlayers < 3) {
@@ -252,10 +252,8 @@ class FrameNewGame extends JFrame implements ActionListener {
 		int nonEmptyIndex = 0;
 		for (int i = 0; i < 5; i++) {
 			selectedItem = playerNameBoxes[i].getSelectedItem();
-			if (selectedItem == null || Tarot.NO_OPTION_SELECTED.equals(selectedItem))
+			if (selectedItem == null || Tarot.NONE_STRING.equals(selectedItem))
 				continue;
-
-			UUID uuid = Tarot.getPlayer(selectedItem.toString()).getUniqueID();
 
 			selectedItem = handfulBoxes[i].getSelectedItem();
 			if (selectedItem == null)
@@ -267,6 +265,7 @@ class FrameNewGame extends JFrame implements ActionListener {
 				throw new IllegalStateException("Misery box cannot have null selection");
 			Misery misery = Misery.BY_NAME.get(selectedItem.toString());
 
+			UUID uuid = Tarot.getPlayer(selectedItem.toString()).getUniqueID();
 			players[nonEmptyIndex] = new LocalPlayer(uuid, sides[i], handful, misery);
 			nonEmptyIndex++;
 		}
@@ -283,7 +282,7 @@ class FrameNewGame extends JFrame implements ActionListener {
 
 		Game game = new Game(month, contract, attackScore, oudlers, petitAuBout, players);
 		game.write("games");
-		Tarot.GAMES.computeIfAbsent(game.getDate(), key -> new ArrayList<>()).add(game);
+		Tarot.ALL_GAMES.computeIfAbsent(game.getDate(), key -> new ArrayList<>()).add(game);
 
 		for (JComboBox<String> handfulBox : handfulBoxes)
 			handfulBox.setSelectedIndex(0);

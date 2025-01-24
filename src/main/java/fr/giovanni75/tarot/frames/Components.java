@@ -1,7 +1,9 @@
 package fr.giovanni75.tarot.frames;
 
+import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.border.Border;
 import java.awt.Font;
 
 final class Components {
@@ -23,6 +25,10 @@ final class Components {
 		label.setLocation(x, y);
 		label.setSize(width, height);
 		return label;
+	}
+
+	static Border getStandardBorder() {
+		return BorderFactory.createEmptyBorder(30, 30, 0, 0);
 	}
 
 	static void popup(String message) {

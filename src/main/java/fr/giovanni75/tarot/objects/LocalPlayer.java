@@ -1,8 +1,6 @@
 package fr.giovanni75.tarot.objects;
 
 import com.google.gson.JsonObject;
-import fr.giovanni75.tarot.DateRecord;
-import fr.giovanni75.tarot.Tarot;
 import fr.giovanni75.tarot.enums.Handful;
 import fr.giovanni75.tarot.enums.Misery;
 import fr.giovanni75.tarot.enums.Side;
@@ -10,10 +8,6 @@ import fr.giovanni75.tarot.enums.Side;
 import java.util.UUID;
 
 public record LocalPlayer(UUID uuid, Side side, Handful handful, Misery misery) implements Serializable {
-
-	void addScore(DateRecord date, int score, int players) {
-		Tarot.getPlayer(uuid).addScore(date, score, players);
-	}
 
 	@Override
 	public boolean equals(Object object) {

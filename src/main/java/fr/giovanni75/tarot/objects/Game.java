@@ -4,13 +4,12 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import fr.giovanni75.tarot.DateRecord;
+import fr.giovanni75.tarot.Maps;
 import fr.giovanni75.tarot.Tarot;
 import fr.giovanni75.tarot.enums.*;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Function;
 
 public class Game implements Serializable {
@@ -94,35 +93,65 @@ public class Game implements Serializable {
 			throw new IllegalStateException("Attacker cannot be null");
 
 		/* Final score */
+		Map<Player, Integer> finalScores = new HashMap<>();
 		int numberOfPlayers = players.length;
 		if (numberOfPlayers == 5) {
 			if (ally == null)
 				throw new IllegalStateException("Ally cannot be null with 5+ players");
 			if (ally == attacker) {
-				attacker.addScore(date, attackFinalScore * 4, numberOfPlayers);
+				Maps.increment(attacker, finalScores, attackFinalScore * 4);
 				for (Player defender : defenders)
-					defender.addScore(date, -attackFinalScore, numberOfPlayers);
+					Maps.increment(defender, finalScores, -attackFinalScore);
 			} else {
-				attacker.addScore(date, attackFinalScore * 2, numberOfPlayers);
-				ally.addScore(date, attackFinalScore, numberOfPlayers);
+				Maps.increment(attacker, finalScores, attackFinalScore * 2);
+				Maps.increment(ally, finalScores, attackFinalScore);
 				for (Player defender : defenders)
-					defender.addScore(date, -attackFinalScore, numberOfPlayers);
+					Maps.increment(defender, finalScores, -attackFinalScore);
 			}
 		} else {
-			attacker.addScore(date, attackFinalScore * (numberOfPlayers - 1), numberOfPlayers);
+			Maps.increment(attacker, finalScores, attackFinalScore * (numberOfPlayers - 1));
 			for (Player defender : defenders)
-				defender.addScore(date, -attackFinalScore, numberOfPlayers);
+				Maps.increment(defender, finalScores, -attackFinalScore);
 		}
 
 		/* Miseries */
-		for (LocalPlayer player : players) {
-			int points = player.misery().getExtraPoints();
+		for (LocalPlayer local : players) {
+			int points = local.misery().getExtraPoints();
 			if (points == 0)
 				continue;
-			player.addScore(date, points * (numberOfPlayers - 1), numberOfPlayers);
+			Player player = Tarot.getPlayer(local.uuid());
+			Maps.increment(player, finalScores, points * (numberOfPlayers - 1));
 			for (LocalPlayer other : players)
-				if (!player.equals(other))
-					other.addScore(date, -points, numberOfPlayers);
+				if (!local.equals(other))
+					Maps.increment(Tarot.getPlayer(other.uuid()), finalScores, -points);
+		}
+
+		Player.LocalStats stats = attacker.getStats(date, numberOfPlayers);
+		Maps.increment(contract, stats.playedGames);
+		Maps.increment(contract, diff >= 0 ? stats.successfulTakes : stats.failedTakes);
+
+		if (ally != null) {
+			if (ally == attacker) {
+				Maps.increment(contract, stats.selfCalls);
+			} else {
+				stats = ally.getStats(date, numberOfPlayers);
+				Maps.increment(contract, stats.calledTimes);
+				Maps.increment(contract, stats.playedGames);
+			}
+		}
+
+		for (Player defender : defenders) {
+			stats = defender.getStats(date, numberOfPlayers);
+			Maps.increment(contract, stats.playedGames);
+		}
+
+		for (Map.Entry<Player, Integer> entry : finalScores.entrySet()) {
+			Player player = entry.getKey();
+			int score = entry.getValue();
+			stats = player.getStats(date, numberOfPlayers);
+			Maps.computeIfHigher(contract, score, stats.bestTurns, 1);
+			Maps.computeIfHigher(contract, score, stats.worstTurns, -1);
+			stats.totalScore += score;
 		}
 
 		return attackFinalScore;
@@ -143,6 +172,10 @@ public class Game implements Serializable {
 			throw new IllegalStateException("There has to be 4 defenders when the attacker called themselves");
 
 		return getPlayer(Side.ATTACK);
+	}
+
+	public Contract getContract() {
+		return contract;
 	}
 
 	public DateRecord getDate() {
@@ -182,6 +215,10 @@ public class Game implements Serializable {
 			throw new IllegalStateException("Ally cannot be null with 5+ players");
 
 		return ally == attacker ? simple : attacker.getName() + " & " + ally.getName() + " vs. " + defense;
+	}
+
+	public int getNumberOfPlayers() {
+		return players.length;
 	}
 
 	private Player getPlayer(Side side) {

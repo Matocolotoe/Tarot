@@ -9,6 +9,7 @@ import javax.swing.*;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -43,54 +44,71 @@ public class FrameMainMenu extends JFrame {
 	}
 
 	public FrameMainMenu() {
-		setBounds(300, 90, 800, 600);
+		setBounds(300, 100, 800, 600);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setResizable(false);
 		setTitle("Tarot – Compteur de points");
 
 		JPanel mainPanel = new JPanel();
-		mainPanel.setBorder(BorderFactory.createEmptyBorder(30, 30, 0, 0));
+		mainPanel.setBorder(Components.getStandardBorder());
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 
 		JMenuBar menuBar = new JMenuBar();
 		setJMenuBar(menuBar);
 
-		JMenu settingsMenu = new JMenu("Données");
-		menuBar.add(settingsMenu);
-
+		JMenu addMenu = new JMenu("Ajouter");
 		JMenuItem addGameItem = new JMenuItem("Ajouter une partie...");
 		JMenuItem addPlayerItem = new JMenuItem("Ajouter un joueur...");
-		JMenuItem backupItem = new JMenuItem("Créer une sauvegarde...");
-		JMenuItem exportItem = new JMenuItem("Exporter les données...");
-		settingsMenu.add(addGameItem);
-		settingsMenu.add(addPlayerItem);
-		settingsMenu.add(backupItem);
-		settingsMenu.add(exportItem);
-
-		int mask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
-		addGameItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, mask));
-		addPlayerItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_J, mask));
-		backupItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, mask));
-		exportItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E, mask));
-
 		addGameItem.addActionListener(event -> new FrameNewGame());
 		addPlayerItem.addActionListener(event -> inputPlayer());
+		addMenu.add(addGameItem);
+		addMenu.add(addPlayerItem);
+		menuBar.add(addMenu);
+
+		JMenu dataMenu = new JMenu("Données");
+		JMenuItem backupItem = new JMenuItem("Créer une sauvegarde...");
+		JMenuItem exportItem = new JMenuItem("Exporter les données...");
+		dataMenu.add(backupItem);
+		dataMenu.add(exportItem);
+		menuBar.add(dataMenu);
+
 		backupItem.addActionListener(event -> {
 			Tarot.createBackup("games");
 			Tarot.createBackup("players");
 			Components.popup("Données sauvegardées avec succès.");
 		});
+
 		exportItem.addActionListener(event -> {
 			Tarot.createLeaderboards();
 			Components.popup("Données exportées avec succès.");
 		});
 
-		mainPanel.add(Components.getSimpleText("Historique des parties", 20));
-		mainPanel.add(Components.getSimpleText(" ", 20));
+		int mask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
+		backupItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, mask));
+		exportItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E, mask));
 
-		for (Map.Entry<DateRecord, List<Game>> entry : Tarot.GAMES.entrySet()) {
-			DateRecord date = entry.getKey();
-			mainPanel.add(Components.getSimpleText(date.month().getName() + " " + date.year(), 18));
+		List<DateRecord> dates = new ArrayList<>(Tarot.ALL_GAMES.keySet());
+		dates.sort((d1, d2) -> 1 - d1.compareTo(d2));
+		for (int i = 5; i > 2; i--) {
+			final int players = i; // Must be final for FramePlayerStats constructor
+			JMenu statsMenu = new JMenu("Tarot à " + players);
+			JMenu globalStatsMenu = new JMenu("Stats générales");
+			JMenu playerStatsMenu = new JMenu("Stats individuelles");
+			for (DateRecord date : dates) {
+				JMenuItem globalStatsItem = new JMenuItem(date.getName());
+				JMenuItem playerStatsItem = new JMenuItem(date.getName());
+				globalStatsItem.addActionListener(event -> new FrameGlobalStats(date, players));
+				playerStatsItem.addActionListener(event -> new FramePlayerStats(date, players));
+				globalStatsMenu.add(globalStatsItem);
+				playerStatsMenu.add(playerStatsItem);
+			}
+			statsMenu.add(globalStatsMenu);
+			statsMenu.add(playerStatsMenu);
+			menuBar.add(statsMenu);
+		}
+
+		for (Map.Entry<DateRecord, List<Game>> entry : Tarot.ALL_GAMES.entrySet()) {
+			mainPanel.add(Components.getSimpleText(entry.getKey().getName(), 20));
 			mainPanel.add(Components.getSimpleText(" ", 18));
 			for (Game game : entry.getValue()) {
 				mainPanel.add(Components.getSimpleText(game.getDescriptionFirstLine(), 15));

@@ -16,9 +16,10 @@ import java.util.*;
 
 public final class Tarot {
 
+	public static final List<Player> ORDERED_PLAYERS = new ArrayList<>();
 	public static final List<String> PLAYER_NAMES = new ArrayList<>();
-	public static final Map<DateRecord, List<Game>> GAMES = new HashMap<>();
-	public static final String NO_OPTION_SELECTED = "—";
+	public static final Map<DateRecord, List<Game>> ALL_GAMES = new HashMap<>();
+	public static final String NONE_STRING = "—";
 
 	private static final Map<String, Player> PLAYER_NAME_MAP = new HashMap<>();
 	private static final Map<UUID, Player> PLAYER_UUID_MAP = new HashMap<>();
@@ -27,6 +28,7 @@ public final class Tarot {
 
 	public static Player addPlayer(String name, UUID uuid) {
 		Player player = new Player(name, uuid);
+		ORDERED_PLAYERS.add(player);
 		PLAYER_NAMES.add(name);
 		PLAYER_NAME_MAP.put(name, player);
 		PLAYER_UUID_MAP.put(uuid, player);
@@ -68,7 +70,7 @@ public final class Tarot {
 	}
 
 	public static void createLeaderboards() {
-		for (DateRecord dateRecord : GAMES.keySet()) {
+		for (DateRecord dateRecord : ALL_GAMES.keySet()) {
 			createDirectory("leaderboards/" + dateRecord.year());
 			final List<Player> fiveLeaderboard = getLeaderboard(dateRecord, 5);
 			final List<Player> fourLeaderboard = getLeaderboard(dateRecord, 4);
@@ -107,7 +109,7 @@ public final class Tarot {
 
 	private static List<Player> getLeaderboard(DateRecord date, int players) {
 		final List<Player> leaderboard = new ArrayList<>();
-		for (Player player : PLAYER_NAME_MAP.values())
+		for (Player player : ORDERED_PLAYERS)
 			if (player.getScore(date, players) != 0)
 				leaderboard.add(player);
 		leaderboard.sort((p1, p2) -> {
@@ -140,10 +142,9 @@ public final class Tarot {
 
 		JsonArray games = getJsonArrayFromFile("games");
 		int size = games.size();
-
 		for (int i = 0; i < size; i++) {
 			Game game = new Game(games.get(size - i - 1).getAsJsonObject());
-			GAMES.computeIfAbsent(game.getDate(), key -> new ArrayList<>()).add(game);
+			ALL_GAMES.computeIfAbsent(game.getDate(), key -> new ArrayList<>()).add(game);
 		}
 
 		JsonArray players = getJsonArrayFromFile("players");
@@ -154,12 +155,14 @@ public final class Tarot {
 			String name = object.get("name").getAsString();
 			addPlayer(name, uuid);
 		}
-		PLAYER_NAMES.sort(String::compareTo);
-		PLAYER_NAMES.addFirst(NO_OPTION_SELECTED);
 
-		for (List<Game> list : GAMES.values())
+		for (List<Game> list : ALL_GAMES.values())
 			for (Game game : list)
 				game.applyResults();
+
+		ORDERED_PLAYERS.sort(Comparator.comparing(Player::getName));
+		PLAYER_NAMES.sort(String::compareTo);
+		PLAYER_NAMES.addFirst(NONE_STRING);
 
 		FlatLightLaf.setup();
 		new FrameMainMenu();

@@ -27,6 +27,7 @@ public enum Contract implements Nameable {
 		return name;
 	}
 
+	public static final Contract[] ALL_CONTRACTS = values();
 	public static final Map<String, Contract> BY_NAME = new HashMap<>();
 
 	static {
