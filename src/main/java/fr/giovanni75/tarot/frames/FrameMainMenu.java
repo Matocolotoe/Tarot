@@ -16,6 +16,8 @@ import java.util.UUID;
 
 public class FrameMainMenu extends JFrame {
 
+	private static final int MAX_GAMES_DISPLAYED = 250;
+
 	private static void inputPlayer() {
 		String name = Components.prompt("Nom du joueur ?", "Ajouter un joueur");
 		if (name == null) // Window was just closed
@@ -107,6 +109,7 @@ public class FrameMainMenu extends JFrame {
 			menuBar.add(statsMenu);
 		}
 
+		int total = 0;
 		for (Map.Entry<DateRecord, List<Game>> entry : Tarot.ALL_GAMES.entrySet()) {
 			mainPanel.add(Components.getSimpleText(entry.getKey().getName(), 20));
 			mainPanel.add(Components.getSimpleText(" ", 18));
@@ -114,6 +117,9 @@ public class FrameMainMenu extends JFrame {
 				mainPanel.add(Components.getSimpleText(game.getDescriptionFirstLine(), 15));
 				mainPanel.add(Components.getSimpleText(game.getDescriptionSecondLine(), 15));
 				mainPanel.add(Components.getSimpleText(" ", 15));
+				total++;
+				if (total >= MAX_GAMES_DISPLAYED)
+					break;
 			}
 		}
 
