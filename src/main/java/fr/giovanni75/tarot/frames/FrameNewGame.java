@@ -26,6 +26,7 @@ class FrameNewGame extends JFrame implements ActionListener {
 	private final JComboBox<String>[] playerNameBoxes = new JComboBox[5];
 
 	private final JComboBox<String> petitAuBoutBox;
+	private final JComboBox<String> slamBox;
 
 	private final JSlider scoreSlider = new JSlider(JSlider.HORIZONTAL, 0, 91, 51);
 
@@ -157,7 +158,10 @@ class FrameNewGame extends JFrame implements ActionListener {
 		}
 
 		mainPanel.add(Components.getSimpleText("Petit au bout", 18, 100, 500, 120, 60));
-		mainPanel.add(petitAuBoutBox = getEnumNameList(PetitAuBout.values(), 250, 520));
+		mainPanel.add(petitAuBoutBox = getEnumNameList(PetitAuBout.values(), 240, 520));
+
+		mainPanel.add(Components.getSimpleText("Chelem", 18, 410, 500, 100, 60));
+		mainPanel.add(slamBox = getEnumNameList(Slam.values(), 500, 520));
 
 		submitButton = new JButton("Ajouter");
 		submitButton.addActionListener(this);
@@ -189,6 +193,7 @@ class FrameNewGame extends JFrame implements ActionListener {
 		int attackScore = scoreSlider.getValue();
 		Oudlers oudlers = null;
 		PetitAuBout petitAuBout;
+		Slam slam;
 		LocalPlayer[] players;
 
 		for (JRadioButton contractButton : contractButtons) {
@@ -219,6 +224,11 @@ class FrameNewGame extends JFrame implements ActionListener {
 		if (selectedItem == null)
 			throw new IllegalStateException("Petit au bout box cannot have null selection");
 		petitAuBout = PetitAuBout.BY_NAME.get(selectedItem.toString());
+
+		selectedItem = slamBox.getSelectedItem();
+		if (selectedItem == null)
+			throw new IllegalStateException("Slam box cannot have null selection");
+		slam = Slam.BY_NAME.get(selectedItem.toString());
 
 		int attackerIndex = -1;
 		int calledPlayerIndex = -1;
@@ -280,7 +290,7 @@ class FrameNewGame extends JFrame implements ActionListener {
 			}
 		}
 
-		Game game = new Game(month, contract, attackScore, oudlers, petitAuBout, players);
+		Game game = new Game(month, contract, attackScore, oudlers, petitAuBout, slam, players);
 		game.write("games");
 		Tarot.ALL_GAMES.computeIfAbsent(game.getDate(), key -> new ArrayList<>()).add(game);
 
@@ -290,6 +300,7 @@ class FrameNewGame extends JFrame implements ActionListener {
 			miseryBox.setSelectedIndex(0);
 
 		petitAuBoutBox.setSelectedIndex(0);
+		slamBox.setSelectedIndex(0);
 		scoreSlider.setValue(51);
 
 		int score = game.applyResults();

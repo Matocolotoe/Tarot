@@ -20,15 +20,17 @@ public class Game implements Serializable {
 	private final int attackScore;
 	private final Oudlers oudlers;
 	private final PetitAuBout petitAuBout;
+	private final Slam slam;
 
 	private final LocalPlayer[] players;
 
-	public Game(Month month, Contract contract, int attackScore, Oudlers oudlers, PetitAuBout petitAuBout, LocalPlayer[] players) {
+	public Game(Month month, Contract contract, int attackScore, Oudlers oudlers, PetitAuBout petitAuBout, Slam slam, LocalPlayer[] players) {
 		this.date = new DateRecord(month, LocalDate.now().getYear());
 		this.contract = contract;
 		this.attackScore = attackScore;
 		this.oudlers = oudlers;
 		this.petitAuBout = petitAuBout;
+		this.slam = slam;
 		this.players = players;
 	}
 
@@ -43,6 +45,9 @@ public class Game implements Serializable {
 
 		JsonElement element = json.get("petit_au_bout");
 		this.petitAuBout = element == null ? PetitAuBout.NONE : PetitAuBout.valueOf(element.getAsString());
+
+		element = json.get("slam");
+		this.slam = element == null ? Slam.UNANNOUNCED : Slam.valueOf(element.getAsString());
 
 		JsonArray playersArray = json.get("players").getAsJsonArray();
 		int size = playersArray.size();
@@ -83,6 +88,17 @@ public class Game implements Serializable {
 			attackFinalScore += 10 * contract.getMultiplier();
 		} else if (petitAuBout == PetitAuBout.DEFENSE) {
 			attackFinalScore -= 10 * contract.getMultiplier();
+		}
+
+		/* Slam */
+		if (slam == Slam.ANNOUNCED) {
+			if (attackScore == 91) {
+				attackFinalScore += 400;
+			} else {
+				attackFinalScore -= 200;
+			}
+		} else if (attackScore == 91) {
+			attackFinalScore += 200;
 		}
 
 		List<Player> defenders = getDefenders(Function.identity());
