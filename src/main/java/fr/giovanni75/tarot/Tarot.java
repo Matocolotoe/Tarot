@@ -110,17 +110,19 @@ public final class Tarot {
 	private static List<Player> getLeaderboard(DateRecord date, int players) {
 		final List<Player> leaderboard = new ArrayList<>();
 		for (Player player : ORDERED_PLAYERS)
-			if (player.getScore(date, players) != 0)
+			if (getScore(player, date, players) != 0)
 				leaderboard.add(player);
+
 		leaderboard.sort((p1, p2) -> {
-			int result = Integer.compare(p2.getScore(date, players), p1.getScore(date, players));
+			int result = Integer.compare(getScore(p2, date, players), getScore(p1, date, players));
 			return result == 0 ? p1.getName().compareTo(p2.getName()) : result;
 		});
+
 		return leaderboard;
 	}
 
 	private static String getLeaderboardEntry(Player player, DateRecord date, int players) {
-		int score = player.getScore(date, players);
+		int score = getScore(player, date, players);
 		return score == 0 ? ",,," : player.getName() + "," + score + ",,";
 	}
 
@@ -130,6 +132,10 @@ public final class Tarot {
 
 	public static Player getPlayer(UUID uuid) {
 		return PLAYER_UUID_MAP.get(uuid);
+	}
+
+	private static int getScore(Player player, DateRecord date, int players) {
+		return player.getStats(date, players).totalScore;
 	}
 
 	public static void main(String[] args) {

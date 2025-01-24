@@ -47,7 +47,7 @@ public class Player implements Serializable {
 
 	public static class LocalStats {
 
-		int totalScore;
+		public int totalScore;
 
 		public final Map<Contract, Integer> bestTurns = new HashMap<>();
 		public final Map<Contract, Integer> calledTimes = new HashMap<>();
@@ -104,10 +104,6 @@ public class Player implements Serializable {
 		result.add("Pire tour : " + Maps.max(stats.worstTurns, "%d (%s)", -1));
 
 		return result;
-	}
-
-	public int getScore(DateRecord date, int players) {
-		return getStats(date, players).totalScore;
 	}
 
 	public LocalStats getStats(DateRecord date, int players) {
