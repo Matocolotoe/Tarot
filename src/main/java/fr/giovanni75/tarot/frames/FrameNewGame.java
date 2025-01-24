@@ -265,6 +265,8 @@ class FrameNewGame extends JFrame implements ActionListener {
 			if (selectedItem == null || Tarot.NONE_STRING.equals(selectedItem))
 				continue;
 
+			UUID uuid = Tarot.getPlayer(selectedItem.toString()).getUniqueID();
+
 			selectedItem = handfulBoxes[i].getSelectedItem();
 			if (selectedItem == null)
 				throw new IllegalStateException("Handful box cannot have null selection");
@@ -275,7 +277,6 @@ class FrameNewGame extends JFrame implements ActionListener {
 				throw new IllegalStateException("Misery box cannot have null selection");
 			Misery misery = Misery.BY_NAME.get(selectedItem.toString());
 
-			UUID uuid = Tarot.getPlayer(selectedItem.toString()).getUniqueID();
 			players[nonEmptyIndex] = new LocalPlayer(uuid, sides[i], handful, misery);
 			nonEmptyIndex++;
 		}
