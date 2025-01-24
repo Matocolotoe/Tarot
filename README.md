@@ -97,14 +97,14 @@ la prime lui reviendra en positif).
 
 Il s'agit du pari de réaliser tous les plis. Le chelem est annoncé en plus du contrat, et
 l'annonce peut être effectuée après l'écart. L'annonceur du chelem entame toujours le tour.
-Un certain nombre de points est attribué à son camp en fonction du résultat de la partie.
-Cette quantité n'est pas affectée par le multiplicateur du contrat.
+Un certain nombre de points est attribué à son camp en fonction du résultat de la partie,
+sans être affecté par le multiplicateur du contrat.
 
-| **Résultat**               | **Score supplémentaire** |
-|----------------------------|--------------------------|
-| Chelem annoncé, réussi     | 400 points               |
-| Chelem non annoncé, réussi | 200 points               |
-| Chelem annoncé, chuté      | -200 points              |
+| **Résultat**               | **Score**   |
+|----------------------------|-------------|
+| Chelem annoncé, réussi     | 400 points  |
+| Chelem non annoncé, réussi | 200 points  |
+| Chelem annoncé, chuté      | -200 points |
 
-_NB : si l'annonceur détient l'Excuse, il devra nécessairement la jouer en dernier, et
-le Petit sera alors considéré au bout s'il est joué à l'avant-dernier tour._
+_NB : si l'annonceur du chelem détient l'Excuse, il devra nécessairement la jouer en dernier
+pour remporter le pli, et le Petit sera alors considéré au bout s'il est joué à l'avant-dernier tour._
