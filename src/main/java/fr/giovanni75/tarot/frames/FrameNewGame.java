@@ -43,14 +43,14 @@ class FrameNewGame extends JFrame implements ActionListener {
 	private static final int PLAYER_X_SPACING = 110;
 	private static final int SECONDARY_BUTTON_BASE_X = 200;
 
-	private static JComboBox<String> getEnumNameList(Nameable[] values, int x, int y) {
+	private static JComboBox<String> getEnumNameList(Nameable[] values, int x, int y, int width) {
 		String[] names = new String[values.length];
 		for (int i = 0; i < values.length; i++)
 			names[i] = values[i].getName();
 		JComboBox<String> box = new JComboBox<>(names);
 		box.setFont(Components.getFont(12));
 		box.setLocation(x, y);
-		box.setSize(100, 20);
+		box.setSize(width, 20);
 		return box;
 	}
 
@@ -81,8 +81,8 @@ class FrameNewGame extends JFrame implements ActionListener {
 		for (int i = 0; i < 5; i++) {
 			int x = COMBO_BOX_BASE_X + PLAYER_X_SPACING * i;
 			playerNameBoxes[i] = getPlayerNameList(names, x);
-			miseryBoxes[i] = getEnumNameList(Misery.values(), x, 120);
-			handfulBoxes[i] = getEnumNameList(Handful.values(), x, 160);
+			miseryBoxes[i] = getEnumNameList(Misery.values(), x, 120, 100);
+			handfulBoxes[i] = getEnumNameList(Handful.values(), x, 160, 100);
 			mainPanel.add(playerNameBoxes[i]);
 			mainPanel.add(miseryBoxes[i]);
 			mainPanel.add(handfulBoxes[i]);
@@ -158,10 +158,10 @@ class FrameNewGame extends JFrame implements ActionListener {
 		}
 
 		mainPanel.add(Components.getSimpleText("Petit au bout", 18, 100, 500, 120, 60));
-		mainPanel.add(petitAuBoutBox = getEnumNameList(PetitAuBout.values(), 240, 520));
+		mainPanel.add(petitAuBoutBox = getEnumNameList(PetitAuBout.values(), 240, 520, 100));
 
 		mainPanel.add(Components.getSimpleText("Chelem", 18, 410, 500, 100, 60));
-		mainPanel.add(slamBox = getEnumNameList(Slam.values(), 500, 520));
+		mainPanel.add(slamBox = getEnumNameList(Slam.values(), 500, 520, 170));
 
 		submitButton = new JButton("Ajouter");
 		submitButton.addActionListener(this);

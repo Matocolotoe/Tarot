@@ -84,21 +84,22 @@ public class Game implements Serializable {
 		}
 
 		/* Petit au bout */
-		if (petitAuBout == PetitAuBout.ATTACK) {
-			attackFinalScore += 10 * contract.getMultiplier();
-		} else if (petitAuBout == PetitAuBout.DEFENSE) {
-			attackFinalScore -= 10 * contract.getMultiplier();
+		switch (petitAuBout) {
+			case ATTACK -> attackFinalScore += 10 * contract.getMultiplier();
+			case DEFENSE -> attackFinalScore -= 10 * contract.getMultiplier();
 		}
 
 		/* Slam */
-		if (slam == Slam.ANNOUNCED) {
-			if (attackScore == 91) {
-				attackFinalScore += 400;
-			} else {
-				attackFinalScore -= 200;
+		switch (slam) {
+			case ATTACK -> attackFinalScore += attackScore == 91 ? 400 : -200;
+			case DEFENSE -> attackFinalScore += attackScore == 0 ? -400 : 200;
+			case UNANNOUNCED -> {
+				if (attackScore == 91) {
+					attackFinalScore += 200;
+				} else if (attackScore == 0) {
+					attackFinalScore -= 200;
+				}
 			}
-		} else if (attackScore == 91) {
-			attackFinalScore += 200;
 		}
 
 		List<Player> defenders = getDefenders(Function.identity());

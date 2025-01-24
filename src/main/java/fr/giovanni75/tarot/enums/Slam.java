@@ -1,14 +1,13 @@
 package fr.giovanni75.tarot.enums;
 
-import fr.giovanni75.tarot.Tarot;
-
 import java.util.HashMap;
 import java.util.Map;
 
 public enum Slam implements Nameable {
 
-	UNANNOUNCED("Non"),
-	ANNOUNCED("Annoncé");
+	UNANNOUNCED("Non déclaré"),
+	ATTACK("Annoncé à l'attaque"),
+	DEFENSE("Annoncé à la défense");
 
 	private final String name;
 
