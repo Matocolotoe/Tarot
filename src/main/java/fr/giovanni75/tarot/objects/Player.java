@@ -109,9 +109,9 @@ public class Player implements Serializable {
 
 	public LocalStats getStats(DateRecord date, int players) {
 		return switch (players) {
-			case 3 -> statsThreePlayers.get(date);
-			case 4 -> statsFourPlayers.get(date);
-			case 5 -> statsFivePlayers.get(date);
+			case 3 -> statsThreePlayers.getOrDefault(date, new LocalStats());
+			case 4 -> statsFourPlayers.getOrDefault(date, new LocalStats());
+			case 5 -> statsFivePlayers.getOrDefault(date, new LocalStats());
 			default -> throw new IllegalArgumentException("Stats are unavailable for " + players + " players");
 		};
 	}
