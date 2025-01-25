@@ -14,6 +14,7 @@ import java.util.function.Function;
 
 public class Game implements Serializable {
 
+	private final int dayOfMonth;
 	private final DateRecord date;
 
 	private final Contract contract;
@@ -25,7 +26,9 @@ public class Game implements Serializable {
 	private final LocalPlayer[] players;
 
 	public Game(Month month, Contract contract, int attackScore, Oudlers oudlers, PetitAuBout petitAuBout, Slam slam, LocalPlayer[] players) {
-		this.date = new DateRecord(month, LocalDate.now().getYear());
+		LocalDate now = LocalDate.now();
+		this.dayOfMonth = now.getDayOfMonth();
+		this.date = new DateRecord(month, now.getYear());
 		this.contract = contract;
 		this.attackScore = attackScore;
 		this.oudlers = oudlers;
@@ -35,15 +38,17 @@ public class Game implements Serializable {
 	}
 
 	public Game(JsonObject json) {
+		JsonElement element = json.get("day");
+		this.dayOfMonth = element == null ? 0 : element.getAsInt();
+
 		Month month = Month.valueOf(json.get("month").getAsString());
-		int year = json.get("year").getAsInt();
-		this.date = new DateRecord(month, year);
+		this.date = new DateRecord(month, json.get("year").getAsInt());
 
 		this.contract = Contract.valueOf(json.get("contract").getAsString());
 		this.attackScore = json.get("attack_score").getAsInt();
 		this.oudlers = Oudlers.valueOf(json.get("oudlers").getAsString());
 
-		JsonElement element = json.get("petit_au_bout");
+		element = json.get("petit_au_bout");
 		this.petitAuBout = element == null ? PetitAuBout.NONE : PetitAuBout.valueOf(element.getAsString());
 
 		element = json.get("slam");
@@ -243,6 +248,7 @@ public class Game implements Serializable {
 	@Override
 	public JsonObject toJson() {
 		JsonObject object = new JsonObject();
+		object.addProperty("day", dayOfMonth);
 		object.addProperty("month", date.month().name());
 		object.addProperty("year", date.year());
 
