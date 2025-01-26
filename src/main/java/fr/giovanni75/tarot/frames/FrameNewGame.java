@@ -253,7 +253,7 @@ class FrameNewGame extends JFrame implements ActionListener {
 		for (int i = 0; i < 5; i++)
 			sides[i] = Side.DEFENSE;
 		sides[attackerIndex] = Side.ATTACK;
-		if (calledPlayerIndex != -1 && attackerIndex != calledPlayerIndex)
+		if (numberOfPlayers == 5 && attackerIndex != calledPlayerIndex)
 			sides[calledPlayerIndex] = Side.ATTACK_ALLY;
 
 		players = new LocalPlayer[numberOfPlayers];
