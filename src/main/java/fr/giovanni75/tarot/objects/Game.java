@@ -87,6 +87,7 @@ public class Game implements Serializable {
 			} else {
 				attackFinalScore += points;
 			}
+			Maps.increment(contract, Tarot.getPlayer(player.uuid()).getStats(date, players.length).handfuls);
 		}
 
 		/* Petit au bout */
@@ -144,6 +145,7 @@ public class Game implements Serializable {
 				continue;
 			Player player = Tarot.getPlayer(local.uuid());
 			Maps.increment(player, finalScores, points * (numberOfPlayers - 1));
+			Maps.increment(contract, player.getStats(date, numberOfPlayers).miseries);
 			for (LocalPlayer other : players)
 				if (!local.equals(other))
 					Maps.increment(Tarot.getPlayer(other.uuid()), finalScores, -points);

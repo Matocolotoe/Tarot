@@ -106,6 +106,12 @@ class FrameGlobalStats extends JFrame {
 				stats -> stats.failedTakes, 1, true);
 		showMaxPlayerStats(mainPanel, date, players, "Le plus d'appels à soi-même", "%s (%d)",
 				stats -> stats.selfCalls, 1, true);
+
+		showMaxPlayerStats(mainPanel, date, players, "Le plus de poignées", "%s (%d)",
+				stats -> stats.handfuls, 1, true);
+		showMaxPlayerStats(mainPanel, date, players, "Le plus de misères", "%s (%d)",
+				stats -> stats.miseries, 1, true);
+
 		showMaxPlayerStats(mainPanel, date, players, "Meilleurs tours", "%s (%d pts)",
 				stats -> stats.bestTurns, 1, false);
 		showMaxPlayerStats(mainPanel, date, players, "Pires tours", "%s (%d pts)",

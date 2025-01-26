@@ -52,6 +52,8 @@ public class Player implements Serializable {
 		public final Map<Contract, Integer> bestTurns = new HashMap<>();
 		public final Map<Contract, Integer> calledTimes = new HashMap<>();
 		public final Map<Contract, Integer> failedTakes = new HashMap<>();
+		public final Map<Contract, Integer> handfuls = new HashMap<>();
+		public final Map<Contract, Integer> miseries = new HashMap<>();
 		public final Map<Contract, Integer> playedGames = new HashMap<>();
 		public final Map<Contract, Integer> selfCalls = new HashMap<>();
 		public final Map<Contract, Integer> successfulTakes = new HashMap<>();
@@ -75,6 +77,10 @@ public class Player implements Serializable {
 
 		List<String> result = new ArrayList<>();
 		result.add("Score total : " + stats.totalScore);
+		result.add("Poignées : " + Maps.sum(stats.handfuls));
+		result.add("Misères : " + Maps.sum(stats.miseries));
+
+		result.add(" ");
 		result.add("Parties jouées : " + Maps.sum(stats.playedGames));
 		for (Contract contract : Contract.ALL_CONTRACTS)
 			result.add(" ‣ " + contract.getName() + " : " + stats.playedGames.getOrDefault(contract, 0));
