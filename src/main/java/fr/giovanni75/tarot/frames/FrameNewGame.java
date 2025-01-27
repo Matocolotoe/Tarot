@@ -18,6 +18,11 @@ class FrameNewGame extends JFrame implements ActionListener {
 
 	private static final String[] LAST_SELECTED_NAMES = new String[5];
 
+	static {
+		for (int i = 0; i < 5; i++)
+			LAST_SELECTED_NAMES[i] = Tarot.NONE_STRING;
+	}
+
 	@SuppressWarnings("unchecked")
 	private final JComboBox<String>[] handfulBoxes = new JComboBox[5];
 
@@ -60,9 +65,8 @@ class FrameNewGame extends JFrame implements ActionListener {
 		JComboBox<String> box = new JComboBox<>(names.toArray(new String[0]));
 		box.setFont(Components.getFont(12));
 		box.setLocation(x, COMBO_BOX_BASE_Y);
+		box.setSelectedItem(LAST_SELECTED_NAMES[index]);
 		box.setSize(100, 20);
-		String last = LAST_SELECTED_NAMES[index];
-		box.setSelectedItem(last == null ? Tarot.NONE_STRING : last);
 		return box;
 	}
 
