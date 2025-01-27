@@ -16,6 +16,8 @@ import java.util.UUID;
 
 class FrameNewGame extends JFrame implements ActionListener {
 
+	private static final String[] LAST_SELECTED_NAMES = new String[5];
+
 	@SuppressWarnings("unchecked")
 	private final JComboBox<String>[] handfulBoxes = new JComboBox[5];
 
@@ -54,11 +56,13 @@ class FrameNewGame extends JFrame implements ActionListener {
 		return box;
 	}
 
-	private static JComboBox<String> getPlayerNameList(List<String> names, int x) {
+	private static JComboBox<String> getPlayerNameList(List<String> names, int index, int x) {
 		JComboBox<String> box = new JComboBox<>(names.toArray(new String[0]));
 		box.setFont(Components.getFont(12));
 		box.setLocation(x, COMBO_BOX_BASE_Y);
 		box.setSize(100, 20);
+		String last = LAST_SELECTED_NAMES[index];
+		box.setSelectedItem(last == null ? Tarot.NONE_STRING : last);
 		return box;
 	}
 
@@ -80,7 +84,7 @@ class FrameNewGame extends JFrame implements ActionListener {
 		mainPanel.add(Components.getSimpleText("Poignées", 18, COMBO_BOX_BASE_X - 92, COMBO_BOX_BASE_Y + 60, 140, 60));
 		for (int i = 0; i < 5; i++) {
 			int x = COMBO_BOX_BASE_X + PLAYER_X_SPACING * i;
-			playerNameBoxes[i] = getPlayerNameList(names, x);
+			playerNameBoxes[i] = getPlayerNameList(names, i, x);
 			miseryBoxes[i] = getEnumNameList(Misery.values(), x, 120, 100);
 			handfulBoxes[i] = getEnumNameList(Handful.values(), x, 160, 100);
 			mainPanel.add(playerNameBoxes[i]);
@@ -265,7 +269,9 @@ class FrameNewGame extends JFrame implements ActionListener {
 			if (selectedItem == null || Tarot.NONE_STRING.equals(selectedItem))
 				continue;
 
-			UUID uuid = Tarot.getPlayer(selectedItem.toString()).getUniqueID();
+			String name = selectedItem.toString();
+			UUID uuid = Tarot.getPlayer(name).getUniqueID();
+			LAST_SELECTED_NAMES[i] = name;
 
 			selectedItem = handfulBoxes[i].getSelectedItem();
 			if (selectedItem == null)
