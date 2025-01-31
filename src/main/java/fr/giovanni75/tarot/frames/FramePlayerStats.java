@@ -13,7 +13,7 @@ import java.util.List;
 class FramePlayerStats extends JFrame {
 
 	FramePlayerStats(DateRecord date, int players) {
-		setBounds(900, 120, 500, 800);
+		setBounds(900, 150, 500, 800);
 		setResizable(false);
 		setTitle("Statistiques – " + players + " joueurs – " + date.getName());
 
