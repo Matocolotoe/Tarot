@@ -8,11 +8,27 @@ import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 class FramePlayerStats extends JFrame {
 
 	FramePlayerStats(DateRecord date, int players) {
+		Map<Player, List<String>> displays = new TreeMap<>(Comparator.comparing(Player::getName));
+		for (Player player : Tarot.ORDERED_PLAYERS) {
+			List<String> display = player.getDisplay(date, players);
+			if (display.isEmpty())
+				continue;
+			displays.put(player, display);
+		}
+
+		if (displays.isEmpty()) {
+			Components.popup("Aucune partie n'est disponible pour cette période.");
+			return;
+		}
+
 		setBounds(900, 150, 500, 800);
 		setResizable(false);
 		setTitle("Statistiques – " + players + " joueurs – " + date.getName());
@@ -26,13 +42,10 @@ class FramePlayerStats extends JFrame {
 		mainPanel.add(Components.getSimpleText(date.getName() + " – " + players + " joueurs", 20));
 		mainPanel.add(Components.getSimpleText(" ", 25));
 
-		for (Player player : Tarot.ORDERED_PLAYERS) {
-			List<String> display = player.getDisplay(date, players);
-			if (display.isEmpty())
-				continue;
-			mainPanel.add(Components.getSimpleText(player.getName(), 18));
+		for (Map.Entry<Player, List<String>> entry : displays.entrySet()) {
+			mainPanel.add(Components.getSimpleText(entry.getKey().getName(), 18));
 			mainPanel.add(Components.getSimpleText(" ", 15));
-			for (String line : display)
+			for (String line : entry.getValue())
 				mainPanel.add(Components.getSimpleText(line, 15));
 			mainPanel.add(Components.getSimpleText(" ", 35));
 		}

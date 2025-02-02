@@ -63,6 +63,19 @@ class FrameGlobalStats extends JFrame {
 	}
 
 	FrameGlobalStats(DateRecord date, int players) {
+		Map<Contract, Integer> contracts = new HashMap<>();
+		for (Game game : Tarot.ALL_GAMES.get(date)) {
+			if (game.getNumberOfPlayers() == players) {
+				Contract contract = game.getContract();
+				contracts.put(contract, contracts.getOrDefault(contract, 0) + 1);
+			}
+		}
+
+		if (contracts.isEmpty()) {
+			Components.popup("Aucune partie n'est disponible pour cette période.");
+			return;
+		}
+
 		setBounds(300, 150, 500, 800);
 		setResizable(false);
 		setTitle("Statistiques – " + players + " joueurs – " + date.getName());
@@ -75,17 +88,6 @@ class FrameGlobalStats extends JFrame {
 		mainPanel.add(Components.getSimpleText("Statistiques générales", 20));
 		mainPanel.add(Components.getSimpleText(date.getName() + " – " + players + " joueurs", 20));
 		mainPanel.add(Components.getSimpleText(" ", 25));
-
-		Map<Contract, Integer> contracts = new HashMap<>();
-		for (Contract contract : Contract.ALL_CONTRACTS)
-			contracts.put(contract, 0);
-
-		for (Game game : Tarot.ALL_GAMES.get(date)) {
-			if (game.getNumberOfPlayers() == players) {
-				Contract contract = game.getContract();
-				contracts.put(contract, contracts.get(contract) + 1);
-			}
-		}
 
 		int total = Maps.sum(contracts);
 		mainPanel.add(Components.getSimpleText("Parties jouées : " + total, 15));
