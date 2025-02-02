@@ -77,9 +77,11 @@ public class Game implements Serializable {
 		if (diff < 0)
 			attackFinalScore *= -1;
 
+		int numberOfPlayers = players.length;
+
 		/* Handfuls */
-		for (LocalPlayer player : players) {
-			int points = player.handful().getExtraPoints();
+		for (LocalPlayer local : players) {
+			int points = local.handful().getExtraPoints();
 			if (points == 0)
 				continue;
 			if (diff < 0) {
@@ -87,7 +89,8 @@ public class Game implements Serializable {
 			} else {
 				attackFinalScore += points;
 			}
-			Maps.increment(contract, Tarot.getPlayer(player.uuid()).getStats(date, players.length).handfuls);
+			Player player = Tarot.getPlayer(local.uuid());
+			Maps.increment(contract, player.getStats(date, numberOfPlayers).handfuls);
 		}
 
 		/* Petit au bout */
@@ -118,7 +121,6 @@ public class Game implements Serializable {
 
 		/* Final score */
 		Map<Player, Integer> finalScores = new HashMap<>();
-		int numberOfPlayers = players.length;
 		if (numberOfPlayers == 5) {
 			if (ally == null)
 				throw new IllegalStateException("Ally cannot be null with 5+ players");
