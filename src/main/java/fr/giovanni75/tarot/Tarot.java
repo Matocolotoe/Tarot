@@ -18,7 +18,7 @@ public final class Tarot {
 
 	public static final List<Player> ORDERED_PLAYERS = new ArrayList<>();
 	public static final List<String> PLAYER_NAMES = new ArrayList<>();
-	public static final Map<DateRecord, List<Game>> ALL_GAMES = new HashMap<>();
+	public static final Map<DateRecord, List<Game>> ALL_GAMES = new TreeMap<>();
 	public static final String NONE_STRING = "—";
 
 	private static final Map<String, Player> PLAYER_NAME_MAP = new HashMap<>();

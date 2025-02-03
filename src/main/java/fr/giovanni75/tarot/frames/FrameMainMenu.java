@@ -90,7 +90,7 @@ public class FrameMainMenu extends JFrame {
 		exportItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E, mask));
 
 		List<DateRecord> dates = new ArrayList<>(Tarot.ALL_GAMES.keySet());
-		dates.sort((d1, d2) -> 1 - d1.compareTo(d2));
+		dates.sort(DateRecord::compareTo);
 		for (int i = 5; i > 2; i--) {
 			final int players = i; // Must be final for FramePlayerStats constructor
 			JMenu statsMenu = new JMenu("Tarot à " + players);

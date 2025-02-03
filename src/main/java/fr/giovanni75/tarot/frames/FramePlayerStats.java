@@ -19,9 +19,8 @@ class FramePlayerStats extends JFrame {
 		Map<Player, List<String>> displays = new TreeMap<>(Comparator.comparing(Player::getName));
 		for (Player player : Tarot.ORDERED_PLAYERS) {
 			List<String> display = player.getDisplay(date, players);
-			if (display.isEmpty())
-				continue;
-			displays.put(player, display);
+			if (!display.isEmpty())
+				displays.put(player, display);
 		}
 
 		if (displays.isEmpty()) {
