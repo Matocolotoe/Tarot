@@ -115,8 +115,8 @@ public class FrameMainMenu extends JFrame {
 			mainPanel.add(Components.getSimpleText(" ", 18));
 			for (Game game : entry.getValue()) {
 				total++;
-				mainPanel.add(Components.getSimpleText(total + ". " + game.getDescriptionFirstLine(), 15));
-				mainPanel.add(Components.getSimpleText(game.getDescriptionSecondLine(), 15));
+				for (String line : game.getDescription(total))
+					mainPanel.add(Components.getSimpleText(line, 15));
 				mainPanel.add(Components.getSimpleText(" ", 15));
 				if (total >= MAX_GAMES_DISPLAYED)
 					break;

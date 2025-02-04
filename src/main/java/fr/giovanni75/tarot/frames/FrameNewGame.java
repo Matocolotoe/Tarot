@@ -314,8 +314,8 @@ class FrameNewGame extends JFrame implements ActionListener {
 		slamBox.setSelectedIndex(0);
 		scoreSlider.setValue(51);
 
-		int score = game.applyResults();
-		Components.popup("Partie ajoutée avec succès !\nPoints à l'attaque : " + score);
+		game.applyResults();
+		Components.popup("Partie ajoutée avec succès !\nPoints à l'attaque : " + game.getAttackFinalScore());
 	}
 
 }

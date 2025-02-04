@@ -25,6 +25,8 @@ public class Game implements Serializable {
 
 	private final LocalPlayer[] players;
 
+	private int attackFinalScore;
+
 	public Game(Month month, Contract contract, int attackScore, Oudlers oudlers, PetitAuBout petitAuBout, Slam slam, LocalPlayer[] players) {
 		LocalDate now = LocalDate.now();
 		this.dayOfMonth = now.getDayOfMonth();
@@ -71,7 +73,7 @@ public class Game implements Serializable {
 		}
 	}
 
-	public int applyResults() {
+	public void applyResults() {
 		int diff = attackScore - oudlers.getRequiredScore();
 		int attackFinalScore = (25 + Math.abs(diff)) * contract.getMultiplier();
 		if (diff < 0)
@@ -175,7 +177,7 @@ public class Game implements Serializable {
 			stats.totalScore += score;
 		}
 
-		return attackFinalScore;
+		this.attackFinalScore = attackFinalScore;
 	}
 
 	private Player getAlly(int defenders) {
@@ -193,6 +195,10 @@ public class Game implements Serializable {
 			throw new IllegalStateException("There has to be 4 defenders when the attacker called themselves");
 
 		return getPlayer(Side.ATTACK);
+	}
+
+	public int getAttackFinalScore() {
+		return attackFinalScore;
 	}
 
 	public Contract getContract() {
@@ -214,11 +220,12 @@ public class Game implements Serializable {
 		return defenders;
 	}
 
-	public String getDescriptionFirstLine() {
-		return contract.getName() + " – " + oudlers.getDisplay() + " – Score : " + attackScore + "/" + oudlers.getRequiredScore();
-	}
+	public List<String> getDescription(int index) {
+		List<String> lines = new ArrayList<>();
+		lines.add(index + ". " + contract.getName() + " – " + oudlers.getDisplay()
+				+ " – Score : " + attackScore + "/" + oudlers.getRequiredScore()
+				+ " (" + attackFinalScore + ")");
 
-	public String getDescriptionSecondLine() {
 		List<String> defenders = getDefenders(Player::getName);
 		Player attacker = getPlayer(Side.ATTACK);
 		Player ally = getAlly(defenders.size());
@@ -228,14 +235,13 @@ public class Game implements Serializable {
 			throw new IllegalStateException("Attacker cannot be null");
 
 		final String defense = String.join(", ", defenders);
-		final String simple = attacker.getName() + " vs. " + defense;
-		if (players.length < 5)
-			return simple;
+		if (players.length < 5 || ally == attacker) {
+			lines.add(attacker.getName() + " vs. " + defense);
+		} else if (ally != null) {
+			lines.add(attacker.getName() + " & " + ally.getName() + " vs. " + defense);
+		}
 
-		if (ally == null)
-			throw new IllegalStateException("Ally cannot be null with 5+ players");
-
-		return ally == attacker ? simple : attacker.getName() + " & " + ally.getName() + " vs. " + defense;
+		return lines;
 	}
 
 	public int getNumberOfPlayers() {
