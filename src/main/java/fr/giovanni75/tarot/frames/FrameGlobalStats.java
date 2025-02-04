@@ -92,7 +92,7 @@ class FrameGlobalStats extends JFrame {
 		int total = Maps.sum(contracts);
 		mainPanel.add(Components.getSimpleText("Parties jouées : " + total, 15));
 		for (Contract contract : Contract.ALL_CONTRACTS) {
-			int amount = contracts.get(contract);
+			int amount = contracts.getOrDefault(contract, 0);
 			mainPanel.add(Components.getSimpleText(" ‣ " + contract.getName() + " : " + amount + " (" + 100 * amount / total + "%)", 15));
 		}
 
