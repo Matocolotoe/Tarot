@@ -69,30 +69,28 @@ public final class Tarot {
 		}
 	}
 
-	public static void createLeaderboards() {
-		for (DateRecord dateRecord : ALL_GAMES.keySet()) {
-			createDirectory("leaderboards/" + dateRecord.year());
-			final List<Player> fiveLeaderboard = getLeaderboard(dateRecord, 5);
-			final List<Player> fourLeaderboard = getLeaderboard(dateRecord, 4);
-			final List<Player> threeLeaderboard = getLeaderboard(dateRecord, 3);
-			int fiveSize = fiveLeaderboard.size();
-			int fourSize = fourLeaderboard.size();
-			int threeSize = threeLeaderboard.size();
-			int limit = Math.max(fiveSize, Math.max(fourSize, threeSize));
-			try {
-				File file = new File("data/leaderboards/" + dateRecord.year() + "/" + dateRecord.month().getName() + ".csv");
-				FileWriter writer = new FileWriter(file);
-				writer.write("Score à 5,,,Score à 4,,,Score à 3,\n");
-				for (int i = 0; i < limit; i++) {
-					writer.write(i < fiveSize ? getLeaderboardEntry(fiveLeaderboard.get(i), dateRecord, 5) : ",,,");
-					writer.write(i < fourSize ? getLeaderboardEntry(fourLeaderboard.get(i), dateRecord, 4) : ",,,");
-					writer.write(i < threeSize ? getLeaderboardEntry(threeLeaderboard.get(i), dateRecord, 3) : ",,,");
-					writer.write("\n");
-				}
-				writer.close();
-			} catch (IOException e) {
-				throw new RuntimeException("Could not create leaderboard for month " + dateRecord.month().name() + " and year " + dateRecord.year(), e);
+	public static void createLeaderboards(DateRecord date) {
+		createDirectory("leaderboards/" + date.year());
+		final List<Player> fiveLeaderboard = getLeaderboard(date, 5);
+		final List<Player> fourLeaderboard = getLeaderboard(date, 4);
+		final List<Player> threeLeaderboard = getLeaderboard(date, 3);
+		int fiveSize = fiveLeaderboard.size();
+		int fourSize = fourLeaderboard.size();
+		int threeSize = threeLeaderboard.size();
+		int limit = Math.max(fiveSize, Math.max(fourSize, threeSize));
+		try {
+			File file = new File("data/leaderboards/" + date.year() + "/" + date.month().getName() + ".csv");
+			FileWriter writer = new FileWriter(file);
+			writer.write("Score à 5,,,Score à 4,,,Score à 3,\n");
+			for (int i = 0; i < limit; i++) {
+				writer.write(i < fiveSize ? getLeaderboardEntry(fiveLeaderboard.get(i), date, 5) : ",,,");
+				writer.write(i < fourSize ? getLeaderboardEntry(fourLeaderboard.get(i), date, 4) : ",,,");
+				writer.write(i < threeSize ? getLeaderboardEntry(threeLeaderboard.get(i), date, 3) : ",,,");
+				writer.write("\n");
 			}
+			writer.close();
+		} catch (IOException e) {
+			throw new RuntimeException("Could not create leaderboard for month " + date.month().name() + " and year " + date.year(), e);
 		}
 	}
 
