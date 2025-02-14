@@ -11,51 +11,76 @@ import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
 class FrameGlobalStats extends JFrame {
 
-	private void showMaxPlayerStats(JPanel panel, DateRecord date, int players, String header, String details,
+	private static String getNameListDisplay(List<Player> players) {
+		List<String> names = new ArrayList<>();
+		for (Player player : players)
+			names.add(player.getName());
+		Collections.sort(names);
+		return String.join(", ", names);
+	}
+
+	private static void showMaxPlayerStats(JPanel panel, DateRecord date, int players, String header, String details,
 									Function<Player.LocalStats, Map<Contract, Integer>> provider, int multiplier,
 									boolean includeTotal) {
 		Map<Contract, Integer> maxAmounts = new HashMap<>();
-		Map<Contract, Player> maxPlayers = new HashMap<>();
+		Map<Contract, List<Player>> maxPlayers = new HashMap<>();
 		int maxAmountAll = 0;
-		Player maxPlayerAll = null;
+		List<Player> maxPlayersAll = new ArrayList<>();
+		for (Contract contract : Contract.ALL_CONTRACTS)
+			maxPlayers.put(contract, new ArrayList<>());
+
 		for (Player player : Tarot.ORDERED_PLAYERS) {
 			int totalAmount = 0;
 			for (Contract contract : Contract.ALL_CONTRACTS) {
 				int amount = provider.apply(player.getStats(date, players)).getOrDefault(contract, 0);
-				if (multiplier * amount > multiplier * maxAmounts.getOrDefault(contract, 0)) {
-					maxAmounts.put(contract, amount);
-					maxPlayers.put(contract, player);
+				int diff = multiplier * (amount - maxAmounts.getOrDefault(contract, 0));
+				if (diff >= 0) {
+					List<Player> playerList = maxPlayers.get(contract);
+					if (diff != 0) {
+						// Amount is strictly greater than any value seen before, reset data
+						maxAmounts.put(contract, amount);
+						playerList.clear();
+						playerList.add(player);
+					} else if (!playerList.isEmpty()) {
+						// Amount equals one that has already been encountered (hence the non-emptiness condition)
+						playerList.add(player);
+					}
 				}
 				totalAmount += amount;
 			}
-			if (multiplier * totalAmount > multiplier * maxAmountAll) {
+			int diff = multiplier * (totalAmount - maxAmountAll);
+			if (diff > 0) {
+				// Amount is strictly greater than any value seen before, reset data
 				maxAmountAll = totalAmount;
-				maxPlayerAll = player;
+				maxPlayersAll.clear();
+				maxPlayersAll.add(player);
+			} else if (diff == 0 && maxAmountAll != 0) {
+				// Amount equals one that has already been encountered (hence the non-zero condition)
+				maxPlayersAll.add(player);
 			}
 		}
 
-		if (maxPlayerAll == null)
+		if (maxPlayersAll.isEmpty())
 			return;
 
 		if (includeTotal) {
-			panel.add(Components.getSimpleText(header + " : " + String.format(details, maxPlayerAll.getName(), maxAmountAll), 15));
+			panel.add(Components.getSimpleText(header + " : " + String.format(details, getNameListDisplay(maxPlayersAll), maxAmountAll), 15));
 		} else {
 			panel.add(Components.getSimpleText(header + " :", 15));
 		}
 
 		for (Contract contract : Contract.ALL_CONTRACTS) {
-			Player player = maxPlayers.get(contract);
-			if (player == null) {
+			List<Player> playerList = maxPlayers.get(contract);
+			if (playerList == null || playerList.isEmpty()) {
 				panel.add(Components.getSimpleText(" ‣ " + contract.getName() + " : " + Tarot.NONE_STRING, 15));
 			} else {
 				panel.add(Components.getSimpleText(" ‣ " + contract.getName() + " : "
-						+ String.format(details, player.getName(), maxAmounts.getOrDefault(contract, 0)), 15));
+						+ String.format(details, getNameListDisplay(playerList), maxAmounts.getOrDefault(contract, 0)), 15));
 			}
 		}
 
@@ -100,7 +125,7 @@ class FrameGlobalStats extends JFrame {
 
 		showMaxPlayerStats(mainPanel, date, players, "Le plus de parties jouées", "%s (%d)",
 				stats -> stats.playedGames, 1, true);
-		showMaxPlayerStats(mainPanel, date, players, "Personne la plus appelée", "%s, %d fois",
+		showMaxPlayerStats(mainPanel, date, players, "Le plus de fois appelé·e", "%s, %d fois",
 				stats -> stats.calledTimes, 1, true);
 		showMaxPlayerStats(mainPanel, date, players, "Le plus de prises réussies", "%s (%d)",
 				stats -> stats.successfulTakes, 1, true);
