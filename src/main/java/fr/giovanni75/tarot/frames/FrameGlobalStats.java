@@ -1,7 +1,6 @@
 package fr.giovanni75.tarot.frames;
 
 import fr.giovanni75.tarot.DateRecord;
-import fr.giovanni75.tarot.Maps;
 import fr.giovanni75.tarot.Tarot;
 import fr.giovanni75.tarot.enums.Contract;
 import fr.giovanni75.tarot.objects.Game;
@@ -13,6 +12,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 class FrameGlobalStats extends JFrame {
 
@@ -22,6 +22,25 @@ class FrameGlobalStats extends JFrame {
 			names.add(player.getName());
 		Collections.sort(names);
 		return String.join(", ", names);
+	}
+
+	private static void showGlobalStats(JPanel panel, DateRecord date, int players, String header, Predicate<Game> matcher) {
+		int totalAmount = 0;
+		Map<Contract, Integer> amounts = new HashMap<>();
+		for (Game game : Tarot.ALL_GAMES.get(date)) {
+			if (game.getNumberOfPlayers() == players && matcher.test(game)) {
+				amounts.put(game.getContract(), amounts.getOrDefault(game.getContract(), 0) + 1);
+				totalAmount++;
+			}
+		}
+
+		panel.add(Components.getSimpleText(header + " : " + totalAmount, 15));
+		for (Contract contract : Contract.ALL_CONTRACTS) {
+			int amount = amounts.getOrDefault(contract, 0);
+			panel.add(Components.getSimpleText(" ‣ " + contract.getName() + " : " + amount + " (" + 100 * amount / totalAmount + "%)", 15));
+		}
+
+		panel.add(Components.getSimpleText(" ", 20));
 	}
 
 	private static void showMaxPlayerStats(JPanel panel, DateRecord date, int players, String header, String details,
@@ -90,19 +109,19 @@ class FrameGlobalStats extends JFrame {
 			}
 		}
 
-		panel.add(Components.getSimpleText(" ", 25));
+		panel.add(Components.getSimpleText(" ", 20));
 	}
 
 	FrameGlobalStats(DateRecord date, int players) {
-		Map<Contract, Integer> contracts = new HashMap<>();
+		boolean hasStatsRecorded = false;
 		for (Game game : Tarot.ALL_GAMES.get(date)) {
 			if (game.getNumberOfPlayers() == players) {
-				Contract contract = game.getContract();
-				contracts.put(contract, contracts.getOrDefault(contract, 0) + 1);
+				hasStatsRecorded = true;
+				break;
 			}
 		}
 
-		if (contracts.isEmpty()) {
+		if (!hasStatsRecorded) {
 			Components.popup("Aucune partie n'est disponible pour cette période.");
 			return;
 		}
@@ -120,14 +139,8 @@ class FrameGlobalStats extends JFrame {
 		mainPanel.add(Components.getSimpleText(date.getName() + " – " + players + " joueurs", 20));
 		mainPanel.add(Components.getSimpleText(" ", 25));
 
-		int total = Maps.sum(contracts);
-		mainPanel.add(Components.getSimpleText("Parties jouées : " + total, 15));
-		for (Contract contract : Contract.ALL_CONTRACTS) {
-			int amount = contracts.getOrDefault(contract, 0);
-			mainPanel.add(Components.getSimpleText(" ‣ " + contract.getName() + " : " + amount + " (" + 100 * amount / total + "%)", 15));
-		}
-
-		mainPanel.add(Components.getSimpleText(" ", 20));
+		showGlobalStats(mainPanel, date, players, "Parties jouées", ignored -> true);
+		showGlobalStats(mainPanel, date, players, "Petits au bout", Game::hasPetitAuBout);
 
 		showMaxPlayerStats(mainPanel, date, players, "Le plus de parties jouées", "%s (%d)",
 				stats -> stats.playedGames, 1, true, false);

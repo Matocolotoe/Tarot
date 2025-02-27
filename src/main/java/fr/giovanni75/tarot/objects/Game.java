@@ -255,6 +255,10 @@ public class Game implements Serializable {
 		return null;
 	}
 
+	public boolean hasPetitAuBout() {
+		return petitAuBout != PetitAuBout.NONE;
+	}
+
 	@Override
 	public JsonObject toJson() {
 		JsonObject object = new JsonObject();
