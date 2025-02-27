@@ -36,8 +36,12 @@ class FrameGlobalStats extends JFrame {
 
 		panel.add(Components.getSimpleText(header + " : " + totalAmount, 15));
 		for (Contract contract : Contract.ALL_CONTRACTS) {
-			int amount = amounts.getOrDefault(contract, 0);
-			panel.add(Components.getSimpleText(" ‣ " + contract.getName() + " : " + amount + " (" + 100 * amount / totalAmount + "%)", 15));
+			Integer amount = amounts.get(contract);
+			if (amount == null) {
+				panel.add(Components.getSimpleText(" ‣ " + contract.getName() + " : " + Tarot.NONE_STRING, 15));
+			} else {
+				panel.add(Components.getSimpleText(" ‣ " + contract.getName() + " : " + amount + " (" + 100 * amount / totalAmount + "%)", 15));
+			}
 		}
 
 		panel.add(Components.getSimpleText(" ", 20));
