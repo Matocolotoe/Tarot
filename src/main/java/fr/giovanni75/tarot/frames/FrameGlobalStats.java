@@ -26,7 +26,7 @@ class FrameGlobalStats extends JFrame {
 
 	private static void showMaxPlayerStats(JPanel panel, DateRecord date, int players, String header, String details,
 									Function<Player.LocalStats, Map<Contract, Integer>> provider, int multiplier,
-									boolean includeTotal) {
+									boolean includeTotal, boolean includeDetailsByContract) {
 		Map<Contract, Integer> maxAmounts = new HashMap<>();
 		Map<Contract, List<Player>> maxPlayers = new HashMap<>();
 		int maxAmountAll = 0;
@@ -38,6 +38,10 @@ class FrameGlobalStats extends JFrame {
 			int totalAmount = 0;
 			for (Contract contract : Contract.ALL_CONTRACTS) {
 				int amount = provider.apply(player.getStats(date, players)).getOrDefault(contract, 0);
+				totalAmount += amount;
+				// Skip calculations if details are not required
+				if (!includeDetailsByContract)
+					continue;
 				int diff = multiplier * (amount - maxAmounts.getOrDefault(contract, 0));
 				if (diff >= 0) {
 					List<Player> playerList = maxPlayers.get(contract);
@@ -51,7 +55,6 @@ class FrameGlobalStats extends JFrame {
 						playerList.add(player);
 					}
 				}
-				totalAmount += amount;
 			}
 			int diff = multiplier * (totalAmount - maxAmountAll);
 			if (diff > 0) {
@@ -73,6 +76,9 @@ class FrameGlobalStats extends JFrame {
 		} else {
 			panel.add(Components.getSimpleText(header + " :", 15));
 		}
+
+		if (!includeDetailsByContract)
+			return;
 
 		for (Contract contract : Contract.ALL_CONTRACTS) {
 			List<Player> playerList = maxPlayers.get(contract);
@@ -121,28 +127,30 @@ class FrameGlobalStats extends JFrame {
 			mainPanel.add(Components.getSimpleText(" ‣ " + contract.getName() + " : " + amount + " (" + 100 * amount / total + "%)", 15));
 		}
 
-		mainPanel.add(Components.getSimpleText(" ", 25));
+		mainPanel.add(Components.getSimpleText(" ", 20));
 
 		showMaxPlayerStats(mainPanel, date, players, "Le plus de parties jouées", "%s (%d)",
-				stats -> stats.playedGames, 1, true);
-		showMaxPlayerStats(mainPanel, date, players, "Le plus de fois appelé·e", "%s, %d fois",
-				stats -> stats.calledTimes, 1, true);
-		showMaxPlayerStats(mainPanel, date, players, "Le plus de prises réussies", "%s (%d)",
-				stats -> stats.successfulTakes, 1, true);
-		showMaxPlayerStats(mainPanel, date, players, "Le plus de prises ratées", "%s (%d)",
-				stats -> stats.failedTakes, 1, true);
-		showMaxPlayerStats(mainPanel, date, players, "Le plus d'appels à soi-même", "%s (%d)",
-				stats -> stats.selfCalls, 1, true);
-
+				stats -> stats.playedGames, 1, true, false);
 		showMaxPlayerStats(mainPanel, date, players, "Le plus de poignées", "%s (%d)",
-				stats -> stats.handfuls, 1, true);
+				stats -> stats.handfuls, 1, true, false);
 		showMaxPlayerStats(mainPanel, date, players, "Le plus de misères", "%s (%d)",
-				stats -> stats.miseries, 1, true);
+				stats -> stats.miseries, 1, true, false);
+
+		mainPanel.add(Components.getSimpleText(" ", 20));
+
+		showMaxPlayerStats(mainPanel, date, players, "Le plus de fois appelé·e", "%s, %d fois",
+				stats -> stats.calledTimes, 1, true, true);
+		showMaxPlayerStats(mainPanel, date, players, "Le plus de prises réussies", "%s (%d)",
+				stats -> stats.successfulTakes, 1, true, true);
+		showMaxPlayerStats(mainPanel, date, players, "Le plus de prises ratées", "%s (%d)",
+				stats -> stats.failedTakes, 1, true, true);
+		showMaxPlayerStats(mainPanel, date, players, "Le plus d'appels à soi-même", "%s (%d)",
+				stats -> stats.selfCalls, 1, true, true);
 
 		showMaxPlayerStats(mainPanel, date, players, "Meilleurs tours", "%s (%d pts)",
-				stats -> stats.bestTurns, 1, false);
+				stats -> stats.bestTurns, 1, false, true);
 		showMaxPlayerStats(mainPanel, date, players, "Pires tours", "%s (%d pts)",
-				stats -> stats.worstTurns, -1, false);
+				stats -> stats.worstTurns, -1, false, true);
 
 		JScrollPane scrollPane = new JScrollPane(mainPanel);
 		scrollPane.getVerticalScrollBar().setUnitIncrement(18);
