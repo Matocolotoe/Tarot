@@ -10,11 +10,14 @@ import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import java.text.DecimalFormat;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
 class FrameGlobalStats extends JFrame {
+
+	private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("#.##");
 
 	private static String getNameListDisplay(List<Player> players) {
 		List<String> names = new ArrayList<>();
@@ -24,12 +27,43 @@ class FrameGlobalStats extends JFrame {
 		return String.join(", ", names);
 	}
 
+	private static void showAverageStats(JPanel panel, DateRecord date, int players, String header, Function<Game, Integer> adder) {
+		int matchingAmount = 0;
+		int totalAmount = 0;
+		Map<Contract, Integer> matchingAmounts = new EnumMap<>(Contract.class);
+		Map<Contract, Integer> totalAmounts = new EnumMap<>(Contract.class);
+		for (Game game : Tarot.ALL_GAMES.get(date)) {
+			if (game.getNumberOfPlayers() == players) {
+				Contract contract = game.getContract();
+				int amount = adder.apply(game);
+				matchingAmounts.put(contract, matchingAmounts.getOrDefault(contract, 0) + 1);
+				totalAmounts.put(contract, totalAmounts.getOrDefault(contract, 0) + amount);
+				matchingAmount++;
+				totalAmount += amount;
+			}
+		}
+
+		panel.add(Components.getSimpleText(header + " : " + DECIMAL_FORMAT.format((double) totalAmount / matchingAmount), 15));
+		for (Contract contract : Contract.ALL_CONTRACTS) {
+			Integer amount = matchingAmounts.get(contract);
+			if (amount == null) {
+				panel.add(Components.getSimpleText(" ‣ " + contract.getName() + " : " + Tarot.NONE_STRING, 15));
+			} else {
+				panel.add(Components.getSimpleText(" ‣ " + contract.getName() + " : "
+						+ DECIMAL_FORMAT.format((double) totalAmounts.get(contract) / amount), 15));
+			}
+		}
+
+		panel.add(Components.getSimpleText(" ", 20));
+	}
+
 	private static void showGlobalStats(JPanel panel, DateRecord date, int players, String header, Predicate<Game> matcher) {
 		int totalAmount = 0;
 		Map<Contract, Integer> amounts = new EnumMap<>(Contract.class);
 		for (Game game : Tarot.ALL_GAMES.get(date)) {
 			if (game.getNumberOfPlayers() == players && matcher.test(game)) {
-				amounts.put(game.getContract(), amounts.getOrDefault(game.getContract(), 0) + 1);
+				Contract contract = game.getContract();
+				amounts.put(contract, amounts.getOrDefault(contract, 0) + 1);
 				totalAmount++;
 			}
 		}
@@ -144,6 +178,7 @@ class FrameGlobalStats extends JFrame {
 		mainPanel.add(Components.getSimpleText(" ", 25));
 
 		showGlobalStats(mainPanel, date, players, "Parties jouées", ignored -> true);
+		showAverageStats(mainPanel, date, players, "Nombre moyen de bouts", Game::getNumberOfOudlers);
 		showGlobalStats(mainPanel, date, players, "Petits au bout", Game::hasPetitAuBout);
 
 		showMaxPlayerStats(mainPanel, date, players, "Le plus de parties jouées", "%s (%d)",

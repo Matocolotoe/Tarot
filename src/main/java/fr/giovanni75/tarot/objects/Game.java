@@ -244,6 +244,10 @@ public class Game implements Serializable {
 		return lines;
 	}
 
+	public int getNumberOfOudlers() {
+		return oudlers.ordinal();
+	}
+
 	public int getNumberOfPlayers() {
 		return players.length;
 	}
