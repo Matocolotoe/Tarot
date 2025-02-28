@@ -49,15 +49,15 @@ public class Player implements Serializable {
 
 		public int totalScore;
 
-		public final Map<Contract, Integer> bestTurns = new HashMap<>();
-		public final Map<Contract, Integer> calledTimes = new HashMap<>();
-		public final Map<Contract, Integer> failedTakes = new HashMap<>();
-		public final Map<Contract, Integer> handfuls = new HashMap<>();
-		public final Map<Contract, Integer> miseries = new HashMap<>();
-		public final Map<Contract, Integer> playedGames = new HashMap<>();
-		public final Map<Contract, Integer> selfCalls = new HashMap<>();
-		public final Map<Contract, Integer> successfulTakes = new HashMap<>();
-		public final Map<Contract, Integer> worstTurns = new HashMap<>();
+		public final Map<Contract, Integer> bestTurns = new EnumMap<>(Contract.class);
+		public final Map<Contract, Integer> calledTimes = new EnumMap<>(Contract.class);
+		public final Map<Contract, Integer> failedTakes = new EnumMap<>(Contract.class);
+		public final Map<Contract, Integer> handfuls = new EnumMap<>(Contract.class);
+		public final Map<Contract, Integer> miseries = new EnumMap<>(Contract.class);
+		public final Map<Contract, Integer> playedGames = new EnumMap<>(Contract.class);
+		public final Map<Contract, Integer> selfCalls = new EnumMap<>(Contract.class);
+		public final Map<Contract, Integer> successfulTakes = new EnumMap<>(Contract.class);
+		public final Map<Contract, Integer> worstTurns = new EnumMap<>(Contract.class);
 
 	}
 

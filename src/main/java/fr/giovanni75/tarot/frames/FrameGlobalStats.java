@@ -26,7 +26,7 @@ class FrameGlobalStats extends JFrame {
 
 	private static void showGlobalStats(JPanel panel, DateRecord date, int players, String header, Predicate<Game> matcher) {
 		int totalAmount = 0;
-		Map<Contract, Integer> amounts = new HashMap<>();
+		Map<Contract, Integer> amounts = new EnumMap<>(Contract.class);
 		for (Game game : Tarot.ALL_GAMES.get(date)) {
 			if (game.getNumberOfPlayers() == players && matcher.test(game)) {
 				amounts.put(game.getContract(), amounts.getOrDefault(game.getContract(), 0) + 1);
@@ -50,8 +50,8 @@ class FrameGlobalStats extends JFrame {
 	private static void showMaxPlayerStats(JPanel panel, DateRecord date, int players, String header, String details,
 									Function<Player.LocalStats, Map<Contract, Integer>> provider, int multiplier,
 									boolean includeTotal, boolean includeDetailsByContract) {
-		Map<Contract, Integer> maxAmounts = new HashMap<>();
-		Map<Contract, List<Player>> maxPlayers = new HashMap<>();
+		Map<Contract, Integer> maxAmounts = new EnumMap<>(Contract.class);
+		Map<Contract, List<Player>> maxPlayers = new EnumMap<>(Contract.class);
 		int maxAmountAll = 0;
 		List<Player> maxPlayersAll = new ArrayList<>();
 		for (Contract contract : Contract.ALL_CONTRACTS)
