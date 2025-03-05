@@ -220,9 +220,11 @@ public class Game implements Serializable {
 		return defenders;
 	}
 
-	public List<String> getDescription(int index) {
+	public List<String> getDescription() {
 		List<String> lines = new ArrayList<>();
-		lines.add(index + ". " + contract.getName() + " – " + oudlers.getDisplay()
+		int m = date.month().ordinal() + 1;
+		lines.add("(" + (dayOfMonth == 0 ? "?" : dayOfMonth) + (m < 10 ? "/0" : "/") + m + ") "
+				+ contract.getName() + " – " + oudlers.getDisplay()
 				+ " – Score : " + attackScore + "/" + oudlers.getRequiredScore()
 				+ " (" + attackFinalScore + ")");
 
