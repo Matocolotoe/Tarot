@@ -16,6 +16,8 @@ import java.util.UUID;
 
 public class FrameMainMenu extends JFrame {
 
+	static FrameMainMenu MAIN_MENU;
+
 	private static final int MAX_GAMES_DISPLAYED = 250;
 
 	private static void inputPlayer() {
@@ -45,13 +47,45 @@ public class FrameMainMenu extends JFrame {
 		Components.popup("Joueur ajouté avec succès.\nNom : " + name);
 	}
 
+	private final JPanel mainPanel;
+	private final List<JLabel> textComponents = new ArrayList<>();
+
+	void reloadGames() {
+		for (JLabel label : textComponents)
+			mainPanel.remove(label);
+		textComponents.clear();
+		showAllGames();
+		repaint();
+		revalidate();
+	}
+
+	private void showAllGames() {
+		int total = 0;
+		for (Map.Entry<DateRecord, List<Game>> entry : Tarot.ALL_GAMES.entrySet()) {
+			textComponents.add(Components.getSimpleText(entry.getKey().getName(), 20));
+			textComponents.add(Components.getSimpleText(" ", 18));
+			for (Game game : entry.getValue()) {
+				total++;
+				for (String line : game.getDescription())
+					textComponents.add(Components.getSimpleText(line, 15));
+				textComponents.add(Components.getSimpleText(" ", 15));
+				if (total >= MAX_GAMES_DISPLAYED)
+					break;
+			}
+		}
+		for (JLabel label : textComponents)
+			mainPanel.add(label);
+	}
+
 	public FrameMainMenu() {
+		MAIN_MENU = this;
+
 		setBounds(300, 100, 800, 600);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setResizable(false);
 		setTitle("Tarot – Compteur de points");
 
-		JPanel mainPanel = new JPanel();
+		mainPanel = new JPanel();
 		mainPanel.setBorder(Components.getStandardBorder());
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 
@@ -110,19 +144,7 @@ public class FrameMainMenu extends JFrame {
 			menuBar.add(statsMenu);
 		}
 
-		int total = 0;
-		for (Map.Entry<DateRecord, List<Game>> entry : Tarot.ALL_GAMES.entrySet()) {
-			mainPanel.add(Components.getSimpleText(entry.getKey().getName(), 20));
-			mainPanel.add(Components.getSimpleText(" ", 18));
-			for (Game game : entry.getValue()) {
-				total++;
-				for (String line : game.getDescription())
-					mainPanel.add(Components.getSimpleText(line, 15));
-				mainPanel.add(Components.getSimpleText(" ", 15));
-				if (total >= MAX_GAMES_DISPLAYED)
-					break;
-			}
-		}
+		showAllGames();
 
 		JScrollPane scrollPane = new JScrollPane(mainPanel);
 		scrollPane.getVerticalScrollBar().setUnitIncrement(18);
