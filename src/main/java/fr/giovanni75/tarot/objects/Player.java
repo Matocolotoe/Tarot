@@ -43,8 +43,6 @@ public class Player implements Serializable {
 		return object;
 	}
 
-	// ** Stats ** //
-
 	public static class LocalStats {
 
 		public int totalScore;
@@ -59,59 +57,53 @@ public class Player implements Serializable {
 		public final Map<Contract, Integer> successfulTakes = new EnumMap<>(Contract.class);
 		public final Map<Contract, Integer> worstTurns = new EnumMap<>(Contract.class);
 
-	}
-
-	public List<String> getDisplay(DateRecord date, int players) {
-		LocalStats stats = getStats(date, players);
-
-		boolean hasNeverPlayed = true;
-		for (Contract contract : Contract.ALL_CONTRACTS) {
-			if (stats.playedGames.getOrDefault(contract, 0) != 0) {
-				hasNeverPlayed = false;
-				break;
-			}
-		}
-
-		if (hasNeverPlayed)
-			return List.of();
-
-		List<String> result = new ArrayList<>();
-		result.add("Score total : " + stats.totalScore);
-		result.add("Poignées : " + Maps.sum(stats.handfuls));
-		result.add("Misères : " + Maps.sum(stats.miseries));
-
-		result.add(" ");
-		result.add("Parties jouées : " + Maps.sum(stats.playedGames));
-		for (Contract contract : Contract.ALL_CONTRACTS)
-			result.add(" ‣ " + contract.getName() + " : " + stats.playedGames.getOrDefault(contract, 0));
-
-		int successes = Maps.sum(stats.successfulTakes);
-		result.add(" ");
-		result.add("Prises totales : " + (successes + Maps.sum(stats.failedTakes)));
-		result.add("Prises réussies : " + successes);
-		for (Contract contract : Contract.ALL_CONTRACTS) {
-			result.add(" ‣ " + contract.getName() + " : " + stats.successfulTakes.getOrDefault(contract, 0)
-					+ " \uD83C\uDFC6 / " + stats.failedTakes.getOrDefault(contract, 0) + " ✖");
-		}
-
-		if (players == 5) {
-			int selfCalls = Maps.sum(stats.selfCalls);
-			result.add(" ");
-			result.add("Appelé(e) " + Maps.sum(stats.calledTimes) + " fois"
-					+ (selfCalls == 0 ? "" : ", dont " + selfCalls + " soi-même"));
+		public List<String> getDisplay() {
+			boolean hasNeverPlayed = true;
 			for (Contract contract : Contract.ALL_CONTRACTS) {
-				selfCalls = stats.selfCalls.getOrDefault(contract, 0);
-				result.add(" ‣ " + contract.getName() + " : " + stats.calledTimes.getOrDefault(contract, 0)
-						+ (selfCalls == 0 ? "" : ", dont " + selfCalls + " soi-même"));
+				if (playedGames.getOrDefault(contract, 0) != 0) {
+					hasNeverPlayed = false;
+					break;
+				}
 			}
+
+			if (hasNeverPlayed)
+				return List.of();
+
+			List<String> result = new ArrayList<>();
+			result.add("Score total : " + totalScore);
+			result.add("Poignées : " + Maps.sum(handfuls));
+			result.add("Misères : " + Maps.sum(miseries));
+
+			result.add(" ");
+			result.add("Parties jouées : " + Maps.sum(playedGames));
+			for (Contract contract : Contract.ALL_CONTRACTS)
+				result.add(" ‣ " + contract.getName() + " : " + playedGames.getOrDefault(contract, 0));
+
+			int successes = Maps.sum(successfulTakes);
+			result.add(" ");
+			result.add("Prises totales : " + (successes + Maps.sum(failedTakes)));
+			result.add("Prises réussies : " + successes);
+			for (Contract contract : Contract.ALL_CONTRACTS) {
+				result.add(" ‣ " + contract.getName() + " : " + successfulTakes.getOrDefault(contract, 0)
+						+ " \uD83C\uDFC6 / " + failedTakes.getOrDefault(contract, 0) + " ✖");
+			}
+
+			int totalSelfCalls = Maps.sum(selfCalls);
+			result.add(" ");
+			result.add("Appelé(e) " + Maps.sum(calledTimes) + " fois"
+					+ (totalSelfCalls == 0 ? "" : ", dont " + totalSelfCalls + " soi-même"));
+			for (Contract contract : Contract.ALL_CONTRACTS) {
+				totalSelfCalls = selfCalls.getOrDefault(contract, 0);
+				result.add(" ‣ " + contract.getName() + " : " + calledTimes.getOrDefault(contract, 0)
+						+ (totalSelfCalls == 0 ? "" : ", dont " + totalSelfCalls + " soi-même"));
+			}
+
+			result.add(" ");
+			result.add("Meilleur tour : " + Maps.max(bestTurns, "%d (%s)", 1));
+			result.add("Pire tour : " + Maps.max(worstTurns, "%d (%s)", -1));
+
+			return result;
 		}
-
-		result.add(" ");
-		result.add("Meilleur tour : " + Maps.max(stats.bestTurns, "%d (%s)", 1));
-		result.add("Pire tour : " + Maps.max(stats.worstTurns, "%d (%s)", -1));
-
-		return result;
-	}
 
 	public LocalStats getStats(DateRecord date, int players) {
 		return switch (players) {
