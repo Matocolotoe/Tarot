@@ -31,7 +31,7 @@ public enum Contract implements Nameable {
 	public static final Map<String, Contract> BY_NAME = new HashMap<>();
 
 	static {
-		for (Contract contract : values())
+		for (Contract contract : ALL_CONTRACTS)
 			BY_NAME.put(contract.name, contract);
 	}
 
