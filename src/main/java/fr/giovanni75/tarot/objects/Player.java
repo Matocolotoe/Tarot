@@ -31,6 +31,16 @@ public class Player implements Serializable {
 		return name;
 	}
 
+	public LocalStats getStats(DateRecord date, int players) {
+		Map<DateRecord, LocalStats> stats = switch (players) {
+			case 3 -> statsThreePlayers;
+			case 4 -> statsFourPlayers;
+			case 5 -> statsFivePlayers;
+			default -> throw new IllegalArgumentException("Stats are unavailable for " + players + " players");
+		};
+		return stats.getOrDefault(date, new LocalStats());
+	}
+
 	public UUID getUniqueID() {
 		return uuid;
 	}
@@ -105,13 +115,6 @@ public class Player implements Serializable {
 			return result;
 		}
 
-	public LocalStats getStats(DateRecord date, int players) {
-		return switch (players) {
-			case 3 -> statsThreePlayers.getOrDefault(date, new LocalStats());
-			case 4 -> statsFourPlayers.getOrDefault(date, new LocalStats());
-			case 5 -> statsFivePlayers.getOrDefault(date, new LocalStats());
-			default -> throw new IllegalArgumentException("Stats are unavailable for " + players + " players");
-		};
 	}
 
 }
