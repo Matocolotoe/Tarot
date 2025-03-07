@@ -133,18 +133,13 @@ class FrameScoreGraphs extends JFrame implements ActionListener {
 		// If we check for zero scores before, we might retain no players if the first selected game is the first one of the month
 		// Instead, check for scores which remained constant during the selected period
 		Iterator<Map.Entry<Player, double[]>> iterator = yDataMap.entrySet().iterator();
-		while (iterator.hasNext()) {
+		yIter: while (iterator.hasNext()) {
 			Map.Entry<Player, double[]> entry = iterator.next();
-			boolean allEqual = true;
 			double[] yData = entry.getValue();
-			for (double y : yData) {
-				if (y != yData[0]) {
-					allEqual = false;
-					break;
-				}
-			}
-			if (allEqual)
-				iterator.remove();
+			for (double y : yData)
+				if (y != yData[0])
+					continue yIter; // There exists at least two distinct elements
+			iterator.remove();
 		}
 
 		int total = 0;
