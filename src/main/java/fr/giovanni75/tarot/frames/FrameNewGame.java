@@ -46,9 +46,13 @@ class FrameNewGame extends JFrame implements ActionListener {
 
 	private static final int COMBO_BOX_BASE_X = 150;
 	private static final int COMBO_BOX_BASE_Y = 80;
+	private static final int LARGE_TEXT_WIDTH = 140;
 	private static final int PLAYER_BUTTON_BASE_X = 190;
 	private static final int PLAYER_X_SPACING = 110;
 	private static final int SECONDARY_BUTTON_BASE_X = 200;
+	private static final int SMALL_TEXT_HEIGHT = 20;
+	private static final int SMALL_TEXT_WIDTH = 100;
+	private static final int TEXT_HEIGHT = 60;
 
 	private static JComboBox<String> getEnumNameList(Nameable[] values, int x, int y, int width) {
 		String[] names = new String[values.length];
@@ -57,16 +61,16 @@ class FrameNewGame extends JFrame implements ActionListener {
 		JComboBox<String> box = new JComboBox<>(names);
 		box.setFont(Components.getFont(12));
 		box.setLocation(x, y);
-		box.setSize(width, 20);
+		box.setSize(width, SMALL_TEXT_HEIGHT);
 		return box;
 	}
 
-	private static JComboBox<String> getPlayerNameList(List<String> names, int index, int x) {
-		JComboBox<String> box = new JComboBox<>(names.toArray(new String[0]));
+	private static JComboBox<String> getPlayerNameList(String[] names, int index, int x) {
+		JComboBox<String> box = new JComboBox<>(names);
 		box.setFont(Components.getFont(12));
 		box.setLocation(x, COMBO_BOX_BASE_Y);
 		box.setSelectedItem(LAST_SELECTED_NAMES[index]);
-		box.setSize(100, 20);
+		box.setSize(SMALL_TEXT_WIDTH, SMALL_TEXT_HEIGHT);
 		return box;
 	}
 
@@ -79,18 +83,20 @@ class FrameNewGame extends JFrame implements ActionListener {
 		mainPanel.setLayout(null);
 		add(mainPanel);
 
-		final List<String> names = new ArrayList<>(Tarot.PLAYER_NAMES);
-		names.sort(String::compareTo);
-		names.addFirst(Tarot.NONE_STRING);
+		final List<String> nameList = new ArrayList<>(Tarot.PLAYER_NAMES);
+		nameList.sort(String::compareTo);
+		nameList.addFirst(Tarot.NONE_STRING);
 
-		mainPanel.add(Components.getSimpleText("Joueurs", 18, COMBO_BOX_BASE_X - 80, COMBO_BOX_BASE_Y - 20, 140, 60));
-		mainPanel.add(Components.getSimpleText("Misères", 18, COMBO_BOX_BASE_X - 80, COMBO_BOX_BASE_Y + 20, 140, 60));
-		mainPanel.add(Components.getSimpleText("Poignées", 18, COMBO_BOX_BASE_X - 92, COMBO_BOX_BASE_Y + 60, 140, 60));
+		mainPanel.add(Components.getSimpleText("Joueurs", 18, COMBO_BOX_BASE_X - 80, COMBO_BOX_BASE_Y - 20, LARGE_TEXT_WIDTH, TEXT_HEIGHT));
+		mainPanel.add(Components.getSimpleText("Misères", 18, COMBO_BOX_BASE_X - 80, COMBO_BOX_BASE_Y + 20, LARGE_TEXT_WIDTH, TEXT_HEIGHT));
+		mainPanel.add(Components.getSimpleText("Poignées", 18, COMBO_BOX_BASE_X - 92, COMBO_BOX_BASE_Y + 60, LARGE_TEXT_WIDTH, TEXT_HEIGHT));
+
+		String[] names = nameList.toArray(new String[0]);
 		for (int i = 0; i < 5; i++) {
 			int x = COMBO_BOX_BASE_X + PLAYER_X_SPACING * i;
 			playerNameBoxes[i] = getPlayerNameList(names, i, x);
-			miseryBoxes[i] = getEnumNameList(Misery.values(), x, 120, 100);
-			handfulBoxes[i] = getEnumNameList(Handful.values(), x, 160, 100);
+			miseryBoxes[i] = getEnumNameList(Misery.values(), x, 120, SMALL_TEXT_WIDTH);
+			handfulBoxes[i] = getEnumNameList(Handful.values(), x, 160, SMALL_TEXT_WIDTH);
 			mainPanel.add(playerNameBoxes[i]);
 			mainPanel.add(miseryBoxes[i]);
 			mainPanel.add(handfulBoxes[i]);
@@ -101,23 +107,23 @@ class FrameNewGame extends JFrame implements ActionListener {
 		final ButtonGroup contractButtonGroup = new ButtonGroup();
 		final ButtonGroup oudlersButtonGroup = new ButtonGroup();
 
-		mainPanel.add(Components.getSimpleText("Preneur", 18, COMBO_BOX_BASE_X - 80, COMBO_BOX_BASE_Y + 110, 100, 60));
+		mainPanel.add(Components.getSimpleText("Preneur", 18, COMBO_BOX_BASE_X - 80, COMBO_BOX_BASE_Y + 110, SMALL_TEXT_WIDTH, TEXT_HEIGHT));
 		for (int i = 0; i < 5; i++) {
 			JRadioButton button = new JRadioButton();
 			attackerButtons[i] = button;
 			attackerButtonGroup.add(button);
 			button.setLocation(PLAYER_BUTTON_BASE_X + PLAYER_X_SPACING * i, COMBO_BOX_BASE_Y + 130);
-			button.setSize(20, 20);
+			button.setSize(20, SMALL_TEXT_HEIGHT);
 			mainPanel.add(button);
 		}
 
-		mainPanel.add(Components.getSimpleText("Appelé", 18, COMBO_BOX_BASE_X - 80, COMBO_BOX_BASE_Y + 140, 100, 60));
+		mainPanel.add(Components.getSimpleText("Appelé", 18, COMBO_BOX_BASE_X - 80, COMBO_BOX_BASE_Y + 140, SMALL_TEXT_WIDTH, TEXT_HEIGHT));
 		for (int i = 0; i < 5; i++) {
 			JRadioButton button = new JRadioButton();
 			calledButtons[i] = button;
 			calledPlayerButtonGroup.add(button);
 			button.setLocation(PLAYER_BUTTON_BASE_X + PLAYER_X_SPACING * i, COMBO_BOX_BASE_Y + 160);
-			button.setSize(20, 20);
+			button.setSize(20, SMALL_TEXT_HEIGHT);
 			mainPanel.add(button);
 		}
 
@@ -145,30 +151,30 @@ class FrameNewGame extends JFrame implements ActionListener {
 			}
 		});
 
-		mainPanel.add(Components.getSimpleText("Contrat", 18, 100, 400, 100, 60));
+		mainPanel.add(Components.getSimpleText("Contrat", 18, 100, 400, SMALL_TEXT_WIDTH, TEXT_HEIGHT));
 		for (Contract contract : Contract.ALL_CONTRACTS) {
 			JRadioButton button = new JRadioButton(contract.getName());
 			contractButtons[contract.ordinal()] = button;
 			button.setLocation(SECONDARY_BUTTON_BASE_X + contract.ordinal() * 120, 420);
-			button.setSize(120, 20);
+			button.setSize(120, SMALL_TEXT_HEIGHT);
 			contractButtonGroup.add(button);
 			mainPanel.add(button);
 		}
 
-		mainPanel.add(Components.getSimpleText("Bouts", 18, 100, 450, 100, 60));
+		mainPanel.add(Components.getSimpleText("Bouts", 18, 100, 450, SMALL_TEXT_WIDTH, TEXT_HEIGHT));
 		for (Oudlers oudler : Oudlers.values()) {
 			JRadioButton button = new JRadioButton(String.valueOf(oudler.ordinal()));
 			oudlersButtons[oudler.ordinal()] = button;
 			button.setLocation(SECONDARY_BUTTON_BASE_X + oudler.ordinal() * 50, 470);
-			button.setSize(40, 20);
+			button.setSize(40, SMALL_TEXT_HEIGHT);
 			mainPanel.add(button);
 			oudlersButtonGroup.add(button);
 		}
 
-		mainPanel.add(Components.getSimpleText("Petit au bout", 18, 100, 500, 120, 60));
-		mainPanel.add(petitAuBoutBox = getEnumNameList(PetitAuBout.values(), 240, 520, 100));
+		mainPanel.add(Components.getSimpleText("Petit au bout", 18, 100, 500, 120, TEXT_HEIGHT));
+		mainPanel.add(petitAuBoutBox = getEnumNameList(PetitAuBout.values(), 240, 520, SMALL_TEXT_WIDTH));
 
-		mainPanel.add(Components.getSimpleText("Chelem", 18, 410, 500, 100, 60));
+		mainPanel.add(Components.getSimpleText("Chelem", 18, 410, 500, SMALL_TEXT_WIDTH, TEXT_HEIGHT));
 		mainPanel.add(slamBox = getEnumNameList(Slam.values(), 500, 520, 170));
 
 		submitButton = new JButton("Ajouter");
