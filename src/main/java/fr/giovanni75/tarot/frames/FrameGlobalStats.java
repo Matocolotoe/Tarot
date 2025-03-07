@@ -165,7 +165,7 @@ class FrameGlobalStats extends JFrame {
 			return;
 		}
 
-		setBounds(300, 150, 550, 800);
+		setBounds(300, 150, 500, 800);
 		setResizable(false);
 		setTitle("Statistiques – " + players + " joueurs – " + date.getName());
 
