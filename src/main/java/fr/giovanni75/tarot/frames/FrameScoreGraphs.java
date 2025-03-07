@@ -20,8 +20,11 @@ import java.util.*;
 
 class FrameScoreGraphs extends JFrame implements ActionListener {
 
+	private final double[] emptyData;
 	private final double[] xData;
 	private final Map<Player, double[]> yDataMap = new TreeMap<>();
+
+	private final List<JCheckBox> checkBoxes = new ArrayList<>();
 	private final Map<String, Player> temporaryProfilesByName = new HashMap<>();
 
 	private final XChartPanel<XYChart> leftPanel;
@@ -33,6 +36,45 @@ class FrameScoreGraphs extends JFrame implements ActionListener {
 			.yAxisTitle("Score total")
 			.theme(Styler.ChartTheme.Matlab)
 			.build();
+
+	private final JButton hideAllButton = getButton("Tout masquer");
+	private final JButton showAllButton = getButton("Tout afficher");
+
+	private JButton getButton(String text) {
+		JButton button = new JButton(text);
+		button.addActionListener(this);
+		button.setFont(Components.getFont(11));
+		button.setSize(50, 15);
+		return button;
+	}
+
+	private void updateAllData(boolean show) {
+		if (show) {
+			for (Map.Entry<Player, double[]> entry : yDataMap.entrySet())
+				chart.updateXYSeries(entry.getKey().getName(), xData, entry.getValue(), emptyData);
+		} else {
+			for (Player player : yDataMap.keySet())
+				chart.updateXYSeries(player.getName(), xData, emptyData, emptyData);
+		}
+		for (JCheckBox box : checkBoxes)
+			box.setSelected(show);
+		leftPanel.revalidate();
+		leftPanel.repaint();
+	}
+
+	private void updateData(String name, boolean show) {
+		if (show) {
+			Player player = temporaryProfilesByName.get(name);
+			chart.updateXYSeries(name, xData, yDataMap.get(player), emptyData);
+		} else {
+			// Removing the whole series and adding it back again would put the name at the end of the list
+			// Only hide actual data to keep name list sorted
+			chart.updateXYSeries(name, xData, emptyData, emptyData);
+		}
+
+		leftPanel.revalidate();
+		leftPanel.repaint();
+	}
 
 	FrameScoreGraphs(int minDay, int maxDay, DateRecord date, int players) {
 		setBounds(300, 150, 1200, 800);
@@ -71,6 +113,7 @@ class FrameScoreGraphs extends JFrame implements ActionListener {
 		chart.getStyler().setZoomEnabled(true);
 
 		int size = games.size() + 1;
+		emptyData = new double[size];
 		xData = new double[size];
 		for (int i = 0; i < size; i++)
 			xData[i] = i;
@@ -95,15 +138,17 @@ class FrameScoreGraphs extends JFrame implements ActionListener {
 		JPanel rightPanel = new JPanel();
 		rightPanel.setBorder(Components.getStandardBorder());
 		rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));
-		rightPanel.setSize(150, 600);
+		rightPanel.setSize(250, 600);
 		rightPanel.setVisible(true);
 
 		rightPanel.add(Components.getSimpleText("Affichage", 20));
 		rightPanel.add(Components.getSimpleText(" ", 15));
 
-		for (Map.Entry<Player, double[]> entry : yDataMap.entrySet()) {
-			// If we check for zero scores before, we might retain no players if the first selected game is the first one of the month
-			// Instead, check for scores which remained constant during the selected period
+		// If we check for zero scores before, we might retain no players if the first selected game is the first one of the month
+		// Instead, check for scores which remained constant during the selected period
+		Iterator<Map.Entry<Player, double[]>> iterator = yDataMap.entrySet().iterator();
+		while (iterator.hasNext()) {
+			Map.Entry<Player, double[]> entry = iterator.next();
 			boolean allEqual = true;
 			double[] yData = entry.getValue();
 			for (double y : yData) {
@@ -113,10 +158,13 @@ class FrameScoreGraphs extends JFrame implements ActionListener {
 				}
 			}
 			if (allEqual)
-				continue;
+				iterator.remove();
+		}
 
+		int total = 0;
+		for (Map.Entry<Player, double[]> entry : yDataMap.entrySet()) {
 			String name = entry.getKey().getName();
-			XYSeries series = chart.addSeries(name, xData, yData);
+			XYSeries series = chart.addSeries(name, xData, entry.getValue(), emptyData);
 			series.setMarker(SeriesMarkers.CIRCLE);
 
 			// From https://stackoverflow.com/questions/223971/generating-spectrum-color-palettes
@@ -128,14 +176,21 @@ class FrameScoreGraphs extends JFrame implements ActionListener {
 			JCheckBox box = new JCheckBox(name);
 			box.addActionListener(this);
 			box.setSelected(true);
+			checkBoxes.add(box);
 			rightPanel.add(box);
+			total += 1;
 		}
+
+		rightPanel.add(Components.getSimpleText(" ", 15));
+		rightPanel.add(showAllButton);
+		rightPanel.add(Components.getSimpleText(" ", 5));
+		rightPanel.add(hideAllButton);
 
 		JSplitPane splitPane = new JSplitPane();
 		splitPane.setDividerLocation(1050);
 		splitPane.setDividerSize(0);
 		splitPane.setOrientation(JSplitPane.HORIZONTAL_SPLIT);
-		splitPane.setSize(1200, 600);
+		splitPane.setSize((int) leftPanel.getSize().getWidth() + (int) rightPanel.getSize().getWidth(), 600);
 
 		splitPane.setLeftComponent(leftPanel);
 		splitPane.setRightComponent(rightPanel);
@@ -147,24 +202,23 @@ class FrameScoreGraphs extends JFrame implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		Object source = e.getSource();
-		if (!(source instanceof JCheckBox box))
-			return;
-
-		// Always required, at least for error bars
-		double[] empty = new double[xData.length];
-
-		String name = box.getText();
-		if (box.isSelected()) {
-			Player player = temporaryProfilesByName.get(name);
-			chart.updateXYSeries(name, xData, yDataMap.get(player), empty);
-		} else {
-			// Removing the whole series and adding it back again would put the name at the end of the list
-			// Only hide actual data to keep name list sorted
-			chart.updateXYSeries(name, empty, empty, empty);
+		if (source == hideAllButton) {
+			updateAllData(false);
+		} else if (source == showAllButton) {
+			updateAllData(true);
+		} else if (source instanceof JCheckBox box) {
+			String name = box.getText();
+			if (box.isSelected()) {
+				Player player = temporaryProfilesByName.get(name);
+				chart.updateXYSeries(name, xData, yDataMap.get(player), emptyData);
+			} else {
+				// Removing the whole series and adding it back again would put the name at the end of the list
+				// Only hide actual data to keep name list sorted
+				chart.updateXYSeries(name, xData, emptyData, emptyData);
+			}
+			leftPanel.revalidate();
+			leftPanel.repaint();
 		}
-
-		leftPanel.revalidate();
-		leftPanel.repaint();
 	}
 
 }
