@@ -67,6 +67,8 @@ class FrameScoreGraphs extends JFrame implements ActionListener {
 			if (game.players.length == players && game.dayOfMonth < minDay)
 				game.applyResults(temporaryProfiles::get);
 
+		chart.getStyler().setZoomEnabled(true);
+
 		int size = games.size() + 1;
 		xData = new double[size];
 		for (int i = 0; i < size; i++)
@@ -131,7 +133,6 @@ class FrameScoreGraphs extends JFrame implements ActionListener {
 		splitPane.setLeftComponent(leftPanel);
 		splitPane.setRightComponent(rightPanel);
 
-		chart.getStyler().setZoomEnabled(true);
 		add(splitPane);
 		setVisible(true);
 	}
