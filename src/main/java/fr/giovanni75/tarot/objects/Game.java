@@ -14,18 +14,18 @@ import java.util.function.Function;
 
 public class Game implements Serializable {
 
-	private final int dayOfMonth;
-	private final DateRecord date;
+	public final int dayOfMonth;
+	public final DateRecord date;
 
-	private final Contract contract;
+	public final Contract contract;
+	public final Oudlers oudlers;
+	public final PetitAuBout petitAuBout;
+	public final LocalPlayer[] players;
+
 	private final int attackScore;
-	private final Oudlers oudlers;
-	private final PetitAuBout petitAuBout;
 	private final Slam slam;
 
-	private final LocalPlayer[] players;
-
-	private int attackFinalScore;
+	public int attackFinalScore;
 
 	public Game(Month month, Contract contract, int attackScore, Oudlers oudlers, PetitAuBout petitAuBout, Slam slam, LocalPlayer[] players) {
 		LocalDate now = LocalDate.now();
@@ -197,18 +197,6 @@ public class Game implements Serializable {
 		return getPlayer(Side.ATTACK);
 	}
 
-	public int getAttackFinalScore() {
-		return attackFinalScore;
-	}
-
-	public Contract getContract() {
-		return contract;
-	}
-
-	public DateRecord getDate() {
-		return date;
-	}
-
 	private <T> List<T> getDefenders(Function<Player, T> function) {
 		List<T> defenders = new ArrayList<>();
 		for (LocalPlayer localPlayer : players) {
@@ -246,23 +234,11 @@ public class Game implements Serializable {
 		return lines;
 	}
 
-	public int getNumberOfOudlers() {
-		return oudlers.ordinal();
-	}
-
-	public int getNumberOfPlayers() {
-		return players.length;
-	}
-
 	private Player getPlayer(Side side) {
 		for (LocalPlayer localPlayer : players)
 			if (localPlayer.side() == side)
 				return Tarot.getPlayer(localPlayer.uuid());
 		return null;
-	}
-
-	public boolean hasPetitAuBout() {
-		return petitAuBout != PetitAuBout.NONE;
 	}
 
 	@Override

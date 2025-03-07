@@ -3,6 +3,7 @@ package fr.giovanni75.tarot.frames;
 import fr.giovanni75.tarot.DateRecord;
 import fr.giovanni75.tarot.Tarot;
 import fr.giovanni75.tarot.enums.Contract;
+import fr.giovanni75.tarot.enums.PetitAuBout;
 import fr.giovanni75.tarot.objects.Game;
 import fr.giovanni75.tarot.objects.Player;
 
@@ -33,8 +34,8 @@ class FrameGlobalStats extends JFrame {
 		Map<Contract, Integer> matchingAmounts = new EnumMap<>(Contract.class);
 		Map<Contract, Integer> totalAmounts = new EnumMap<>(Contract.class);
 		for (Game game : Tarot.ALL_GAMES.get(date)) {
-			if (game.getNumberOfPlayers() == players) {
-				Contract contract = game.getContract();
+			if (game.players.length == players) {
+				Contract contract = game.contract;
 				int amount = adder.apply(game);
 				matchingAmounts.put(contract, matchingAmounts.getOrDefault(contract, 0) + 1);
 				totalAmounts.put(contract, totalAmounts.getOrDefault(contract, 0) + amount);
@@ -61,8 +62,8 @@ class FrameGlobalStats extends JFrame {
 		int totalAmount = 0;
 		Map<Contract, Integer> amounts = new EnumMap<>(Contract.class);
 		for (Game game : Tarot.ALL_GAMES.get(date)) {
-			if (game.getNumberOfPlayers() == players && matcher.test(game)) {
-				Contract contract = game.getContract();
+			if (game.players.length == players && matcher.test(game)) {
+				Contract contract = game.contract;
 				amounts.put(contract, amounts.getOrDefault(contract, 0) + 1);
 				totalAmount++;
 			}
@@ -153,7 +154,7 @@ class FrameGlobalStats extends JFrame {
 	FrameGlobalStats(DateRecord date, int players) {
 		boolean hasStatsRecorded = false;
 		for (Game game : Tarot.ALL_GAMES.get(date)) {
-			if (game.getNumberOfPlayers() == players) {
+			if (game.players.length == players) {
 				hasStatsRecorded = true;
 				break;
 			}
@@ -178,8 +179,8 @@ class FrameGlobalStats extends JFrame {
 		mainPanel.add(Components.getSimpleText(" ", 25));
 
 		showGlobalStats(mainPanel, date, players, "Parties jouées", ignored -> true);
-		showAverageStats(mainPanel, date, players, "Nombre moyen de bouts", Game::getNumberOfOudlers);
-		showGlobalStats(mainPanel, date, players, "Petits au bout", Game::hasPetitAuBout);
+		showAverageStats(mainPanel, date, players, "Nombre moyen de bouts", game -> game.oudlers.ordinal());
+		showGlobalStats(mainPanel, date, players, "Petits au bout", game -> game.petitAuBout != PetitAuBout.NONE);
 
 		showMaxPlayerStats(mainPanel, date, players, "Le plus de parties jouées", "%s (%d)",
 				stats -> stats.playedGames, 1, true, false);

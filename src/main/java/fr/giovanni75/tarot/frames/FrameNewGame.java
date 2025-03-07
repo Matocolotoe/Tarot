@@ -309,7 +309,7 @@ class FrameNewGame extends JFrame implements ActionListener {
 
 		Game game = new Game(month, contract, attackScore, oudlers, petitAuBout, slam, players);
 		game.write("games");
-		Tarot.ALL_GAMES.computeIfAbsent(game.getDate(), key -> new ArrayList<>()).addFirst(game); // Add first so that game is shown on top
+		Tarot.ALL_GAMES.computeIfAbsent(game.date, key -> new ArrayList<>()).addFirst(game); // Add first so that game is shown on top
 
 		for (JComboBox<String> handfulBox : handfulBoxes)
 			handfulBox.setSelectedIndex(0);
@@ -321,7 +321,7 @@ class FrameNewGame extends JFrame implements ActionListener {
 		scoreSlider.setValue(51);
 
 		game.applyResults();
-		Components.popup("Partie ajoutée avec succès !\nPoints à l'attaque : " + game.getAttackFinalScore());
+		Components.popup("Partie ajoutée avec succès !\nPoints à l'attaque : " + game.attackFinalScore);
 		FrameMainMenu.MAIN_MENU.reloadGames();
 	}
 

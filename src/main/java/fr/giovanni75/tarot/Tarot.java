@@ -148,7 +148,7 @@ public final class Tarot {
 		int size = games.size();
 		for (int i = 0; i < size; i++) {
 			Game game = new Game(games.get(size - i - 1).getAsJsonObject());
-			ALL_GAMES.computeIfAbsent(game.getDate(), key -> new ArrayList<>()).add(game);
+			ALL_GAMES.computeIfAbsent(game.date, key -> new ArrayList<>()).add(game);
 		}
 
 		JsonArray players = getJsonArrayFromFile("players");
