@@ -13,6 +13,7 @@ import org.knowm.xchart.style.Styler;
 import org.knowm.xchart.style.markers.SeriesMarkers;
 
 import javax.swing.*;
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.*;
@@ -117,6 +118,12 @@ class FrameScoreGraphs extends JFrame implements ActionListener {
 			String name = entry.getKey().getName();
 			XYSeries series = chart.addSeries(name, xData, yData);
 			series.setMarker(SeriesMarkers.CIRCLE);
+
+			// From https://stackoverflow.com/questions/223971/generating-spectrum-color-palettes
+			Color color = Color.getHSBColor((float) total / (float) yDataMap.size(), 0.85f, 1.0f);
+			series.setFillColor(color);
+			series.setLineColor(color);
+			series.setMarkerColor(color);
 
 			JCheckBox box = new JCheckBox(name);
 			box.addActionListener(this);
