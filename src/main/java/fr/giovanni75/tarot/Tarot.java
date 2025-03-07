@@ -164,7 +164,7 @@ public final class Tarot {
 			for (Game game : list)
 				game.applyResults();
 
-		ORDERED_PLAYERS.sort(Comparator.comparing(Player::getName));
+		ORDERED_PLAYERS.sort(Player::compareTo);
 		PLAYER_NAMES.sort(String::compareTo);
 		PLAYER_NAMES.addFirst(NONE_STRING);
 

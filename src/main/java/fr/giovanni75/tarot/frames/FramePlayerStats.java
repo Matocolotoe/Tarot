@@ -8,7 +8,6 @@ import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -16,7 +15,7 @@ import java.util.TreeMap;
 class FramePlayerStats extends JFrame {
 
 	FramePlayerStats(DateRecord date, int players) {
-		Map<Player, List<String>> displays = new TreeMap<>(Comparator.comparing(Player::getName));
+		Map<Player, List<String>> displays = new TreeMap<>();
 		for (Player player : Tarot.ORDERED_PLAYERS) {
 			List<String> display = player.getStats(date, players).getDisplay();
 			if (!display.isEmpty())

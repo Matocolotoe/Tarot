@@ -8,7 +8,7 @@ import fr.giovanni75.tarot.enums.Contract;
 
 import java.util.*;
 
-public class Player implements Serializable {
+public class Player implements Comparable<Player>, Serializable {
 
 	private final String name;
 	private final UUID uuid;
@@ -25,6 +25,11 @@ public class Player implements Serializable {
 			statsFourPlayers.put(record, new LocalStats());
 			statsThreePlayers.put(record, new LocalStats());
 		}
+	}
+
+	@Override
+	public int compareTo(Player other) {
+		return name.compareTo(other.name);
 	}
 
 	public String getName() {
