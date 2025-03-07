@@ -20,6 +20,9 @@ import java.util.*;
 
 class FrameScoreGraphs extends JFrame implements ActionListener {
 
+	private static final int LEFT_PANEL_WIDTH = 1050;
+	private static final int RIGHT_PANEL_WIDTH = 1050;
+
 	private final double[] emptyData;
 	private final double[] xData;
 	private final Map<Player, double[]> yDataMap = new TreeMap<>();
@@ -118,13 +121,13 @@ class FrameScoreGraphs extends JFrame implements ActionListener {
 		}
 
 		leftPanel = new XChartPanel<>(chart);
-		leftPanel.setSize(1050, 600);
+		leftPanel.setSize(LEFT_PANEL_WIDTH, 600);
 		leftPanel.setVisible(true);
 
 		JPanel rightPanel = new JPanel();
 		rightPanel.setBorder(Components.getStandardBorder());
 		rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));
-		rightPanel.setSize(250, 600);
+		rightPanel.setSize(RIGHT_PANEL_WIDTH, 600);
 		rightPanel.setVisible(true);
 
 		rightPanel.add(Components.getSimpleText("Affichage", 20));
@@ -168,10 +171,10 @@ class FrameScoreGraphs extends JFrame implements ActionListener {
 		rightPanel.add(hideAllButton);
 
 		JSplitPane splitPane = new JSplitPane();
-		splitPane.setDividerLocation(1050);
+		splitPane.setDividerLocation(LEFT_PANEL_WIDTH);
 		splitPane.setDividerSize(0);
 		splitPane.setOrientation(JSplitPane.HORIZONTAL_SPLIT);
-		splitPane.setSize((int) leftPanel.getSize().getWidth() + (int) rightPanel.getSize().getWidth(), 600);
+		splitPane.setSize(LEFT_PANEL_WIDTH + RIGHT_PANEL_WIDTH, 600);
 
 		splitPane.setLeftComponent(leftPanel);
 		splitPane.setRightComponent(rightPanel);
