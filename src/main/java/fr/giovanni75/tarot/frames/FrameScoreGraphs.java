@@ -62,20 +62,6 @@ class FrameScoreGraphs extends JFrame implements ActionListener {
 		leftPanel.repaint();
 	}
 
-	private void updateData(String name, boolean show) {
-		if (show) {
-			Player player = temporaryProfilesByName.get(name);
-			chart.updateXYSeries(name, xData, yDataMap.get(player), emptyData);
-		} else {
-			// Removing the whole series and adding it back again would put the name at the end of the list
-			// Only hide actual data to keep name list sorted
-			chart.updateXYSeries(name, xData, emptyData, emptyData);
-		}
-
-		leftPanel.revalidate();
-		leftPanel.repaint();
-	}
-
 	FrameScoreGraphs(int minDay, int maxDay, DateRecord date, int players) {
 		setBounds(300, 150, 1200, 800);
 		setResizable(false);
