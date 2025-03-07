@@ -9,6 +9,7 @@ import java.awt.Font;
 final class Components {
 
 	private static final String FONT_NAME = "Helvetica";
+	private static final String INVALID_DAY_MESSAGE = "Veuillez entrer un jour valide.";
 
 	static Font getFont(int size) {
 		return new Font(FONT_NAME, Font.PLAIN, size);
@@ -37,6 +38,32 @@ final class Components {
 
 	static String prompt(String message, String title) {
 		return JOptionPane.showInputDialog(null, message, title, JOptionPane.INFORMATION_MESSAGE);
+	}
+
+	static int promptDay(String message, String title) {
+		String prompt = prompt(message, title);
+		if (prompt == null) // Window was just closed
+			return -1;
+
+		if (prompt.isBlank()) {
+			Components.popup(INVALID_DAY_MESSAGE);
+			return promptDay(message, title);
+		}
+
+		int result;
+		try {
+			result = Integer.parseInt(prompt);
+		} catch (NumberFormatException e) {
+			Components.popup(INVALID_DAY_MESSAGE);
+			return promptDay(message, title);
+		}
+
+		if (result < 1 || result > 31) {
+			Components.popup(INVALID_DAY_MESSAGE);
+			return promptDay(message, title);
+		}
+
+		return result;
 	}
 
 }

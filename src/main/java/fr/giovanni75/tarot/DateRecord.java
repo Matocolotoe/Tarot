@@ -17,4 +17,9 @@ public record DateRecord(Month month, int year) implements Comparable<DateRecord
 		return month.getName() + " " + year;
 	}
 
+	public String getShortName() {
+		int m = month.ordinal() + 1;
+		return (m < 10 ? "0" + m : m) + "/" + year;
+	}
+
 }

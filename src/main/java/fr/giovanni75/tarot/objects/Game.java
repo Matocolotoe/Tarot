@@ -14,6 +14,8 @@ import java.util.function.Function;
 
 public class Game implements Serializable {
 
+	private static final Function<UUID, Player> DEFAULT_LOCAL_PLAYER_CONVERTER = Tarot::getPlayer;
+
 	public final int dayOfMonth;
 	public final DateRecord date;
 
@@ -74,6 +76,10 @@ public class Game implements Serializable {
 	}
 
 	public void applyResults() {
+		applyResults(DEFAULT_LOCAL_PLAYER_CONVERTER);
+	}
+
+	public void applyResults(Function<UUID, Player> localConverter) {
 		int diff = attackScore - oudlers.getRequiredScore();
 		int attackFinalScore = (25 + Math.abs(diff)) * contract.getMultiplier();
 		if (diff < 0)
@@ -91,7 +97,7 @@ public class Game implements Serializable {
 			} else {
 				attackFinalScore += points;
 			}
-			Player player = Tarot.getPlayer(local.uuid());
+			Player player = localConverter.apply(local.uuid());
 			Maps.increment(contract, player.getStats(date, numberOfPlayers).handfuls);
 		}
 
@@ -114,9 +120,9 @@ public class Game implements Serializable {
 			}
 		}
 
-		List<Player> defenders = getDefenders(Function.identity());
-		Player attacker = getPlayer(Side.ATTACK);
-		Player ally = getAlly(defenders.size());
+		List<Player> defenders = getDefenders(Function.identity(), localConverter);
+		Player attacker = getPlayer(Side.ATTACK, localConverter);
+		Player ally = getAlly(defenders.size(), localConverter);
 
 		if (attacker == null)
 			throw new IllegalStateException("Attacker cannot be null");
@@ -147,12 +153,12 @@ public class Game implements Serializable {
 			int points = local.misery().getExtraPoints();
 			if (points == 0)
 				continue;
-			Player player = Tarot.getPlayer(local.uuid());
+			Player player = localConverter.apply(local.uuid());
 			Maps.increment(player, finalScores, points * (numberOfPlayers - 1));
 			Maps.increment(contract, player.getStats(date, numberOfPlayers).miseries);
 			for (LocalPlayer other : players)
 				if (!local.equals(other))
-					Maps.increment(Tarot.getPlayer(other.uuid()), finalScores, -points);
+					Maps.increment(localConverter.apply(other.uuid()), finalScores, -points);
 		}
 
 		Player.LocalStats stats = attacker.getStats(date, numberOfPlayers);
@@ -180,11 +186,11 @@ public class Game implements Serializable {
 		this.attackFinalScore = attackFinalScore;
 	}
 
-	private Player getAlly(int defenders) {
+	private Player getAlly(int defenders, Function<UUID, Player> localConverter) {
 		if (players.length < 5)
 			return null;
 
-		Player ally = getPlayer(Side.ATTACK_ALLY);
+		Player ally = getPlayer(Side.ATTACK_ALLY, localConverter);
 		if (ally != null) {
 			if (defenders != 3)
 				throw new IllegalStateException("There has to be 3 defenders with an attacker and an ally");
@@ -194,15 +200,15 @@ public class Game implements Serializable {
 		if (defenders != 4)
 			throw new IllegalStateException("There has to be 4 defenders when the attacker called themselves");
 
-		return getPlayer(Side.ATTACK);
+		return getPlayer(Side.ATTACK, localConverter);
 	}
 
-	private <T> List<T> getDefenders(Function<Player, T> function) {
+	private <T> List<T> getDefenders(Function<Player, T> playerTConverter, Function<UUID, Player> localConverter) {
 		List<T> defenders = new ArrayList<>();
-		for (LocalPlayer localPlayer : players) {
-			if (localPlayer.side() == Side.DEFENSE) {
-				Player player = Tarot.getPlayer(localPlayer.uuid());
-				defenders.add(function.apply(player));
+		for (LocalPlayer local : players) {
+			if (local.side() == Side.DEFENSE) {
+				Player player = localConverter.apply(local.uuid());
+				defenders.add(playerTConverter.apply(player));
 			}
 		}
 		return defenders;
@@ -216,9 +222,10 @@ public class Game implements Serializable {
 				+ " – Score : " + attackScore + "/" + oudlers.getRequiredScore()
 				+ " (" + attackFinalScore + ")");
 
-		List<String> defenders = getDefenders(Player::getName);
-		Player attacker = getPlayer(Side.ATTACK);
-		Player ally = getAlly(defenders.size());
+		// These are only used in main menu summary, so use default converter
+		List<String> defenders = getDefenders(Player::getName, DEFAULT_LOCAL_PLAYER_CONVERTER);
+		Player attacker = getPlayer(Side.ATTACK, DEFAULT_LOCAL_PLAYER_CONVERTER);
+		Player ally = getAlly(defenders.size(), DEFAULT_LOCAL_PLAYER_CONVERTER);
 		defenders.sort(String::compareTo);
 
 		if (attacker == null)
@@ -234,10 +241,10 @@ public class Game implements Serializable {
 		return lines;
 	}
 
-	private Player getPlayer(Side side) {
-		for (LocalPlayer localPlayer : players)
-			if (localPlayer.side() == side)
-				return Tarot.getPlayer(localPlayer.uuid());
+	private Player getPlayer(Side side, Function<UUID, Player> localConverter) {
+		for (LocalPlayer local : players)
+			if (local.side() == side)
+				return localConverter.apply(local.uuid());
 		return null;
 	}
 

@@ -127,18 +127,32 @@ public class FrameMainMenu extends JFrame {
 		List<DateRecord> dates = new ArrayList<>(Tarot.ALL_GAMES.keySet());
 		dates.sort(DateRecord::compareTo);
 		for (int i = 5; i > 2; i--) {
-			final int players = i; // Must be final for FramePlayerStats constructor
+			final int players = i; // Must be final for constructors below
 			JMenu statsMenu = new JMenu("Tarot à " + players);
+			JMenu graphMenu = new JMenu("Graphiques");
 			JMenu globalStatsMenu = new JMenu("Stats générales");
 			JMenu playerStatsMenu = new JMenu("Stats individuelles");
 			for (DateRecord date : dates) {
-				JMenuItem globalStatsItem = new JMenuItem(date.getName());
-				JMenuItem playerStatsItem = new JMenuItem(date.getName());
+				String dateName = date.getName();
+				JMenuItem graphItem = new JMenuItem(dateName);
+				JMenuItem globalStatsItem = new JMenuItem(dateName);
+				JMenuItem playerStatsItem = new JMenuItem(dateName);
+				graphItem.addActionListener(event -> {
+					int minDay = Components.promptDay("De quel jour ?", "Graphiques – " + dateName);
+					if (minDay == -1) // Window was just closed
+						return;
+					int maxDay = Components.promptDay("À quel jour ?", "Graphiques – " + dateName);
+					if (maxDay == -1) // Window was just closed
+						return;
+					new FrameScoreGraphs(minDay, maxDay, date, players);
+				});
 				globalStatsItem.addActionListener(event -> new FrameGlobalStats(date, players));
 				playerStatsItem.addActionListener(event -> new FramePlayerStats(date, players));
+				graphMenu.add(graphItem);
 				globalStatsMenu.add(globalStatsItem);
 				playerStatsMenu.add(playerStatsItem);
 			}
+			statsMenu.add(graphMenu);
 			statsMenu.add(globalStatsMenu);
 			statsMenu.add(playerStatsMenu);
 			menuBar.add(statsMenu);
