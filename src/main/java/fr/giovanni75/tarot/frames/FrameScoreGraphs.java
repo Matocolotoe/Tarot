@@ -54,10 +54,10 @@ class FrameScoreGraphs extends JFrame implements ActionListener {
 	private void updateAllData(boolean show) {
 		if (show) {
 			for (Map.Entry<Player, double[]> entry : yDataMap.entrySet())
-				chart.updateXYSeries(entry.getKey().getName(), xData, entry.getValue(), emptyData);
+				chart.updateXYSeries(entry.getKey().getName(), xData, entry.getValue(), null);
 		} else {
 			for (Player player : yDataMap.keySet())
-				chart.updateXYSeries(player.getName(), xData, emptyData, emptyData);
+				chart.updateXYSeries(player.getName(), xData, emptyData, null);
 		}
 		for (JCheckBox box : checkBoxes)
 			box.setSelected(show);
@@ -148,7 +148,7 @@ class FrameScoreGraphs extends JFrame implements ActionListener {
 		int total = 0;
 		for (Map.Entry<Player, double[]> entry : yDataMap.entrySet()) {
 			String name = entry.getKey().getName();
-			XYSeries series = chart.addSeries(name, xData, entry.getValue(), emptyData);
+			XYSeries series = chart.addSeries(name, xData, entry.getValue());
 			series.setMarker(SeriesMarkers.CIRCLE);
 
 			// From https://stackoverflow.com/questions/223971/generating-spectrum-color-palettes
@@ -194,11 +194,11 @@ class FrameScoreGraphs extends JFrame implements ActionListener {
 			String name = box.getText();
 			if (box.isSelected()) {
 				Player player = temporaryProfilesByName.get(name);
-				chart.updateXYSeries(name, xData, yDataMap.get(player), emptyData);
+				chart.updateXYSeries(name, xData, yDataMap.get(player), null);
 			} else {
 				// Removing the whole series and adding it back again would put the name at the end of the list
 				// Only hide actual data to keep name list sorted
-				chart.updateXYSeries(name, xData, emptyData, emptyData);
+				chart.updateXYSeries(name, xData, emptyData, null);
 			}
 			leftPanel.revalidate();
 			leftPanel.repaint();
