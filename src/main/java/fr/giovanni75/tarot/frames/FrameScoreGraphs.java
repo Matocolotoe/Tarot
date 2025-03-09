@@ -1,6 +1,7 @@
 package fr.giovanni75.tarot.frames;
 
 import fr.giovanni75.tarot.DateRecord;
+import fr.giovanni75.tarot.Maps;
 import fr.giovanni75.tarot.Tarot;
 import fr.giovanni75.tarot.objects.Game;
 import fr.giovanni75.tarot.objects.LocalPlayer;
@@ -21,14 +22,15 @@ import java.util.*;
 class FrameScoreGraphs extends JFrame implements ActionListener {
 
 	private static final int LEFT_PANEL_WIDTH = 1050;
+	private static final int MINIMUM_PLAYED_GAMES = 10;
 	private static final int RIGHT_PANEL_WIDTH = 1050;
 
-	private final double[] emptyData;
 	private final double[] xData;
 	private final Map<Player, double[]> yDataMap = new TreeMap<>();
 
 	private final List<JCheckBox> checkBoxes = new ArrayList<>();
 	private final Map<String, Player> temporaryProfilesByName = new HashMap<>();
+	private final Set<String> displayedPlayerNames = new HashSet<>();
 
 	private final XChartPanel<XYChart> leftPanel;
 
@@ -51,14 +53,34 @@ class FrameScoreGraphs extends JFrame implements ActionListener {
 		return button;
 	}
 
+	private void recalculateColors() {
+		float index = 0;
+		float total = displayedPlayerNames.size();
+		for (XYSeries series : chart.getSeriesMap().values()) {
+			// From https://stackoverflow.com/questions/223971/generating-spectrum-color-palettes
+			Color color = Color.getHSBColor(index / total, 0.85f, 1.0f);
+			series.setFillColor(color);
+			series.setLineColor(color);
+			series.setMarkerColor(color);
+			series.setMarker(SeriesMarkers.CIRCLE);
+			index++;
+		}
+	}
+
 	private void updateAllData(boolean show) {
 		if (show) {
-			for (Map.Entry<Player, double[]> entry : yDataMap.entrySet())
-				chart.updateXYSeries(entry.getKey().getName(), xData, entry.getValue(), null);
+			for (Map.Entry<Player, double[]> entry : yDataMap.entrySet()) {
+				String name = entry.getKey().getName();
+				// Only show series if it wasn't present before
+				if (displayedPlayerNames.add(name))
+					chart.addSeries(name, xData, entry.getValue());
+			}
 		} else {
-			for (Player player : yDataMap.keySet())
-				chart.updateXYSeries(player.getName(), xData, emptyData, null);
+			for (String name : displayedPlayerNames)
+				chart.removeSeries(name);
+			displayedPlayerNames.clear();
 		}
+		recalculateColors();
 		for (JCheckBox box : checkBoxes)
 			box.setSelected(show);
 		leftPanel.revalidate();
@@ -103,7 +125,6 @@ class FrameScoreGraphs extends JFrame implements ActionListener {
 		chart.getStyler().setZoomEnabled(true);
 
 		int size = games.size() + 1;
-		emptyData = new double[size];
 		xData = new double[size];
 		for (int i = 0; i < size; i++)
 			xData[i] = i;
@@ -138,33 +159,29 @@ class FrameScoreGraphs extends JFrame implements ActionListener {
 		// Instead, check for scores which remained constant during the selected period
 		Iterator<Map.Entry<Player, double[]>> iterator = yDataMap.entrySet().iterator();
 		yIter: while (iterator.hasNext()) {
-			Map.Entry<Player, double[]> entry = iterator.next();
-			double[] yData = entry.getValue();
+			double[] yData = iterator.next().getValue();
 			for (double y : yData)
 				if (y != yData[0])
 					continue yIter; // There exists at least two distinct elements
 			iterator.remove();
 		}
 
-		int total = 0;
 		for (Map.Entry<Player, double[]> entry : yDataMap.entrySet()) {
-			String name = entry.getKey().getName();
-			XYSeries series = chart.addSeries(name, xData, entry.getValue());
-			series.setMarker(SeriesMarkers.CIRCLE);
-
-			// From https://stackoverflow.com/questions/223971/generating-spectrum-color-palettes
-			Color color = Color.getHSBColor((float) total / (float) yDataMap.size(), 0.85f, 1.0f);
-			series.setFillColor(color);
-			series.setLineColor(color);
-			series.setMarkerColor(color);
-
+			Player player = entry.getKey();
+			String name = player.getName();
 			JCheckBox box = new JCheckBox(name);
 			box.addActionListener(this);
-			box.setSelected(true);
 			checkBoxes.add(box);
 			rightPanel.add(box);
-			total += 1;
+			if (Maps.sum(player.getStats(date, players).playedGames) < MINIMUM_PLAYED_GAMES)
+				continue;
+			box.setSelected(true);
+			chart.addSeries(name, entry.getValue());
+			displayedPlayerNames.add(name);
 		}
+
+		// Need to get the number of displayed players calculated before
+		recalculateColors();
 
 		rightPanel.add(Components.getSimpleText(" ", 15));
 		rightPanel.add(showAllButton);
@@ -189,21 +206,40 @@ class FrameScoreGraphs extends JFrame implements ActionListener {
 		Object source = e.getSource();
 		if (source == hideAllButton) {
 			updateAllData(false);
-		} else if (source == showAllButton) {
-			updateAllData(true);
-		} else if (source instanceof JCheckBox box) {
-			String name = box.getText();
-			if (box.isSelected()) {
-				Player player = temporaryProfilesByName.get(name);
-				chart.updateXYSeries(name, xData, yDataMap.get(player), null);
-			} else {
-				// Removing the whole series and adding it back again would put the name at the end of the list
-				// Only hide actual data to keep name list sorted
-				chart.updateXYSeries(name, xData, emptyData, null);
-			}
-			leftPanel.revalidate();
-			leftPanel.repaint();
+			return;
 		}
+
+		if (source == showAllButton) {
+			updateAllData(true);
+			return;
+		}
+
+		if (!(source instanceof JCheckBox box))
+			return;
+
+		String name = box.getText();
+		if (box.isSelected()) {
+			Player player = temporaryProfilesByName.get(name);
+			displayedPlayerNames.add(name); // Add before to pass condition below
+			for (Map.Entry<Player, double[]> entry : yDataMap.entrySet()) {
+				Player other = entry.getKey();
+				if (other.compareTo(player) < 0)
+					continue;
+				name = other.getName();
+				if (!displayedPlayerNames.contains(name))
+					continue;
+				// Only rebuild series of shown players with a higher name in alphabetical order
+				chart.removeSeries(name);
+				chart.addSeries(name, xData, entry.getValue());
+			}
+		} else {
+			chart.removeSeries(name);
+			displayedPlayerNames.remove(name);
+		}
+
+		recalculateColors();
+		leftPanel.revalidate();
+		leftPanel.repaint();
 	}
 
 }
