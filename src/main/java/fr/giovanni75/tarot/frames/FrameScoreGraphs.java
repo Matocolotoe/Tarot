@@ -69,11 +69,13 @@ class FrameScoreGraphs extends JFrame implements ActionListener {
 
 	private void updateAllData(boolean show) {
 		if (show) {
+			// Remove all data first to preserve name order
+			for (String name : displayedPlayerNames)
+				chart.removeSeries(name);
 			for (Map.Entry<Player, double[]> entry : yDataMap.entrySet()) {
 				String name = entry.getKey().getName();
-				// Only show series if it wasn't present before
-				if (displayedPlayerNames.add(name))
-					chart.addSeries(name, xData, entry.getValue());
+				chart.addSeries(name, xData, entry.getValue());
+				displayedPlayerNames.add(name);
 			}
 		} else {
 			for (String name : displayedPlayerNames)
