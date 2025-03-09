@@ -70,7 +70,8 @@ class FrameScoreGraphs extends JFrame implements ActionListener {
 		setResizable(false);
 		setTitle("Statistiques – " + players + " joueurs – " + minDay + "/" + date.getShortName() + " ➝ " + maxDay + "/" + date.getShortName());
 
-		List<Game> allPossibleGames = Tarot.ALL_GAMES.get(date);
+		// Games stored in ALL_GAMES are sorted in descending order
+		List<Game> allPossibleGames = Tarot.ALL_GAMES.get(date).reversed();
 
 		// Store all games that have been played between minDay and maxDay
 		// Need to add all players to recalculate stats for now
