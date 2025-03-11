@@ -182,7 +182,7 @@ class FrameScoreGraphs extends JFrame implements ActionListener {
 			displayedPlayerNames.add(name);
 		}
 
-		// Need to get the number of displayed players calculated before
+		// Need to have the number of displayed players calculated before
 		recalculateColors();
 
 		rightPanel.add(Components.getSimpleText(" ", 15));
@@ -222,7 +222,7 @@ class FrameScoreGraphs extends JFrame implements ActionListener {
 		String name = box.getText();
 		if (box.isSelected()) {
 			Player player = temporaryProfilesByName.get(name);
-			displayedPlayerNames.add(name); // Add before to pass condition below
+			displayedPlayerNames.add(name); // Add before to pass condition below and ensure all data is properly refreshed
 			for (Map.Entry<Player, double[]> entry : yDataMap.entrySet()) {
 				Player other = entry.getKey();
 				if (other.compareTo(player) < 0)

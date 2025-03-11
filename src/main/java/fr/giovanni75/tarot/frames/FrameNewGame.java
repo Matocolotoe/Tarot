@@ -272,7 +272,7 @@ class FrameNewGame extends JFrame implements ActionListener {
 
 		players = new LocalPlayer[numberOfPlayers];
 
-		// Count up to 5 since names need not to be empty after last index
+		// Count up to 5 since names need not be empty after last index
 		int nonEmptyIndex = 0;
 		for (int i = 0; i < 5; i++) {
 			selectedItem = playerNameBoxes[i].getSelectedItem();
