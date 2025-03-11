@@ -175,7 +175,7 @@ class FrameScoreGraphs extends JFrame implements ActionListener {
 			box.addActionListener(this);
 			checkBoxes.add(box);
 			rightPanel.add(box);
-			if (Maps.sum(player.getStats(date, players).playedGames) < MINIMUM_PLAYED_GAMES)
+			if (players == 5 && Maps.sum(player.getStats(date, players).playedGames) < MINIMUM_PLAYED_GAMES)
 				continue;
 			box.setSelected(true);
 			chart.addSeries(name, entry.getValue());
