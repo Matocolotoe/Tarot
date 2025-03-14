@@ -16,6 +16,16 @@ import java.util.UUID;
 
 class FrameNewGame extends JFrame implements ActionListener {
 
+	private static final int COMBO_BOX_BASE_X = 150;
+	private static final int COMBO_BOX_BASE_Y = 80;
+	private static final int LARGE_TEXT_WIDTH = 140;
+	private static final int PLAYER_BUTTON_BASE_X = 190;
+	private static final int PLAYER_X_SPACING = 110;
+	private static final int SECONDARY_BUTTON_BASE_X = 200;
+	private static final int SMALL_TEXT_HEIGHT = 20;
+	private static final int SMALL_TEXT_WIDTH = 100;
+	private static final int TEXT_HEIGHT = 60;
+
 	private static final String[] LAST_SELECTED_NAMES = new String[5];
 
 	static {
@@ -43,16 +53,6 @@ class FrameNewGame extends JFrame implements ActionListener {
 	private final JRadioButton[] oudlersButtons = new JRadioButton[Oudlers.values().length];
 
 	private final JButton submitButton;
-
-	private static final int COMBO_BOX_BASE_X = 150;
-	private static final int COMBO_BOX_BASE_Y = 80;
-	private static final int LARGE_TEXT_WIDTH = 140;
-	private static final int PLAYER_BUTTON_BASE_X = 190;
-	private static final int PLAYER_X_SPACING = 110;
-	private static final int SECONDARY_BUTTON_BASE_X = 200;
-	private static final int SMALL_TEXT_HEIGHT = 20;
-	private static final int SMALL_TEXT_WIDTH = 100;
-	private static final int TEXT_HEIGHT = 60;
 
 	private static JComboBox<String> getEnumNameList(Nameable[] values, int x, int y, int width) {
 		String[] names = new String[values.length];
