@@ -135,13 +135,13 @@ class FrameScoreGraphs extends JFrame implements ActionListener {
 			yDataMap.put(player, new double[size]);
 
 		for (int i = 0; i < size; i++) {
+			// First iteration stores the total score earned before the first game
+			if (i > 0)
+				games.get(i - 1).applyResults(temporaryProfiles::get);
 			for (Player player : temporaryProfiles.values()) {
 				Player.LocalStats stats = player.getStats(date, players);
 				yDataMap.get(player)[i] = stats.totalScore;
 			}
-			// First iteration stores the total score earned before the first game
-			if (i > 0)
-				games.get(i - 1).applyResults(temporaryProfiles::get);
 		}
 
 		leftPanel = new XChartPanel<>(chart);
