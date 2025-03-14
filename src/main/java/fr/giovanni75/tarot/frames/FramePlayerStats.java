@@ -27,7 +27,7 @@ class FramePlayerStats extends JFrame {
 			return;
 		}
 
-		setBounds(950, 150, 500, 800);
+		setBounds(900, 150, 500, 800);
 		setResizable(false);
 		setTitle("Statistiques – " + players + " joueurs – " + date.getName());
 
