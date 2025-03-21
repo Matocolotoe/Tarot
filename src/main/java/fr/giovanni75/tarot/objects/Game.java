@@ -50,7 +50,7 @@ public class Game implements Serializable {
 
 		this.contract = Contract.valueOf(json.get("contract").getAsString());
 		this.attackScore = json.get("attack_score").getAsInt();
-		this.oudlers = Oudlers.valueOf(json.get("oudlers").getAsString());
+		this.oudlers = Oudlers.ALL_OUDLERS[json.get("oudlers").getAsInt()];
 
 		element = json.get("petit_au_bout");
 		this.petitAuBout = element == null ? PetitAuBout.NONE : PetitAuBout.valueOf(element.getAsString());
@@ -280,7 +280,7 @@ public class Game implements Serializable {
 
 		object.addProperty("contract", contract.name());
 		object.addProperty("attack_score", attackScore);
-		object.addProperty("oudlers", oudlers.name());
+		object.addProperty("oudlers", oudlers.ordinal());
 		if (petitAuBout != PetitAuBout.NONE)
 			object.addProperty("petit_au_bout", petitAuBout.name());
 
