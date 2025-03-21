@@ -21,27 +21,27 @@ public final class Tarot {
 	public static final Map<DateRecord, List<Game>> ALL_GAMES = new TreeMap<>();
 	public static final String NONE_STRING = "—";
 
+	private static final Map<Integer, Player> PLAYER_ID_MAP = new HashMap<>();
 	private static final Map<String, Player> PLAYER_NAME_MAP = new HashMap<>();
-	private static final Map<UUID, Player> PLAYER_UUID_MAP = new HashMap<>();
 
-	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd_MM_yyyy");
+	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd-MM-yyyy");
 
-	public static Player addPlayer(String name, UUID uuid) {
-		Player player = new Player(name, uuid);
+	public static Player addPlayer(int id, String name) {
+		Player player = new Player(id, name);
 		ORDERED_PLAYERS.add(player);
 		PLAYER_NAMES.add(name);
+		PLAYER_ID_MAP.put(id, player);
 		PLAYER_NAME_MAP.put(name, player);
-		PLAYER_UUID_MAP.put(uuid, player);
 		return player;
 	}
 
-	public static void createBackup(String fileName) {
+	public static void createBackup(String fileName, String targetName) {
 		File original = new File("data/" + fileName + ".json");
 		File copy;
 		try {
 			String date = DATE_FORMAT.format(new Date(System.currentTimeMillis()));
 			int backupIndex = 1;
-			while ((copy = new File("data/backups/" + fileName + "_" + date + "_" + backupIndex + ".json")).exists())
+			while ((copy = new File("data/backups/" + targetName + "_" + date + "_" + backupIndex + ".json")).exists())
 				backupIndex++;
 			Files.copy(original.toPath(), copy.toPath());
 		} catch (IOException e) {
@@ -94,15 +94,18 @@ public final class Tarot {
 		}
 	}
 
-	public static JsonArray getJsonArrayFromFile(String fileName) {
+	private static JsonArray getJsonArrayFromFile(File file) {
 		JsonArray array;
-		File file = new File("data/" + fileName + ".json");
 		try (FileInputStream is = new FileInputStream(file)) {
 			array = (JsonArray) JsonParser.parseReader(new InputStreamReader(is, StandardCharsets.UTF_8));
 		} catch (IOException e) {
-			throw new RuntimeException("Could not read array from " + fileName + ".json", e);
+			throw new RuntimeException("Could not read array from " + file.getName() + ".json", e);
 		}
 		return array;
+	}
+
+	public static JsonArray getJsonArrayFromFile(String fileName) {
+		return getJsonArrayFromFile(new File("data/" + fileName + ".json"));
 	}
 
 	private static List<Player> getLeaderboard(DateRecord date, int players) {
@@ -124,12 +127,12 @@ public final class Tarot {
 		return score == 0 ? ",,," : player.getName() + "," + score + ",,";
 	}
 
-	public static Player getPlayer(String name) {
-		return PLAYER_NAME_MAP.get(name);
+	public static Player getPlayer(int id) {
+		return PLAYER_ID_MAP.get(id);
 	}
 
-	public static Player getPlayer(UUID uuid) {
-		return PLAYER_UUID_MAP.get(uuid);
+	public static Player getPlayer(String name) {
+		return PLAYER_NAME_MAP.get(name);
 	}
 
 	private static int getScore(Player player, DateRecord date, int players) {
@@ -140,24 +143,29 @@ public final class Tarot {
 		createDirectory(""); // Create data directory
 
 		createDirectory("backups");
+		createDirectory("games");
 		createDirectory("leaderboards");
-		createJsonFile("games");
 		createJsonFile("players");
 
-		JsonArray games = getJsonArrayFromFile("games");
-		int size = games.size();
-		for (int i = 0; i < size; i++) {
-			Game game = new Game(games.get(size - i - 1).getAsJsonObject());
-			ALL_GAMES.computeIfAbsent(game.date, key -> new ArrayList<>()).add(game);
+		File[] gameFiles = new File("data/games").listFiles();
+		if (gameFiles != null) {
+			for (File file : gameFiles) {
+				JsonArray games = getJsonArrayFromFile(file);
+				int size = games.size();
+				for (int i = 0; i < size; i++) {
+					Game game = new Game(games.get(size - i - 1).getAsJsonObject());
+					ALL_GAMES.computeIfAbsent(game.date, key -> new ArrayList<>()).add(game);
+				}
+			}
 		}
 
 		JsonArray players = getJsonArrayFromFile("players");
-		size = players.size();
+		int size = players.size();
 		for (int i = 0; i < size; i++) {
 			JsonObject object = players.get(i).getAsJsonObject();
-			UUID uuid = UUID.fromString(object.get("uuid").getAsString());
+			int id = object.get("id").getAsInt();
 			String name = object.get("name").getAsString();
-			addPlayer(name, uuid);
+			addPlayer(id, name);
 		}
 
 		for (List<Game> list : ALL_GAMES.values())

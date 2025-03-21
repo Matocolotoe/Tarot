@@ -12,7 +12,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 public class FrameMainMenu extends JFrame {
 
@@ -37,12 +36,7 @@ public class FrameMainMenu extends JFrame {
 			return;
 		}
 
-		UUID uuid;
-		do {
-			uuid = UUID.randomUUID();
-		} while (Tarot.getPlayer(uuid) != null);
-
-		Player player = Tarot.addPlayer(name, uuid);
+		Player player = Tarot.addPlayer(Tarot.ORDERED_PLAYERS.size() + 1, name);
 		player.write("players");
 		Components.popup("Joueur ajouté avec succès.\nNom : " + name);
 	}
@@ -109,8 +103,11 @@ public class FrameMainMenu extends JFrame {
 		menuBar.add(dataMenu);
 
 		backupItem.addActionListener(event -> {
-			Tarot.createBackup("games");
-			Tarot.createBackup("players");
+			for (DateRecord date : Tarot.ALL_GAMES.keySet()) {
+				String fileName = "games_" + date.getShortName("_");
+				Tarot.createBackup("games/" + fileName, fileName);
+			}
+			Tarot.createBackup("players", "players");
 			Components.popup("Données sauvegardées avec succès.");
 		});
 
