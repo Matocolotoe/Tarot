@@ -5,21 +5,27 @@ import java.util.Map;
 
 public enum Handful implements Nameable {
 
-	NONE("Aucune", 0),
-	SIMPLE("Simple", 20),
-	DOUBLE("Double", 30),
-	TRIPLE("Triple", 40);
+	NONE("Aucune", null, 0),
+	SIMPLE("Simple", "Poignée", 20),
+	DOUBLE("Double", "Double poignée", 30),
+	TRIPLE("Triple", "Triple poignée", 40);
 
 	private final String name;
+	private final String fullName;
 	private final int points;
 
-	Handful(String name, int points) {
+	Handful(String name, String fullName, int points) {
 		this.name = name;
+		this.fullName = fullName;
 		this.points = points;
 	}
 
 	public int getExtraPoints() {
 		return points;
+	}
+
+	public String getFullName() {
+		return fullName;
 	}
 
 	@Override
