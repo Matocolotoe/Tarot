@@ -71,7 +71,7 @@ public class Game implements Serializable {
 			Handful handful = element == null ? Handful.NONE : Handful.valueOf(element.getAsString());
 			element = object.get("misery");
 			Misery misery = element == null ? Misery.NONE : Misery.valueOf(element.getAsString());
-			this.players[i] = new LocalPlayer(Tarot.getPlayer(uuid).getName(), uuid, side, handful, misery);
+			this.players[i] = new LocalPlayer(uuid, side, handful, misery);
 		}
 	}
 
@@ -242,10 +242,10 @@ public class Game implements Serializable {
 		for (LocalPlayer local : players) {
 			Handful handful = local.handful();
 			if (handful != Handful.NONE)
-				details.add(handful.getFullName() + " " + getOfWord(local.name()));
+				details.add(handful.getFullName() + " " + getOfWord(DEFAULT_LOCAL_PLAYER_CONVERTER.apply(local.uuid()).getName()));
 			Misery misery = local.misery();
 			if (misery != Misery.NONE)
-				details.add(misery.getFullName() + " " + getOfWord(local.name()));
+				details.add(misery.getFullName() + " " + getOfWord(DEFAULT_LOCAL_PLAYER_CONVERTER.apply(local.uuid()).getName()));
 		}
 
 		if (petitAuBout != PetitAuBout.NONE)

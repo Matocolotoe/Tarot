@@ -293,7 +293,7 @@ class FrameNewGame extends JFrame implements ActionListener {
 				throw new IllegalStateException("Misery box cannot have null selection");
 			Misery misery = Misery.BY_NAME.get(selectedItem.toString());
 
-			players[nonEmptyIndex] = new LocalPlayer(name, uuid, sides[i], handful, misery);
+			players[nonEmptyIndex] = new LocalPlayer(uuid, sides[i], handful, misery);
 			nonEmptyIndex++;
 		}
 

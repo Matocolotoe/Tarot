@@ -144,21 +144,20 @@ public final class Tarot {
 		createJsonFile("games");
 		createJsonFile("players");
 
-		// Initialize players before games to store name in LocalPlayer objects
+		JsonArray games = getJsonArrayFromFile("games");
+		int size = games.size();
+		for (int i = 0; i < size; i++) {
+			Game game = new Game(games.get(size - i - 1).getAsJsonObject());
+			ALL_GAMES.computeIfAbsent(game.date, key -> new ArrayList<>()).add(game);
+		}
+
 		JsonArray players = getJsonArrayFromFile("players");
-		int size = players.size();
+		size = players.size();
 		for (int i = 0; i < size; i++) {
 			JsonObject object = players.get(i).getAsJsonObject();
 			UUID uuid = UUID.fromString(object.get("uuid").getAsString());
 			String name = object.get("name").getAsString();
 			addPlayer(name, uuid);
-		}
-
-		JsonArray games = getJsonArrayFromFile("games");
-		size = games.size();
-		for (int i = 0; i < size; i++) {
-			Game game = new Game(games.get(size - i - 1).getAsJsonObject());
-			ALL_GAMES.computeIfAbsent(game.date, key -> new ArrayList<>()).add(game);
 		}
 
 		for (List<Game> list : ALL_GAMES.values())

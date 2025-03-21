@@ -7,7 +7,7 @@ import fr.giovanni75.tarot.enums.Side;
 
 import java.util.UUID;
 
-public record LocalPlayer(String name, UUID uuid, Side side, Handful handful, Misery misery) implements Serializable {
+public record LocalPlayer(UUID uuid, Side side, Handful handful, Misery misery) implements Serializable {
 
 	@Override
 	public boolean equals(Object object) {
