@@ -23,4 +23,6 @@ public enum Oudlers {
 		return score;
 	}
 
+	public static final Oudlers[] ALL_OUDLERS = values();
+
 }

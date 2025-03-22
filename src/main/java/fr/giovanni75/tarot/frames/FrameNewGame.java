@@ -12,7 +12,6 @@ import java.awt.event.ActionListener;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 class FrameNewGame extends JFrame implements ActionListener {
 
@@ -280,7 +279,7 @@ class FrameNewGame extends JFrame implements ActionListener {
 				continue;
 
 			String name = selectedItem.toString();
-			UUID uuid = Tarot.getPlayer(name).getUniqueID();
+			int id = Tarot.getPlayer(name).getID();
 			LAST_SELECTED_NAMES[i] = name;
 
 			selectedItem = handfulBoxes[i].getSelectedItem();
@@ -293,7 +292,7 @@ class FrameNewGame extends JFrame implements ActionListener {
 				throw new IllegalStateException("Misery box cannot have null selection");
 			Misery misery = Misery.BY_NAME.get(selectedItem.toString());
 
-			players[nonEmptyIndex] = new LocalPlayer(uuid, sides[i], handful, misery);
+			players[nonEmptyIndex] = new LocalPlayer(id, sides[i], handful, misery);
 			nonEmptyIndex++;
 		}
 
@@ -308,8 +307,8 @@ class FrameNewGame extends JFrame implements ActionListener {
 		}
 
 		Game game = new Game(month, contract, attackScore, oudlers, petitAuBout, slam, players);
-		game.write("games");
 		Tarot.ALL_GAMES.computeIfAbsent(game.date, key -> new ArrayList<>()).addFirst(game); // Add first so that game is shown on top
+		game.write("games/games_" + game.date.getShortName("_"));
 
 		for (JComboBox<String> handfulBox : handfulBoxes)
 			handfulBox.setSelectedIndex(0);

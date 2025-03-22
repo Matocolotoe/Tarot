@@ -5,19 +5,17 @@ import fr.giovanni75.tarot.enums.Handful;
 import fr.giovanni75.tarot.enums.Misery;
 import fr.giovanni75.tarot.enums.Side;
 
-import java.util.UUID;
-
-public record LocalPlayer(UUID uuid, Side side, Handful handful, Misery misery) implements Serializable {
+public record LocalPlayer(int id, Side side, Handful handful, Misery misery) implements Serializable {
 
 	@Override
 	public boolean equals(Object object) {
-		return object instanceof LocalPlayer && uuid.equals(((LocalPlayer) object).uuid);
+		return object instanceof LocalPlayer && id == ((LocalPlayer) object).id;
 	}
 
 	@Override
 	public JsonObject toJson() {
 		JsonObject object = new JsonObject();
-		object.addProperty("uuid", uuid.toString());
+		object.addProperty("id", id);
 		if (side != Side.DEFENSE)
 			object.addProperty("side", side.toString());
 		if (handful != Handful.NONE)

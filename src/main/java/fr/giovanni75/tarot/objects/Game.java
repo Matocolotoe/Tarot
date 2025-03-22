@@ -14,7 +14,7 @@ import java.util.function.Function;
 
 public class Game implements Serializable {
 
-	private static final Function<UUID, Player> DEFAULT_LOCAL_PLAYER_CONVERTER = Tarot::getPlayer;
+	private static final Function<Integer, Player> DEFAULT_LOCAL_PLAYER_CONVERTER = Tarot::getPlayer;
 
 	public final int dayOfMonth;
 	public final DateRecord date;
@@ -50,7 +50,7 @@ public class Game implements Serializable {
 
 		this.contract = Contract.valueOf(json.get("contract").getAsString());
 		this.attackScore = json.get("attack_score").getAsInt();
-		this.oudlers = Oudlers.valueOf(json.get("oudlers").getAsString());
+		this.oudlers = Oudlers.ALL_OUDLERS[json.get("oudlers").getAsInt()];
 
 		element = json.get("petit_au_bout");
 		this.petitAuBout = element == null ? PetitAuBout.NONE : PetitAuBout.valueOf(element.getAsString());
@@ -64,14 +64,14 @@ public class Game implements Serializable {
 
 		for (int i = 0; i < size; i++) {
 			JsonObject object = playersArray.get(i).getAsJsonObject();
-			UUID uuid = UUID.fromString(object.get("uuid").getAsString());
+			int id = object.get("id").getAsInt();
 			element = object.get("side");
 			Side side = element == null ? Side.DEFENSE : Side.valueOf(element.getAsString());
 			element = object.get("handful");
 			Handful handful = element == null ? Handful.NONE : Handful.valueOf(element.getAsString());
 			element = object.get("misery");
 			Misery misery = element == null ? Misery.NONE : Misery.valueOf(element.getAsString());
-			this.players[i] = new LocalPlayer(uuid, side, handful, misery);
+			this.players[i] = new LocalPlayer(id, side, handful, misery);
 		}
 	}
 
@@ -79,7 +79,7 @@ public class Game implements Serializable {
 		applyResults(DEFAULT_LOCAL_PLAYER_CONVERTER);
 	}
 
-	public void applyResults(Function<UUID, Player> localConverter) {
+	public void applyResults(Function<Integer, Player> localConverter) {
 		int diff = attackScore - oudlers.getRequiredScore();
 		int attackFinalScore = (25 + Math.abs(diff)) * contract.getMultiplier();
 		if (diff < 0)
@@ -97,7 +97,7 @@ public class Game implements Serializable {
 			} else {
 				attackFinalScore += points;
 			}
-			Player player = localConverter.apply(local.uuid());
+			Player player = localConverter.apply(local.id());
 			Maps.increment(contract, player.getStats(date, numberOfPlayers).handfuls);
 		}
 
@@ -153,12 +153,12 @@ public class Game implements Serializable {
 			int points = local.misery().getExtraPoints();
 			if (points == 0)
 				continue;
-			Player player = localConverter.apply(local.uuid());
+			Player player = localConverter.apply(local.id());
 			Maps.increment(player, finalScores, points * (numberOfPlayers - 1));
 			Maps.increment(contract, player.getStats(date, numberOfPlayers).miseries);
 			for (LocalPlayer other : players)
 				if (!local.equals(other))
-					Maps.increment(localConverter.apply(other.uuid()), finalScores, -points);
+					Maps.increment(localConverter.apply(other.id()), finalScores, -points);
 		}
 
 		Player.LocalStats stats = attacker.getStats(date, numberOfPlayers);
@@ -186,7 +186,7 @@ public class Game implements Serializable {
 		this.attackFinalScore = attackFinalScore;
 	}
 
-	private Player getAlly(int defenders, Function<UUID, Player> localConverter) {
+	private Player getAlly(int defenders, Function<Integer, Player> localConverter) {
 		if (players.length < 5)
 			return null;
 
@@ -203,11 +203,11 @@ public class Game implements Serializable {
 		return getPlayer(Side.ATTACK, localConverter);
 	}
 
-	private <T> List<T> getDefenders(Function<Player, T> playerTConverter, Function<UUID, Player> localConverter) {
+	private <T> List<T> getDefenders(Function<Player, T> playerTConverter, Function<Integer, Player> localConverter) {
 		List<T> defenders = new ArrayList<>();
 		for (LocalPlayer local : players) {
 			if (local.side() == Side.DEFENSE) {
-				Player player = localConverter.apply(local.uuid());
+				Player player = localConverter.apply(local.id());
 				defenders.add(playerTConverter.apply(player));
 			}
 		}
@@ -242,10 +242,10 @@ public class Game implements Serializable {
 		for (LocalPlayer local : players) {
 			Handful handful = local.handful();
 			if (handful != Handful.NONE)
-				details.add(handful.getFullName() + " " + getOfWord(DEFAULT_LOCAL_PLAYER_CONVERTER.apply(local.uuid()).getName()));
+				details.add(handful.getFullName() + " " + getOfWord(DEFAULT_LOCAL_PLAYER_CONVERTER.apply(local.id()).getName()));
 			Misery misery = local.misery();
 			if (misery != Misery.NONE)
-				details.add(misery.getFullName() + " " + getOfWord(DEFAULT_LOCAL_PLAYER_CONVERTER.apply(local.uuid()).getName()));
+				details.add(misery.getFullName() + " " + getOfWord(DEFAULT_LOCAL_PLAYER_CONVERTER.apply(local.id()).getName()));
 		}
 
 		if (petitAuBout != PetitAuBout.NONE)
@@ -264,10 +264,10 @@ public class Game implements Serializable {
 		};
 	}
 
-	private Player getPlayer(Side side, Function<UUID, Player> localConverter) {
+	private Player getPlayer(Side side, Function<Integer, Player> localConverter) {
 		for (LocalPlayer local : players)
 			if (local.side() == side)
-				return localConverter.apply(local.uuid());
+				return localConverter.apply(local.id());
 		return null;
 	}
 
@@ -280,7 +280,7 @@ public class Game implements Serializable {
 
 		object.addProperty("contract", contract.name());
 		object.addProperty("attack_score", attackScore);
-		object.addProperty("oudlers", oudlers.name());
+		object.addProperty("oudlers", oudlers.ordinal());
 		if (petitAuBout != PetitAuBout.NONE)
 			object.addProperty("petit_au_bout", petitAuBout.name());
 

@@ -10,16 +10,16 @@ import java.util.*;
 
 public class Player implements Comparable<Player>, Serializable {
 
+	private final int id;
 	private final String name;
-	private final UUID uuid;
 
 	private final Map<DateRecord, LocalStats> statsFivePlayers = new HashMap<>();
 	private final Map<DateRecord, LocalStats> statsFourPlayers = new HashMap<>();
 	private final Map<DateRecord, LocalStats> statsThreePlayers = new HashMap<>();
 
-	public Player(String name, UUID uuid) {
+	public Player(int id, String name) {
+		this.id = id;
 		this.name = name;
-		this.uuid = uuid;
 		for (DateRecord record : Tarot.ALL_GAMES.keySet()) {
 			statsFivePlayers.put(record, new LocalStats());
 			statsFourPlayers.put(record, new LocalStats());
@@ -30,6 +30,10 @@ public class Player implements Comparable<Player>, Serializable {
 	@Override
 	public int compareTo(Player other) {
 		return name.compareTo(other.name);
+	}
+
+	public int getID() {
+		return id;
 	}
 
 	public String getName() {
@@ -46,15 +50,11 @@ public class Player implements Comparable<Player>, Serializable {
 		return stats.getOrDefault(date, new LocalStats());
 	}
 
-	public UUID getUniqueID() {
-		return uuid;
-	}
-
 	@Override
 	public JsonObject toJson() {
 		JsonObject object = new JsonObject();
+		object.addProperty("id", id);
 		object.addProperty("name", name);
-		object.addProperty("uuid", uuid.toString());
 		return object;
 	}
 

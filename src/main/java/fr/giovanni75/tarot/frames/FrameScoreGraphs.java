@@ -90,9 +90,10 @@ class FrameScoreGraphs extends JFrame implements ActionListener {
 	}
 
 	FrameScoreGraphs(int minDay, int maxDay, DateRecord date, int players) {
+		String dateName = date.getShortName("/");
 		setBounds(300, 150, 1200, 800);
 		setResizable(false);
-		setTitle("Statistiques – " + players + " joueurs – " + minDay + "/" + date.getShortName() + " ➝ " + maxDay + "/" + date.getShortName());
+		setTitle("Statistiques – " + players + " joueurs – " + minDay + "/" + dateName + " ➝ " + maxDay + "/" + dateName);
 
 		// Games stored in ALL_GAMES are sorted in descending order
 		List<Game> allPossibleGames = Tarot.ALL_GAMES.get(date).reversed();
@@ -100,22 +101,22 @@ class FrameScoreGraphs extends JFrame implements ActionListener {
 		// Store all games that have been played between minDay and maxDay
 		// Need to add all players to recalculate stats for now
 		List<Game> games = new ArrayList<>();
-		Set<UUID> uuids = new HashSet<>();
+		Set<Integer> ids = new HashSet<>();
 		for (Game game : allPossibleGames) {
 			if (game.players.length == players) {
 				for (LocalPlayer local : game.players)
-					uuids.add(local.uuid());
+					ids.add(local.id());
 				if (game.dayOfMonth == 0 || (game.dayOfMonth >= minDay && game.dayOfMonth <= maxDay))
 					games.add(game);
 			}
 		}
 
 		// Create a virtual profile for every player involved in those games to avoid conflicts with actual pre-calculated stats
-		Map<UUID, Player> temporaryProfiles = new HashMap<>();
-		for (UUID uuid : uuids) {
-			String name = Tarot.getPlayer(uuid).getName();
-			Player player = new Player(name, UUID.randomUUID());
-			temporaryProfiles.put(uuid, player);
+		Map<Integer, Player> temporaryProfiles = new HashMap<>();
+		for (int id : ids) {
+			String name = Tarot.getPlayer(id).getName();
+			Player player = new Player(-id, name);
+			temporaryProfiles.put(id, player);
 			temporaryProfilesByName.put(name, player);
 		}
 
