@@ -103,11 +103,7 @@ public class FrameMainMenu extends JFrame {
 		menuBar.add(dataMenu);
 
 		backupItem.addActionListener(event -> {
-			for (DateRecord date : Tarot.ALL_GAMES.keySet()) {
-				String fileName = "games_" + date.getShortName("_");
-				Tarot.createBackup("games/" + fileName, fileName);
-			}
-			Tarot.createBackup("players", "players");
+			Tarot.createBackup();
 			Components.popup("Données sauvegardées avec succès.");
 		});
 

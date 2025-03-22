@@ -10,9 +10,10 @@ import fr.giovanni75.tarot.objects.Player;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 public final class Tarot {
 
@@ -35,17 +36,33 @@ public final class Tarot {
 		return player;
 	}
 
-	public static void createBackup(String fileName, String targetName) {
-		File original = new File("data/" + fileName + ".json");
-		File copy;
-		try {
-			String date = DATE_FORMAT.format(new Date(System.currentTimeMillis()));
-			int backupIndex = 1;
-			while ((copy = new File("data/backups/" + targetName + "_" + date + "_" + backupIndex + ".json")).exists())
-				backupIndex++;
-			Files.copy(original.toPath(), copy.toPath());
+	private static void addZipEntry(ZipOutputStream zip, String path) {
+		path = "data/" + path + ".json";
+		File target = new File(path);
+		try (FileInputStream fis = new FileInputStream(target)) {
+			ZipEntry entry = new ZipEntry(target.getName()); // Avoid messing up paths
+			zip.putNextEntry(entry);
+			byte[] buffer = new byte[1024];
+			int read;
+			while ((read = fis.read(buffer)) >= 0)
+				zip.write(buffer, 0, read);
 		} catch (IOException e) {
-			throw new RuntimeException("Could not create backup of " + fileName + ".json", e);
+			throw new RuntimeException("Could not add " + path + " to backup ZIP", e);
+		}
+	}
+
+	public static void createBackup() {
+		String backupDate = DATE_FORMAT.format(new Date(System.currentTimeMillis()));
+		File backupTarget;
+		int backupIndex = 1;
+		while ((backupTarget = new File("data/backups/backup_" + backupDate + "_" + backupIndex + ".zip")).exists())
+			backupIndex++;
+		try (ZipOutputStream zip = new ZipOutputStream(new FileOutputStream(backupTarget))) {
+			for (DateRecord date : Tarot.ALL_GAMES.keySet())
+				addZipEntry(zip, "games/games_" + date.getShortName("_"));
+			addZipEntry(zip, "players");
+		} catch (IOException e) {
+			throw new RuntimeException("Could not create backup", e);
 		}
 	}
 
