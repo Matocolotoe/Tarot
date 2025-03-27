@@ -1,6 +1,7 @@
 package fr.giovanni75.tarot.frames;
 
 import fr.giovanni75.tarot.DateRecord;
+import fr.giovanni75.tarot.Files;
 import fr.giovanni75.tarot.Tarot;
 import fr.giovanni75.tarot.objects.Game;
 import fr.giovanni75.tarot.objects.Player;
@@ -103,13 +104,13 @@ public class FrameMainMenu extends JFrame {
 		menuBar.add(dataMenu);
 
 		backupItem.addActionListener(event -> {
-			Tarot.createBackup();
+			Files.createBackup();
 			Components.popup("Données sauvegardées avec succès.");
 		});
 
 		exportItem.addActionListener(event -> {
 			for (DateRecord date : Tarot.ALL_GAMES.keySet())
-				Tarot.createLeaderboards(date);
+				Files.createLeaderboards(date);
 			Components.popup("Données exportées avec succès.");
 		});
 
