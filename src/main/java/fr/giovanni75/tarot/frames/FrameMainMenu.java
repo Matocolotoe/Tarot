@@ -109,8 +109,7 @@ public class FrameMainMenu extends JFrame {
 		});
 
 		exportItem.addActionListener(event -> {
-			for (DateRecord date : Tarot.ALL_GAMES.keySet())
-				Files.createLeaderboards(date);
+			Files.createLeaderboards();
 			Components.popup("Données exportées avec succès.");
 		});
 
