@@ -14,16 +14,7 @@ class Leaderboards {
 
 	private static final DecimalFormat PERCENTAGE_DECIMAL_FORMAT = new DecimalFormat("#0.0%");
 
-	private record IndividiualEntry(Player player, Number value) implements Comparable<IndividiualEntry> {
-
-		@Override
-		public int compareTo(IndividiualEntry other) {
-			return Double.compare(value.doubleValue(), other.value.doubleValue());
-		}
-
-	}
-
-	private enum LeaderboardEntry {
+	private enum LeaderboardStats {
 
 		TOTAL_SCORE("Score", "Score total", true,
 				stats -> stats.totalScore,
@@ -51,7 +42,7 @@ class Leaderboards {
 		private final Function<Player.LocalStats, Number> valueResolver;
 		private final BiFunction<Player.LocalStats, Number, String> valueDisplayer;
 
-		LeaderboardEntry(String name, String fullName, boolean includeInLeaderboards,
+		LeaderboardStats(String name, String fullName, boolean includeInLeaderboards,
 						 Function<Player.LocalStats, Number> valueResolver,
 						 BiFunction<Player.LocalStats, Number, String> valueDisplayer) {
 			this.name = name;
@@ -72,7 +63,16 @@ class Leaderboards {
 
 	}
 
-	private static final LeaderboardEntry[] LEADERBOARD_ENTRIES = LeaderboardEntry.values();
+	private record NumberPair(Player player, Number value) implements Comparable<NumberPair> {
+
+		@Override
+		public int compareTo(NumberPair other) {
+			return Double.compare(value.doubleValue(), other.value.doubleValue());
+		}
+
+	}
+
+	private static final LeaderboardStats[] LEADERBOARD_ENTRIES = LeaderboardStats.values();
 
 	private static final String FONT_NAME = "Arial";
 	private static final int FONT_SIZE = 10;
@@ -104,38 +104,38 @@ class Leaderboards {
 			return;
 
 		final List<Player> playerList = new ArrayList<>();
-		final Map<LeaderboardEntry, List<IndividiualEntry>> playerEntries = new EnumMap<>(LeaderboardEntry.class);
-		final Map<LeaderboardEntry, List<IndividiualEntry>> playerLeaderboards = new EnumMap<>(LeaderboardEntry.class);
+		final Map<LeaderboardStats, List<NumberPair>> unsortedPairs = new EnumMap<>(LeaderboardStats.class);
+		final Map<LeaderboardStats, List<NumberPair>> sortedPairs = new EnumMap<>(LeaderboardStats.class);
 
 		for (Player player : Tarot.ORDERED_PLAYERS)
 			if (Maps.sum(player.getStats(date, players).playedGames) != 0)
 				playerList.add(player);
 
-		for (LeaderboardEntry entry : LEADERBOARD_ENTRIES) {
-			List<IndividiualEntry> entries = new ArrayList<>();
+		for (LeaderboardStats entry : LEADERBOARD_ENTRIES) {
+			List<NumberPair> entries = new ArrayList<>();
 			for (Player player : playerList) {
 				Number value = entry.getValue(date, player, players);
-				entries.add(new IndividiualEntry(player, value));
+				entries.add(new NumberPair(player, value));
 			}
 			// Store entries that will be displayed in the left column, sorted by player names
 			entries.sort(Comparator.comparing(individualEntry -> individualEntry.player.getName()));
-			playerEntries.put(entry, entries);
+			unsortedPairs.put(entry, entries);
 			// Store entries that will be displayed in the leaderboards on the right, only if needed
 			if (entry.includeInLeaderboards) {
 				// Copy to avoid modifying the previous reference
-				List<IndividiualEntry> copy = new ArrayList<>(entries);
+				List<NumberPair> copy = new ArrayList<>(entries);
 				copy.sort(Comparator.reverseOrder());
-				playerLeaderboards.put(entry, copy);
+				sortedPairs.put(entry, copy);
 			}
 		}
 
-		int lastRow = Leaderboards.writeLeaderboards(date, players, playerList, playerEntries, playerLeaderboards, ws, initialRow);
+		int lastRow = Leaderboards.writeLeaderboards(date, players, playerList, unsortedPairs, sortedPairs, ws, initialRow);
 		createLeaderboards(date, players - 1, ws, lastRow + 10);
 	}
 
 	private static int writeLeaderboards(DateRecord date, int players, List<Player> playerList,
-										 Map<LeaderboardEntry, List<IndividiualEntry>> playerEntries,
-										 Map<LeaderboardEntry, List<IndividiualEntry>> playerLeaderboards,
+										 Map<LeaderboardStats, List<NumberPair>> unsortedPairs,
+										 Map<LeaderboardStats, List<NumberPair>> sortedPairs,
 										 Worksheet ws, int initialRow) {
 		/* Column width */
 		int column;
@@ -163,17 +163,17 @@ class Leaderboards {
 
 		/* Individual entries, player names sorted alphabetically */
 		column = 1;
-		for (var mapEntry : playerEntries.entrySet()) {
-			LeaderboardEntry entry = mapEntry.getKey();
-			ws.value(initialRow + 1, column, entry.name);
+		for (var entry : unsortedPairs.entrySet()) {
+			LeaderboardStats stats = entry.getKey();
+			ws.value(initialRow + 1, column, stats.name);
 			ws.style(initialRow + 1, column).bold()
 					.horizontalAlignment("center")
 					.verticalAlignment("center")
 					.set();
 
 			row = initialRow + 2;
-			for (IndividiualEntry individualEntry : mapEntry.getValue()) {
-				ws.value(row, column, entry.getDisplay(date, individualEntry.player, players, individualEntry.value));
+			for (NumberPair pair : entry.getValue()) {
+				ws.value(row, column, stats.getDisplay(date, pair.player, players, pair.value));
 				row++;
 			}
 
@@ -188,9 +188,9 @@ class Leaderboards {
 		/* Leaderboards */
 		column += 2;
 		row = initialRow + 1;
-		for (var mapEntry : playerLeaderboards.entrySet()) {
-			LeaderboardEntry entry = mapEntry.getKey();
-			ws.value(initialRow + 1, column, entry.fullName);
+		for (var entry : sortedPairs.entrySet()) {
+			LeaderboardStats stats = entry.getKey();
+			ws.value(initialRow + 1, column, stats.fullName);
 			ws.range(initialRow + 1, column, initialRow + 1, column + 1).style()
 					.bold()
 					.horizontalAlignment("center")
@@ -200,10 +200,10 @@ class Leaderboards {
 
 			int place = 1;
 			row = initialRow + 2;
-			for (IndividiualEntry individualEntry : mapEntry.getValue()) {
+			for (NumberPair pair : entry.getValue()) {
 				ws.value(row, column - 1, place);
-				ws.value(row, column, individualEntry.player.getName());
-				ws.value(row, column + 1, entry.getDisplay(date, individualEntry.player, players, individualEntry.value));
+				ws.value(row, column, pair.player.getName());
+				ws.value(row, column + 1, stats.getDisplay(date, pair.player, players, pair.value));
 				place++;
 				row++;
 			}
