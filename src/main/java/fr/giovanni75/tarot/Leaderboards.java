@@ -78,6 +78,7 @@ class Leaderboards {
 	private static final int FONT_SIZE = 10;
 
 	private static final double COLUMN_WIDTH = 12.5;
+	private static final double HEADER_HEIGHT = 20;
 	private static final int MAX_COLUMN_NUMBER = 14;
 
 	static void createScoreGrid(int year) {
@@ -148,7 +149,8 @@ class Leaderboards {
 			ws.width(column, COLUMN_WIDTH);
 
 		/* Header */
-		ws.value(initialRow, 0, "Tarot à " + players);
+		ws.rowHeight(initialRow, HEADER_HEIGHT);
+		ws.value(initialRow, 0, "Tarot à " + players + " – " + date.getName());
 		ws.range(initialRow, 0, initialRow, MAX_COLUMN_NUMBER).style()
 				.bold().fontColor(Color.RED).fontSize(13)
 				.horizontalAlignment("center")
