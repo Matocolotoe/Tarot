@@ -16,38 +16,35 @@ class Leaderboards {
 
 	private enum LeaderboardStats {
 
-		TOTAL_SCORE("Score", "Score total", true,
+		TOTAL_SCORE("Score", "Score total",
 				stats -> stats.totalScore,
 				(Player.LocalStats stats, Number value) -> value.toString()),
 
-		PLAYED_GAMES("Jouées", "Parties jouées", true,
+		PLAYED_GAMES("Jouées", "Parties jouées",
 				stats -> Maps.sum(stats.playedGames),
 				(Player.LocalStats stats, Number value) -> value.toString()),
 
-		SUCCESSFUL_TAKES("Réussies", null, false,
+		SUCCESSFUL_TAKES("Prises", null,
 				stats -> Maps.sum(stats.successfulTakes),
 				(Player.LocalStats stats, Number value) -> value + "/" + (value.intValue() + Maps.sum(stats.failedTakes))),
 
-		WIN_RATE("Réussite", "Taux de réussite", true,
+		WIN_RATE("Réussite", "Taux de réussite",
 				stats -> {
 					int successful = Maps.sum(stats.successfulTakes);
 					int total = successful + Maps.sum(stats.failedTakes);
 					return total == 0 ? -1 : (double) successful / total;
 				},
-				(Player.LocalStats stats, Number value) -> PERCENTAGE_DECIMAL_FORMAT.format(value));
 
 		private final String name;
-		private final String fullName;
-		private final boolean includeInLeaderboards;
+		private final String leaderboardName;
 		private final Function<Player.LocalStats, Number> valueResolver;
 		private final BiFunction<Player.LocalStats, Number, String> valueDisplayer;
 
-		LeaderboardStats(String name, String fullName, boolean includeInLeaderboards,
+		LeaderboardStats(String name, String leaderboardName,
 						 Function<Player.LocalStats, Number> valueResolver,
 						 BiFunction<Player.LocalStats, Number, String> valueDisplayer) {
 			this.name = name;
-			this.fullName = fullName;
-			this.includeInLeaderboards = includeInLeaderboards;
+			this.leaderboardName = leaderboardName;
 			this.valueResolver = valueResolver;
 			this.valueDisplayer = valueDisplayer;
 		}
@@ -72,31 +69,24 @@ class Leaderboards {
 
 	}
 
-	private static final LeaderboardStats[] LEADERBOARD_ENTRIES = LeaderboardStats.values();
+	private static final LeaderboardStats[] LEADERBOARD_STATS = LeaderboardStats.values();
 
 	private static final String FONT_NAME = "Arial";
 	private static final int FONT_SIZE = 10;
 
 	private static final double COLUMN_WIDTH = 12.5;
-	private static final double HEADER_HEIGHT = 20;
-	private static final int MAX_COLUMN_NUMBER = 14;
+	private static final double HEADER_HEIGHT = 20.5;
 
-	static void createScoreGrid(int year) {
-		Set<DateRecord> dates = new TreeSet<>();
-		for (DateRecord date : Tarot.ALL_GAMES.keySet())
-			if (date.year() == year)
-				dates.add(date);
+	private static final int COLUMNS_PER_LEADERBOARD = 3;
+	private static final int MAX_COLUMN_NUMBER;
 
-		// Create one file per year, with one sheet per month inside it
-		try (FileOutputStream os = new FileOutputStream("data/leaderboards/Score tarot " + year + ".xlsx");
-			 Workbook wb = new Workbook(os, "Tarot", null)) {
-			wb.setGlobalDefaultFont(FONT_NAME, FONT_SIZE);
-			for (DateRecord date : dates)
-				// Start at 5 players, then recursive calls will follow for 4 and 3 players
-				createLeaderboards(date, 5, wb.newWorksheet(date.month().getName()), 0);
-		} catch (IOException e) {
-			throw new RuntimeException("Could not create leaderboard for year " + year, e);
-		}
+	static {
+		// Player names (starts at 0) + Invidiual stats + Margin
+		int column = LEADERBOARD_STATS.length + 1;
+		for (LeaderboardStats stats : LEADERBOARD_STATS)
+			if (stats.leaderboardName != null)
+				column += COLUMNS_PER_LEADERBOARD;
+		MAX_COLUMN_NUMBER = column;
 	}
 
 	private static void createLeaderboards(DateRecord date, int players, Worksheet ws, int initialRow) {
@@ -117,7 +107,7 @@ class Leaderboards {
 
 		final Map<LeaderboardStats, List<NumberPair>> unsortedPairs = new EnumMap<>(LeaderboardStats.class);
 		final Map<LeaderboardStats, List<NumberPair>> sortedPairs = new EnumMap<>(LeaderboardStats.class);
-		for (LeaderboardStats entry : LEADERBOARD_ENTRIES) {
+		for (LeaderboardStats entry : LEADERBOARD_STATS) {
 			List<NumberPair> entries = new ArrayList<>();
 			for (Player player : playerList) {
 				Number value = entry.getValue(date, player, players);
@@ -127,7 +117,7 @@ class Leaderboards {
 			entries.sort(Comparator.comparing(individualEntry -> individualEntry.player.getName()));
 			unsortedPairs.put(entry, entries);
 			// Store entries that will be displayed in the leaderboards on the right, only if needed
-			if (entry.includeInLeaderboards) {
+			if (entry.leaderboardName != null) {
 				// Copy to avoid modifying the previous reference
 				List<NumberPair> copy = new ArrayList<>(entries);
 				copy.sort(Comparator.reverseOrder());
@@ -135,15 +125,33 @@ class Leaderboards {
 			}
 		}
 
-		int lastRow = Leaderboards.writeLeaderboards(date, players, playerList, unsortedPairs, sortedPairs, ws, initialRow);
+		int lastRow = writeLeaderboards(date, players, playerList, unsortedPairs, sortedPairs, ws, initialRow);
 		createLeaderboards(date, players - 1, ws, lastRow + 10);
+	}
+
+	static void createScoreGrid(int year) {
+		Set<DateRecord> dates = new TreeSet<>();
+		for (DateRecord date : Tarot.ALL_GAMES.keySet())
+			if (date.year() == year)
+				dates.add(date);
+
+		// Create one file per year, with one sheet per month inside it
+		try (FileOutputStream os = new FileOutputStream("data/leaderboards/Score tarot " + year + ".xlsx");
+			 Workbook wb = new Workbook(os, "Tarot", null)) {
+			wb.setGlobalDefaultFont(FONT_NAME, FONT_SIZE);
+			for (DateRecord date : dates)
+				// Start at 5 players, then recursive calls will follow for 4 and 3 players
+				createLeaderboards(date, 5, wb.newWorksheet(date.month().getName()), 0);
+		} catch (IOException e) {
+			throw new RuntimeException("Could not create leaderboard for year " + year, e);
+		}
 	}
 
 	private static int writeLeaderboards(DateRecord date, int players, List<Player> playerList,
 										 Map<LeaderboardStats, List<NumberPair>> unsortedPairs,
 										 Map<LeaderboardStats, List<NumberPair>> sortedPairs,
 										 Worksheet ws, int initialRow) {
-		/* Column width */
+		/* Global column width */
 		int column;
 		for (column = 0; column <= MAX_COLUMN_NUMBER; column++)
 			ws.width(column, COLUMN_WIDTH);
@@ -163,6 +171,7 @@ class Leaderboards {
 			ws.value(row, 0, player.getName());
 			row++;
 		}
+
 		ws.range(initialRow + 2, 0, row - 1, 0).style()
 				.horizontalAlignment("center")
 				.verticalAlignment("center")
@@ -193,11 +202,11 @@ class Leaderboards {
 		}
 
 		/* Leaderboards */
-		column += 2;
+		column += COLUMNS_PER_LEADERBOARD - 1;
 		row = initialRow + 1;
 		for (var entry : sortedPairs.entrySet()) {
 			LeaderboardStats stats = entry.getKey();
-			ws.value(initialRow + 1, column, stats.fullName);
+			ws.value(initialRow + 1, column, stats.leaderboardName);
 			ws.range(initialRow + 1, column, initialRow + 1, column + 1).style()
 					.bold()
 					.horizontalAlignment("center")
@@ -205,13 +214,11 @@ class Leaderboards {
 					.borderStyle(BorderStyle.THIN)
 					.merge().set();
 
-			int place = 1;
 			row = initialRow + 2;
 			for (NumberPair pair : entry.getValue()) {
-				ws.value(row, column - 1, place);
+				ws.value(row, column - 1, row - initialRow - 1); // Place in the leaderboard
 				ws.value(row, column, pair.player.getName());
 				ws.value(row, column + 1, stats.getDisplay(date, pair.player, players, pair.value));
-				place++;
 				row++;
 			}
 
@@ -234,7 +241,7 @@ class Leaderboards {
 					.verticalAlignment("center")
 					.set();
 
-			column += 3;
+			column += COLUMNS_PER_LEADERBOARD;
 		}
 
 		return row + 8;
