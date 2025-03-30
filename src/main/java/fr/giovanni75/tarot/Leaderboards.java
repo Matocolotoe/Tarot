@@ -104,13 +104,18 @@ class Leaderboards {
 			return;
 
 		final List<Player> playerList = new ArrayList<>();
-		final Map<LeaderboardStats, List<NumberPair>> unsortedPairs = new EnumMap<>(LeaderboardStats.class);
-		final Map<LeaderboardStats, List<NumberPair>> sortedPairs = new EnumMap<>(LeaderboardStats.class);
-
 		for (Player player : Tarot.ORDERED_PLAYERS)
 			if (Maps.sum(player.getStats(date, players).playedGames) != 0)
 				playerList.add(player);
 
+		// No stats recorded, just skip
+		if (playerList.isEmpty()) {
+			createLeaderboards(date, players - 1, ws, initialRow);
+			return;
+		}
+
+		final Map<LeaderboardStats, List<NumberPair>> unsortedPairs = new EnumMap<>(LeaderboardStats.class);
+		final Map<LeaderboardStats, List<NumberPair>> sortedPairs = new EnumMap<>(LeaderboardStats.class);
 		for (LeaderboardStats entry : LEADERBOARD_ENTRIES) {
 			List<NumberPair> entries = new ArrayList<>();
 			for (Player player : playerList) {
