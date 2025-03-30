@@ -78,7 +78,7 @@ class Leaderboards {
 	private static final int FONT_SIZE = 10;
 
 	private static final double COLUMN_WIDTH = 12.5;
-	private static final int MAX_COLUMN_NUMBER = 16;
+	private static final int MAX_COLUMN_NUMBER = 14;
 
 	static void createScoreGrid(int year) {
 		Set<DateRecord> dates = new TreeSet<>();
@@ -232,7 +232,7 @@ class Leaderboards {
 					.verticalAlignment("center")
 					.set();
 
-			column += 4;
+			column += 3;
 		}
 
 		return row + 8;
