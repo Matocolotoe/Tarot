@@ -89,7 +89,8 @@ public class Game implements Serializable {
 
 		int numberOfPlayers = players.length;
 
-		Maps.increment(contract, Tarot.getGlobalStats(date, numberOfPlayers).contracts);
+		GlobalStats globalStats = Tarot.getGlobalStats(date, numberOfPlayers);
+		Maps.increment(contract, globalStats.contracts);
 
 		/* Handfuls */
 		for (LocalPlayer local : players) {
@@ -104,12 +105,12 @@ public class Game implements Serializable {
 			}
 			Player player = localConverter.apply(local.id());
 			Maps.increment(contract, player.getStats(date, numberOfPlayers).handfuls);
-			Maps.increment(handful, Tarot.getGlobalStats(date, numberOfPlayers).handfuls);
+			Maps.increment(handful, globalStats.handfuls);
 		}
 
 		/* Petit au bout */
 		if (petitAuBout != null) {
-			Maps.increment(petitAuBout, Tarot.getGlobalStats(date, numberOfPlayers).petits);
+			Maps.increment(petitAuBout, globalStats.petits);
 			attackFinalScore += petitAuBout.getAttackPoints() * contract.getMultiplier();
 		}
 
@@ -161,7 +162,7 @@ public class Game implements Serializable {
 			Player player = localConverter.apply(local.id());
 			Maps.increment(player, finalScores, points * (numberOfPlayers - 1));
 			Maps.increment(contract, player.getStats(date, numberOfPlayers).miseries);
-			Maps.increment(misery, Tarot.getGlobalStats(date, numberOfPlayers).miseries);
+			Maps.increment(misery, globalStats.miseries);
 			for (LocalPlayer other : players)
 				if (!local.equals(other))
 					Maps.increment(localConverter.apply(other.id()), finalScores, -points);
