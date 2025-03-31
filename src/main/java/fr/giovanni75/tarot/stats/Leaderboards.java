@@ -1,6 +1,8 @@
-package fr.giovanni75.tarot;
+package fr.giovanni75.tarot.stats;
 
-import fr.giovanni75.tarot.enums.GlobalStats;
+import fr.giovanni75.tarot.DateRecord;
+import fr.giovanni75.tarot.Maps;
+import fr.giovanni75.tarot.Tarot;
 import fr.giovanni75.tarot.enums.Nameable;
 import fr.giovanni75.tarot.objects.Player;
 import org.dhatim.fastexcel.BorderStyle;
@@ -15,7 +17,7 @@ import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-class Leaderboards {
+public final class Leaderboards {
 
 	private static final DecimalFormat PERCENTAGE_DECIMAL_FORMAT = new DecimalFormat("#0.0%");
 
@@ -169,7 +171,7 @@ class Leaderboards {
 		createLeaderboards(date, players - 1, ws, lastRow + 10);
 	}
 
-	static void createScoreGrid(int year) {
+	public static void createScoreGrid(int year) {
 		Set<DateRecord> dates = new TreeSet<>();
 		for (DateRecord date : Tarot.ALL_GAMES.keySet())
 			if (date.year() == year)

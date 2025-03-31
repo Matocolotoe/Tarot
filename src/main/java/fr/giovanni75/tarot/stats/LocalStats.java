@@ -1,5 +1,6 @@
-package fr.giovanni75.tarot;
+package fr.giovanni75.tarot.stats;
 
+import fr.giovanni75.tarot.Maps;
 import fr.giovanni75.tarot.enums.Contract;
 
 import java.util.ArrayList;

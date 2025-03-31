@@ -3,7 +3,7 @@ package fr.giovanni75.tarot;
 import com.formdev.flatlaf.FlatLightLaf;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import fr.giovanni75.tarot.enums.GlobalStats;
+import fr.giovanni75.tarot.stats.GlobalStats;
 import fr.giovanni75.tarot.frames.FrameMainMenu;
 import fr.giovanni75.tarot.objects.Game;
 import fr.giovanni75.tarot.objects.Player;

@@ -1,7 +1,7 @@
 package fr.giovanni75.tarot.frames;
 
 import fr.giovanni75.tarot.DateRecord;
-import fr.giovanni75.tarot.LocalStats;
+import fr.giovanni75.tarot.stats.LocalStats;
 import fr.giovanni75.tarot.Maps;
 import fr.giovanni75.tarot.Tarot;
 import fr.giovanni75.tarot.objects.Game;

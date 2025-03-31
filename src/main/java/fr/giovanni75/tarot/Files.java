@@ -2,6 +2,7 @@ package fr.giovanni75.tarot;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonParser;
+import fr.giovanni75.tarot.stats.Leaderboards;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
