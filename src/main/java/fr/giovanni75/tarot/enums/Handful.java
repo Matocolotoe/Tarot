@@ -5,7 +5,6 @@ import java.util.Map;
 
 public enum Handful implements Nameable {
 
-	NONE("Aucune", null, 0),
 	SIMPLE("Simple", "Poignée", 20),
 	DOUBLE("Double", "Double poignée", 30),
 	TRIPLE("Triple", "Triple poignée", 40);

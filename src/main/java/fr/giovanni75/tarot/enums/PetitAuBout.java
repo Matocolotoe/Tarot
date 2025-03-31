@@ -5,16 +5,21 @@ import java.util.Map;
 
 public enum PetitAuBout implements Nameable {
 
-	NONE("Non", null),
-	ATTACK("Attaque", "Petit au bout à l'attaque"),
-	DEFENSE("Défense", "Petit au bout à la défense");
+	ATTACK("Attaque", "Petit au bout à l'attaque", 10),
+	DEFENSE("Défense", "Petit au bout à la défense", -10);
 
 	private final String name;
 	private final String fullName;
+	private final int attackPoints;
 
-	PetitAuBout(String name, String fullName) {
+	PetitAuBout(String name, String fullName, int attackPoints) {
 		this.name = name;
 		this.fullName = fullName;
+		this.attackPoints = attackPoints;
+	}
+
+	public int getAttackPoints() {
+		return attackPoints;
 	}
 
 	public String getFullName() {

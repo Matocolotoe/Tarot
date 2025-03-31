@@ -1,6 +1,7 @@
 package fr.giovanni75.tarot.frames;
 
 import fr.giovanni75.tarot.DateRecord;
+import fr.giovanni75.tarot.LocalStats;
 import fr.giovanni75.tarot.Maps;
 import fr.giovanni75.tarot.Tarot;
 import fr.giovanni75.tarot.objects.Game;
@@ -140,7 +141,7 @@ class FrameScoreGraphs extends JFrame implements ActionListener {
 			if (i > 0)
 				games.get(i - 1).applyResults(temporaryProfiles::get);
 			for (Player player : temporaryProfiles.values()) {
-				Player.LocalStats stats = player.getStats(date, players);
+				LocalStats stats = player.getStats(date, players);
 				yDataMap.get(player)[i] = stats.totalScore;
 			}
 		}

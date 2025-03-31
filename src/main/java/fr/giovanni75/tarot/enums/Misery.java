@@ -5,7 +5,6 @@ import java.util.Map;
 
 public enum Misery implements Nameable {
 
-	NONE("Aucune", null, 0),
 	SIMPLE("Simple", "Misère", 10),
 	DOUBLE("Double", "Double misère", 20);
 

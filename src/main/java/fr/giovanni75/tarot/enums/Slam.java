@@ -5,7 +5,6 @@ import java.util.Map;
 
 public enum Slam implements Nameable {
 
-	UNANNOUNCED("Non déclaré"),
 	ATTACK("Annoncé à l'attaque"),
 	DEFENSE("Annoncé à la défense");
 

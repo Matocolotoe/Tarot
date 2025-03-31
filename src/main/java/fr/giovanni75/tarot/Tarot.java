@@ -3,6 +3,7 @@ package fr.giovanni75.tarot;
 import com.formdev.flatlaf.FlatLightLaf;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import fr.giovanni75.tarot.enums.GlobalStats;
 import fr.giovanni75.tarot.frames.FrameMainMenu;
 import fr.giovanni75.tarot.objects.Game;
 import fr.giovanni75.tarot.objects.Player;
@@ -11,6 +12,10 @@ import java.io.File;
 import java.util.*;
 
 public final class Tarot {
+
+	private static final Map<DateRecord, GlobalStats> GLOBAL_STATS_FIVE = new HashMap<>();
+	private static final Map<DateRecord, GlobalStats> GLOBAL_STATS_FOUR = new HashMap<>();
+	private static final Map<DateRecord, GlobalStats> GLOBAL_STATS_THREE = new HashMap<>();
 
 	public static final List<Player> ORDERED_PLAYERS = new ArrayList<>();
 	public static final List<String> PLAYER_NAMES = new ArrayList<>();
@@ -27,6 +32,16 @@ public final class Tarot {
 		PLAYER_ID_MAP.put(id, player);
 		PLAYER_NAME_MAP.put(name, player);
 		return player;
+	}
+
+	public static GlobalStats getGlobalStats(DateRecord date, int players) {
+		Map<DateRecord, GlobalStats> stats = switch (players) {
+			case 3 -> GLOBAL_STATS_THREE;
+			case 4 -> GLOBAL_STATS_FOUR;
+			case 5 -> GLOBAL_STATS_FIVE;
+			default -> throw new IllegalArgumentException("Global stats are unavailable for " + players + " players");
+		};
+		return stats.get(date);
 	}
 
 	public static Player getPlayer(int id) {
@@ -64,6 +79,12 @@ public final class Tarot {
 			int id = object.get("id").getAsInt();
 			String name = object.get("name").getAsString();
 			addPlayer(id, name);
+		}
+
+		for (DateRecord date : ALL_GAMES.keySet()) {
+			GLOBAL_STATS_FIVE.put(date, new GlobalStats());
+			GLOBAL_STATS_FOUR.put(date, new GlobalStats());
+			GLOBAL_STATS_THREE.put(date, new GlobalStats());
 		}
 
 		for (List<Game> list : ALL_GAMES.values())

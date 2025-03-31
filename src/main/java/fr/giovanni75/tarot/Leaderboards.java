@@ -1,7 +1,12 @@
 package fr.giovanni75.tarot;
 
+import fr.giovanni75.tarot.enums.GlobalStats;
+import fr.giovanni75.tarot.enums.Nameable;
 import fr.giovanni75.tarot.objects.Player;
-import org.dhatim.fastexcel.*;
+import org.dhatim.fastexcel.BorderStyle;
+import org.dhatim.fastexcel.Color;
+import org.dhatim.fastexcel.Workbook;
+import org.dhatim.fastexcel.Worksheet;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -14,35 +19,67 @@ class Leaderboards {
 
 	private static final DecimalFormat PERCENTAGE_DECIMAL_FORMAT = new DecimalFormat("#0.0%");
 
-	private enum LeaderboardStats {
+	private enum GlobalData {
+
+		TAKES("Prises", false, stats -> stats.contracts),
+		HANDFULS("Poignées", true, stats -> stats.handfuls),
+		MISERIES("Misères", true, stats -> stats.miseries),
+		PETITS("Petits au bout", false, stats -> stats.petits);
+
+		private final String header;
+		private final boolean pluralizeKey;
+		private final Function<GlobalStats, Map<? extends Nameable, Integer>> resolver;
+
+		GlobalData(String header, boolean pluralizeKey, Function<GlobalStats, Map<? extends Nameable, Integer>> resolver) {
+			this.header = header;
+			this.pluralizeKey = pluralizeKey;
+			this.resolver = resolver;
+		}
+
+	}
+
+	private enum PlayerData {
 
 		TOTAL_SCORE("Score", "Score total",
 				stats -> stats.totalScore,
-				(Player.LocalStats stats, Number value) -> value.toString()),
+				(LocalStats stats, Number value) -> value.toString()),
 
 		PLAYED_GAMES("Jouées", "Parties jouées",
 				stats -> Maps.sum(stats.playedGames),
-				(Player.LocalStats stats, Number value) -> value.toString()),
+				(LocalStats stats, Number value) -> value.toString()),
+
+		CALLED_TIMES("Appelé·e", null,
+				stats -> Maps.sum(stats.calledTimes),
+				(LocalStats stats, Number value) -> value.intValue() == 0 ? "–" : value + " fois"),
+
+		SELF_CALLED_TIMES("Seul·e", null,
+				stats -> Maps.sum(stats.selfCalls),
+				(LocalStats stats, Number value) -> value.intValue() == 0 ? "–" : value + " fois"),
 
 		SUCCESSFUL_TAKES("Prises", null,
 				stats -> Maps.sum(stats.successfulTakes),
-				(Player.LocalStats stats, Number value) -> value + "/" + (value.intValue() + Maps.sum(stats.failedTakes))),
+				(LocalStats stats, Number value) -> {
+					int successes = value.intValue();
+					int total = successes + Maps.sum(stats.failedTakes);
+					return total == 0 ? "–" : successes + "/" + total;
+				}),
 
 		WIN_RATE("Réussite", "Taux de réussite",
 				stats -> {
-					int successful = Maps.sum(stats.successfulTakes);
-					int total = successful + Maps.sum(stats.failedTakes);
-					return total == 0 ? -1 : (double) successful / total;
+					int successes = Maps.sum(stats.successfulTakes);
+					int total = successes + Maps.sum(stats.failedTakes);
+					return total < 3 ? -1 : (double) successes / total;
 				},
+				(LocalStats stats, Number value) -> value.intValue() == -1 ? "" : PERCENTAGE_DECIMAL_FORMAT.format(value));
 
 		private final String name;
 		private final String leaderboardName;
-		private final Function<Player.LocalStats, Number> valueResolver;
-		private final BiFunction<Player.LocalStats, Number, String> valueDisplayer;
+		private final Function<LocalStats, Number> valueResolver;
+		private final BiFunction<LocalStats, Number, String> valueDisplayer;
 
-		LeaderboardStats(String name, String leaderboardName,
-						 Function<Player.LocalStats, Number> valueResolver,
-						 BiFunction<Player.LocalStats, Number, String> valueDisplayer) {
+		PlayerData(String name, String leaderboardName,
+				   Function<LocalStats, Number> valueResolver,
+				   BiFunction<LocalStats, Number, String> valueDisplayer) {
 			this.name = name;
 			this.leaderboardName = leaderboardName;
 			this.valueResolver = valueResolver;
@@ -50,6 +87,7 @@ class Leaderboards {
 		}
 
 		String getDisplay(DateRecord date, Player player, int players, Number value) {
+			// FIXME wasteful call when stats are not used within the biconsumer
 			return valueDisplayer.apply(player.getStats(date, players), value);
 		}
 
@@ -69,7 +107,8 @@ class Leaderboards {
 
 	}
 
-	private static final LeaderboardStats[] LEADERBOARD_STATS = LeaderboardStats.values();
+	private static final GlobalData[] GLOBAL_DATA = GlobalData.values();
+	private static final PlayerData[] PLAYER_DATA = PlayerData.values();
 
 	private static final String FONT_NAME = "Arial";
 	private static final int FONT_SIZE = 10;
@@ -77,15 +116,16 @@ class Leaderboards {
 	private static final double COLUMN_WIDTH = 12.5;
 	private static final double HEADER_HEIGHT = 20.5;
 
-	private static final int COLUMNS_PER_LEADERBOARD = 3;
+	private static final int GLOBAL_DATA_ORIGIN = 3;
 	private static final int MAX_COLUMN_NUMBER;
+	private static final int STRUCTURE_COLUMN_MARGIN = 3;
 
 	static {
-		// Player names (starts at 0) + Invidiual stats + Margin
-		int column = LEADERBOARD_STATS.length + 1;
-		for (LeaderboardStats stats : LEADERBOARD_STATS)
-			if (stats.leaderboardName != null)
-				column += COLUMNS_PER_LEADERBOARD;
+		// Player names (starts at 0) + Individiual data + Margin with leaderboards
+		int column = PLAYER_DATA.length + 1;
+		for (PlayerData data : PLAYER_DATA)
+			if (data.leaderboardName != null)
+				column += STRUCTURE_COLUMN_MARGIN;
 		MAX_COLUMN_NUMBER = column;
 	}
 
@@ -105,23 +145,23 @@ class Leaderboards {
 			return;
 		}
 
-		final Map<LeaderboardStats, List<NumberPair>> unsortedPairs = new EnumMap<>(LeaderboardStats.class);
-		final Map<LeaderboardStats, List<NumberPair>> sortedPairs = new EnumMap<>(LeaderboardStats.class);
-		for (LeaderboardStats entry : LEADERBOARD_STATS) {
+		final Map<PlayerData, List<NumberPair>> unsortedPairs = new EnumMap<>(PlayerData.class);
+		final Map<PlayerData, List<NumberPair>> sortedPairs = new EnumMap<>(PlayerData.class);
+		for (PlayerData data : PLAYER_DATA) {
 			List<NumberPair> entries = new ArrayList<>();
 			for (Player player : playerList) {
-				Number value = entry.getValue(date, player, players);
+				Number value = data.getValue(date, player, players);
 				entries.add(new NumberPair(player, value));
 			}
 			// Store entries that will be displayed in the left column, sorted by player names
 			entries.sort(Comparator.comparing(individualEntry -> individualEntry.player.getName()));
-			unsortedPairs.put(entry, entries);
+			unsortedPairs.put(data, entries);
 			// Store entries that will be displayed in the leaderboards on the right, only if needed
-			if (entry.leaderboardName != null) {
+			if (data.leaderboardName != null) {
 				// Copy to avoid modifying the previous reference
 				List<NumberPair> copy = new ArrayList<>(entries);
 				copy.sort(Comparator.reverseOrder());
-				sortedPairs.put(entry, copy);
+				sortedPairs.put(data, copy);
 			}
 		}
 
@@ -148,8 +188,8 @@ class Leaderboards {
 	}
 
 	private static int writeLeaderboards(DateRecord date, int players, List<Player> playerList,
-										 Map<LeaderboardStats, List<NumberPair>> unsortedPairs,
-										 Map<LeaderboardStats, List<NumberPair>> sortedPairs,
+										 Map<PlayerData, List<NumberPair>> unsortedPairs,
+										 Map<PlayerData, List<NumberPair>> sortedPairs,
 										 Worksheet ws, int initialRow) {
 		/* Global column width */
 		int column;
@@ -180,8 +220,8 @@ class Leaderboards {
 		/* Individual entries, player names sorted alphabetically */
 		column = 1;
 		for (var entry : unsortedPairs.entrySet()) {
-			LeaderboardStats stats = entry.getKey();
-			ws.value(initialRow + 1, column, stats.name);
+			PlayerData data = entry.getKey();
+			ws.value(initialRow + 1, column, data.name);
 			ws.style(initialRow + 1, column).bold()
 					.horizontalAlignment("center")
 					.verticalAlignment("center")
@@ -189,7 +229,7 @@ class Leaderboards {
 
 			row = initialRow + 2;
 			for (NumberPair pair : entry.getValue()) {
-				ws.value(row, column, stats.getDisplay(date, pair.player, players, pair.value));
+				ws.value(row, column, data.getDisplay(date, pair.player, players, pair.value));
 				row++;
 			}
 
@@ -202,11 +242,11 @@ class Leaderboards {
 		}
 
 		/* Leaderboards */
-		column += COLUMNS_PER_LEADERBOARD - 1;
+		column += STRUCTURE_COLUMN_MARGIN - 1;
 		row = initialRow + 1;
 		for (var entry : sortedPairs.entrySet()) {
-			LeaderboardStats stats = entry.getKey();
-			ws.value(initialRow + 1, column, stats.leaderboardName);
+			PlayerData data = entry.getKey();
+			ws.value(initialRow + 1, column, data.leaderboardName);
 			ws.range(initialRow + 1, column, initialRow + 1, column + 1).style()
 					.bold()
 					.horizontalAlignment("center")
@@ -218,7 +258,7 @@ class Leaderboards {
 			for (NumberPair pair : entry.getValue()) {
 				ws.value(row, column - 1, row - initialRow - 1); // Place in the leaderboard
 				ws.value(row, column, pair.player.getName());
-				ws.value(row, column + 1, stats.getDisplay(date, pair.player, players, pair.value));
+				ws.value(row, column + 1, data.getDisplay(date, pair.player, players, pair.value));
 				row++;
 			}
 
@@ -241,10 +281,49 @@ class Leaderboards {
 					.verticalAlignment("center")
 					.set();
 
-			column += COLUMNS_PER_LEADERBOARD;
+			column += STRUCTURE_COLUMN_MARGIN;
 		}
 
-		return row + 8;
+		/* Global entries */
+		GlobalStats stats = Tarot.getGlobalStats(date, players);
+		column = GLOBAL_DATA_ORIGIN;
+		int globalDataMargin = 0;
+		for (GlobalData data : GLOBAL_DATA) {
+			ws.value(row + 2, column, data.header);
+			ws.range(row + 2, column, row + 2, column + 1).style()
+					.bold()
+					.horizontalAlignment("center")
+					.verticalAlignment("center")
+					.merge().set();
+
+			int i = 3;
+			var map = data.resolver.apply(stats);
+			if (map.size() > globalDataMargin)
+				globalDataMargin = map.size();
+
+			for (var entry : map.entrySet()) {
+				String name = entry.getKey().getName();
+				if (data.pluralizeKey)
+					name += "s";
+				ws.value(row + i, column, name);
+				ws.value(row + i, column + 1, entry.getValue());
+				i++;
+			}
+
+			ws.value(row + i, column, "Total");
+			ws.style(row + i, column).bold().verticalAlignment("center").set();
+
+			ws.value(row + i, column + 1, Maps.sum(map));
+
+			ws.range(row + 3, column, row + i, column).style().verticalAlignment("center").set();
+			ws.range(row + 3, column + 1, row + i, column + 1).style().verticalAlignment("center").set();
+
+			column += STRUCTURE_COLUMN_MARGIN;
+		}
+
+		// Last row for next iteration
+		// Keep 2 empty above global data + 2 extra to ensure data sets are separated by 10 empty rows
+		return row + globalDataMargin + 4;
 	}
 
 }
