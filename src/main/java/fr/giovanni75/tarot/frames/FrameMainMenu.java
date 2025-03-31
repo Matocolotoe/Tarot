@@ -57,6 +57,9 @@ public class FrameMainMenu extends JFrame {
 	private void showAllGames() {
 		int total = 0;
 		for (Map.Entry<DateRecord, List<Game>> entry : Tarot.ALL_GAMES.entrySet()) {
+			// Avoid executing one iteration if threshold has already been reached
+			if (total >= MAX_GAMES_DISPLAYED)
+				break;
 			textComponents.add(Components.getSimpleText(entry.getKey().getName(), 20));
 			textComponents.add(Components.getSimpleText(" ", 18));
 			for (Game game : entry.getValue()) {
