@@ -273,8 +273,6 @@ public class Game implements Serializable {
 	public JsonObject toJson() {
 		JsonObject object = new JsonObject();
 		object.addProperty("day", dayOfMonth);
-		object.addProperty("month", date.month().name());
-		object.addProperty("year", date.year());
 
 		object.addProperty("contract", contract.name());
 		object.addProperty("attack_score", attackScore);
