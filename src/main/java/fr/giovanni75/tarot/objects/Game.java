@@ -41,12 +41,10 @@ public class Game implements Serializable {
 		this.players = players;
 	}
 
-	public Game(JsonObject json) {
+	public Game(JsonObject json, DateRecord date) {
 		JsonElement element = json.get("day");
 		this.dayOfMonth = element == null ? 0 : element.getAsInt();
-
-		Month month = Month.valueOf(json.get("month").getAsString());
-		this.date = new DateRecord(month, json.get("year").getAsInt());
+		this.date = date; // Pre-calculated using file name
 
 		this.contract = Contract.valueOf(json.get("contract").getAsString());
 		this.attackScore = json.get("attack_score").getAsInt();

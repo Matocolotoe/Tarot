@@ -48,12 +48,13 @@ public final class Tarot {
 		File[] gameFiles = new File("data/games").listFiles();
 		if (gameFiles != null) {
 			for (File file : gameFiles) {
+				DateRecord date = Files.getDateFromFile(file);
 				JsonArray games = Files.getJsonArrayFromFile(file);
+				List<Game> gameList = new ArrayList<>();
 				int size = games.size();
-				for (int i = 0; i < size; i++) {
-					Game game = new Game(games.get(size - i - 1).getAsJsonObject());
-					ALL_GAMES.computeIfAbsent(game.date, key -> new ArrayList<>()).add(game);
-				}
+				for (int i = 0; i < size; i++)
+					gameList.add(new Game(games.get(size - i - 1).getAsJsonObject(), date));
+				ALL_GAMES.put(date, gameList);
 			}
 		}
 
