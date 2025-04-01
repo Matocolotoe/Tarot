@@ -102,7 +102,7 @@ public final class Files {
 		try (FileInputStream is = new FileInputStream(file)) {
 			array = (JsonArray) JsonParser.parseReader(new InputStreamReader(is, StandardCharsets.UTF_8));
 		} catch (IOException e) {
-			throw new RuntimeException("Could not read array from " + file.getName() + ".json", e);
+			throw new RuntimeException("Could not read array from " + file.getName(), e);
 		}
 		return array;
 	}
