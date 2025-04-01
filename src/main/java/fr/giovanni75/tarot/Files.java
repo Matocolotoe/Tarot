@@ -2,6 +2,7 @@ package fr.giovanni75.tarot;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonParser;
+import fr.giovanni75.tarot.enums.Month;
 import fr.giovanni75.tarot.stats.Leaderboards;
 
 import java.io.*;
@@ -74,6 +75,26 @@ public final class Files {
 			years.add(date.year());
 		for (int year : years)
 			Leaderboards.createScoreGrid(year);
+	}
+
+	static DateRecord getDateFromFile(File file) {
+		String name = file.getName();
+		
+		// Expected format :
+		// split[0] = "games"
+		// split[1] = month
+		// split[2] = year.json
+		String[] split = name.split("_");
+		if (split.length != 3 || !split[0].equals("games"))
+			throw new IllegalArgumentException("Invalid format for game file " + name);
+
+		try {
+			int month = Integer.parseInt(split[1]);
+			int year = Integer.parseInt(split[2].substring(0, 4));
+			return new DateRecord(Month.ALL_MONTHS[month - 1], year);
+		} catch (NumberFormatException e) {
+			throw new IllegalArgumentException("Invalid format for game file " + name);
+		}
 	}
 
 	static JsonArray getJsonArrayFromFile(File file) {

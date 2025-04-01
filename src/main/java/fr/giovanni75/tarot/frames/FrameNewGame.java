@@ -202,7 +202,7 @@ class FrameNewGame extends JFrame implements ActionListener {
 			return;
 		}
 
-		Month month = Month.values()[LocalDate.now().getMonthValue() - 1];
+		Month month = Month.ALL_MONTHS[LocalDate.now().getMonthValue() - 1];
 		Contract contract = null;
 		int attackScore = scoreSlider.getValue();
 		Oudlers oudlers = null;
@@ -308,8 +308,11 @@ class FrameNewGame extends JFrame implements ActionListener {
 		}
 
 		Game game = new Game(month, contract, attackScore, oudlers, petitAuBout, slam, players);
-		Tarot.ALL_GAMES.computeIfAbsent(game.date, key -> new ArrayList<>()).addFirst(game); // Add first so that game is shown on top
 		game.write("games/games_" + game.date.getShortName("_"));
+
+		// Add first so that game is shown on top
+		// Use computeIfAbsent since this might be the first game having the corresponding DateRecord
+		Tarot.ALL_GAMES.computeIfAbsent(game.date, key -> new ArrayList<>()).addFirst(game);
 
 		for (JComboBox<String> handfulBox : handfulBoxes)
 			handfulBox.setSelectedIndex(0);

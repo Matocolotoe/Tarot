@@ -26,4 +26,6 @@ public enum Month implements Nameable {
 		return name;
 	}
 
+	public static final Month[] ALL_MONTHS = Month.values();
+
 }
