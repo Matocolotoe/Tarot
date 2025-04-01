@@ -324,7 +324,7 @@ class FrameNewGame extends JFrame implements ActionListener {
 		scoreSlider.setValue(51);
 
 		game.applyResults();
-		Components.popup("Partie ajoutée avec succès !\nPoints à l'attaque : " + game.attackFinalScore);
+		Components.popup("Partie ajoutée avec succès !\n\n" + String.join("\n", game.getDescription()));
 		FrameMainMenu.MAIN_MENU.reloadGames();
 	}
 
