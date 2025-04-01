@@ -1,6 +1,7 @@
 package fr.giovanni75.tarot.stats;
 
 import fr.giovanni75.tarot.DateRecord;
+import fr.giovanni75.tarot.Fraction;
 import fr.giovanni75.tarot.Maps;
 import fr.giovanni75.tarot.Tarot;
 import fr.giovanni75.tarot.enums.Contract;
@@ -15,13 +16,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.*;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public final class Leaderboards {
 
 	private static final DecimalFormat DOUBLE_DECIMAL_FORMAT = new DecimalFormat("#.##");
 	private static final DecimalFormat PERCENTAGE_DECIMAL_FORMAT = new DecimalFormat("#0.0%");
+
+	private static final int WINRATE_MINIMUM_TAKES = 3;
 
 	private enum GlobalData {
 
@@ -48,55 +50,47 @@ public final class Leaderboards {
 
 	private enum PlayerData {
 
-		TOTAL_SCORE("Score", "Score total",
-				stats -> stats.totalScore,
-				(LocalStats stats, Number value) -> value.toString()),
+		TOTAL_SCORE("Score", "Score total", stats -> stats.totalScore, Object::toString),
 
-		PLAYED_GAMES("Jouées", "Parties jouées",
-				stats -> Maps.sum(stats.playedGames),
-				(LocalStats stats, Number value) -> value.toString()),
+		PLAYED_GAMES("Jouées", "Parties jouées", stats -> Maps.sum(stats.playedGames), Object::toString),
 
 		CALLED_TIMES("Appelé·e", null,
 				stats -> Maps.sum(stats.calledTimes),
-				(LocalStats stats, Number value) -> value.intValue() == 0 ? "–" : value + " fois"),
+				value -> value.intValue() == 0 ? "–" : value + " fois"),
 
 		SELF_CALLED_TIMES("Seul·e", null,
 				stats -> Maps.sum(stats.selfCalls),
-				(LocalStats stats, Number value) -> value.intValue() == 0 ? "–" : value + " fois"),
+				value -> value.intValue() == 0 ? "–" : value + " fois"),
 
-		SUCCESSFUL_TAKES("Prises", null,
-				stats -> Maps.sum(stats.successfulTakes),
-				(LocalStats stats, Number value) -> {
-					int successes = value.intValue();
+		TAKES("Prises", null,
+				stats -> {
+					int successes = Maps.sum(stats.successfulTakes);
 					int total = successes + Maps.sum(stats.failedTakes);
-					return total == 0 ? "–" : successes + "/" + total;
-				}),
+					return total == 0 ? -1 : new Fraction(successes, total);
+				}, value -> value.intValue() == -1 ? "–" : value.toString()),
 
 		WIN_RATE("Réussite", "Taux de réussite",
 				stats -> {
 					int successes = Maps.sum(stats.successfulTakes);
 					int total = successes + Maps.sum(stats.failedTakes);
-					return total < 3 ? -1 : (double) successes / total;
+					return total < WINRATE_MINIMUM_TAKES ? -1 : (double) successes / total;
 				},
-				(LocalStats stats, Number value) -> value.intValue() == -1 ? "" : PERCENTAGE_DECIMAL_FORMAT.format(value));
+				value -> value.intValue() == -1 ? "" : PERCENTAGE_DECIMAL_FORMAT.format(value));
 
 		private final String name;
 		private final String leaderboardName;
 		private final Function<LocalStats, Number> valueResolver;
-		private final BiFunction<LocalStats, Number, String> valueDisplayer;
+		private final Function<Number, String> valueDisplayer;
 
-		PlayerData(String name, String leaderboardName,
-				   Function<LocalStats, Number> valueResolver,
-				   BiFunction<LocalStats, Number, String> valueDisplayer) {
+		PlayerData(String name, String leaderboardName, Function<LocalStats, Number> valueResolver, Function<Number, String> valueDisplayer) {
 			this.name = name;
 			this.leaderboardName = leaderboardName;
 			this.valueResolver = valueResolver;
 			this.valueDisplayer = valueDisplayer;
 		}
 
-		String getDisplay(DateRecord date, Player player, int players, Number value) {
-			// FIXME wasteful call when stats are not used within the biconsumer
-			return valueDisplayer.apply(player.getStats(date, players), value);
+		String getDisplay(Number value) {
+			return valueDisplayer.apply(value);
 		}
 
 		Number getValue(DateRecord date, Player player, int players) {
@@ -237,7 +231,7 @@ public final class Leaderboards {
 
 			row = initialRow + 2;
 			for (NumberPair pair : entry.getValue()) {
-				ws.value(row, column, data.getDisplay(date, pair.player, players, pair.value));
+				ws.value(row, column, data.getDisplay(pair.value));
 				row++;
 			}
 
@@ -266,7 +260,7 @@ public final class Leaderboards {
 			for (NumberPair pair : entry.getValue()) {
 				ws.value(row, column - 1, row - initialRow - 1); // Place in the leaderboard
 				ws.value(row, column, pair.player.getName());
-				ws.value(row, column + 1, data.getDisplay(date, pair.player, players, pair.value));
+				ws.value(row, column + 1, data.getDisplay(pair.value));
 				row++;
 			}
 
