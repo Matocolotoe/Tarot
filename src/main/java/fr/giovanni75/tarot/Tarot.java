@@ -41,7 +41,7 @@ public final class Tarot {
 			case 5 -> GLOBAL_STATS_FIVE;
 			default -> throw new IllegalArgumentException("Global stats are unavailable for " + players + " players");
 		};
-		return stats.get(date);
+		return stats.getOrDefault(date, new GlobalStats());
 	}
 
 	public static Player getPlayer(int id) {

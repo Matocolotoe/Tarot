@@ -108,6 +108,7 @@ public final class Files {
 	}
 
 	public static JsonArray getJsonArrayFromFile(String fileName) {
+		createJsonFile(fileName); // File might not exist, for instance when serializing data
 		return getJsonArrayFromFile(new File("data/" + fileName + ".json"));
 	}
 
