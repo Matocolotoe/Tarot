@@ -1,12 +1,12 @@
 package fr.giovanni75.tarot.frames;
 
 import fr.giovanni75.tarot.DateRecord;
-import fr.giovanni75.tarot.stats.LocalStats;
 import fr.giovanni75.tarot.Maps;
 import fr.giovanni75.tarot.Tarot;
 import fr.giovanni75.tarot.objects.Game;
 import fr.giovanni75.tarot.objects.LocalPlayer;
 import fr.giovanni75.tarot.objects.Player;
+import fr.giovanni75.tarot.stats.LocalStats;
 import org.knowm.xchart.XChartPanel;
 import org.knowm.xchart.XYChart;
 import org.knowm.xchart.XYChartBuilder;

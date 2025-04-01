@@ -1,11 +1,11 @@
 package fr.giovanni75.tarot.frames;
 
 import fr.giovanni75.tarot.DateRecord;
-import fr.giovanni75.tarot.stats.LocalStats;
 import fr.giovanni75.tarot.Tarot;
 import fr.giovanni75.tarot.enums.Contract;
 import fr.giovanni75.tarot.objects.Game;
 import fr.giovanni75.tarot.objects.Player;
+import fr.giovanni75.tarot.stats.LocalStats;
 
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;

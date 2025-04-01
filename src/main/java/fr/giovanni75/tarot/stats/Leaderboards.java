@@ -3,6 +3,7 @@ package fr.giovanni75.tarot.stats;
 import fr.giovanni75.tarot.DateRecord;
 import fr.giovanni75.tarot.Maps;
 import fr.giovanni75.tarot.Tarot;
+import fr.giovanni75.tarot.enums.Contract;
 import fr.giovanni75.tarot.enums.Nameable;
 import fr.giovanni75.tarot.objects.Player;
 import org.dhatim.fastexcel.BorderStyle;
@@ -20,20 +21,25 @@ import java.util.function.Function;
 public final class Leaderboards {
 
 	private static final DecimalFormat PERCENTAGE_DECIMAL_FORMAT = new DecimalFormat("#0.0%");
+	private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("#.##");
 
 	private enum GlobalData {
 
-		TAKES("Prises", false, stats -> stats.contracts),
-		HANDFULS("Poignées", true, stats -> stats.handfuls),
-		MISERIES("Misères", true, stats -> stats.miseries),
-		PETITS("Petits au bout", false, stats -> stats.petits);
+		TAKES("Prises", false, false, stats -> stats.contracts),
+		OUDLERS("Bouts en moyenne", true, false, stats -> stats.oudlers),
+		SELF_CALLS("Appels à soi-même", false, false, stats -> stats.selfCalls),
+		HANDFULS("Poignées", false, true, stats -> stats.handfuls),
+		MISERIES("Misères", false, true, stats -> stats.miseries),
+		PETITS("Petits au bout", false, false, stats -> stats.petits);
 
 		private final String header;
+		private final boolean average;
 		private final boolean pluralizeKey;
 		private final Function<GlobalStats, Map<? extends Nameable, Integer>> resolver;
 
-		GlobalData(String header, boolean pluralizeKey, Function<GlobalStats, Map<? extends Nameable, Integer>> resolver) {
+		GlobalData(String header, boolean average, boolean pluralizeKey, Function<GlobalStats, Map<? extends Nameable, Integer>> resolver) {
 			this.header = header;
+			this.average = average;
 			this.pluralizeKey = pluralizeKey;
 			this.resolver = resolver;
 		}
@@ -118,7 +124,7 @@ public final class Leaderboards {
 	private static final double COLUMN_WIDTH = 12.5;
 	private static final double HEADER_HEIGHT = 20.5;
 
-	private static final int GLOBAL_DATA_ORIGIN = 3;
+	private static final int GLOBAL_DATA_ORIGIN = 0;
 	private static final int MAX_COLUMN_NUMBER;
 	private static final int STRUCTURE_COLUMN_MARGIN = 3;
 
@@ -308,17 +314,38 @@ public final class Leaderboards {
 				if (data.pluralizeKey)
 					name += "s";
 				ws.value(row + i, column, name);
-				ws.value(row + i, column + 1, entry.getValue());
+				if (data.average) {
+					Nameable nameable = entry.getKey();
+					if (nameable instanceof Contract contract) {
+						ws.value(row + i, column + 1, DECIMAL_FORMAT.format((double) entry.getValue() / stats.contracts.get(contract)));
+					} else {
+						throw new IllegalArgumentException("Map keys need to be an instance of Contract for average data");
+					}
+				} else {
+					ws.value(row + i, column + 1, entry.getValue());
+				}
 				i++;
 			}
 
 			ws.value(row + i, column, "Total");
 			ws.style(row + i, column).bold().verticalAlignment("center").set();
 
-			ws.value(row + i, column + 1, Maps.sum(map));
+			if (data.average) {
+				ws.value(row + i, column + 1, DECIMAL_FORMAT.format((double) Maps.sum(map) / Maps.sum(stats.contracts)));
+			} else {
+				ws.value(row + i, column + 1, Maps.sum(map));
+			}
 
-			ws.range(row + 3, column, row + i, column).style().verticalAlignment("center").set();
-			ws.range(row + 3, column + 1, row + i, column + 1).style().verticalAlignment("center").set();
+			// Horizontal alignment is left by default, keep it that way
+			ws.range(row + 3, column, row + i, column).style()
+					.verticalAlignment("center")
+					.set();
+
+			// Force right alignment since we might be displaying strings
+			ws.range(row + 3, column + 1, row + i, column + 1).style()
+					.horizontalAlignment("right")
+					.verticalAlignment("center")
+					.set();
 
 			column += STRUCTURE_COLUMN_MARGIN;
 		}

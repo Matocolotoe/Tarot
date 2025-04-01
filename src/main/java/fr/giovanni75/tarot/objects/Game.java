@@ -4,11 +4,11 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import fr.giovanni75.tarot.DateRecord;
-import fr.giovanni75.tarot.stats.GlobalStats;
-import fr.giovanni75.tarot.stats.LocalStats;
 import fr.giovanni75.tarot.Maps;
 import fr.giovanni75.tarot.Tarot;
 import fr.giovanni75.tarot.enums.*;
+import fr.giovanni75.tarot.stats.GlobalStats;
+import fr.giovanni75.tarot.stats.LocalStats;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -91,6 +91,7 @@ public class Game implements Serializable {
 
 		GlobalStats globalStats = Tarot.getGlobalStats(date, numberOfPlayers);
 		Maps.increment(contract, globalStats.contracts);
+		Maps.increment(contract, globalStats.oudlers, oudlers.ordinal());
 
 		/* Handfuls */
 		for (LocalPlayer local : players) {
@@ -174,6 +175,7 @@ public class Game implements Serializable {
 		if (ally != null) {
 			if (ally == attacker) {
 				Maps.increment(contract, stats.selfCalls);
+				Maps.increment(contract, globalStats.selfCalls);
 			} else {
 				stats = ally.getStats(date, numberOfPlayers);
 				Maps.increment(contract, stats.calledTimes);
