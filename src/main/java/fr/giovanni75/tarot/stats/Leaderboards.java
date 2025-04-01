@@ -20,8 +20,8 @@ import java.util.function.Function;
 
 public final class Leaderboards {
 
+	private static final DecimalFormat DOUBLE_DECIMAL_FORMAT = new DecimalFormat("#.##");
 	private static final DecimalFormat PERCENTAGE_DECIMAL_FORMAT = new DecimalFormat("#0.0%");
-	private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("#.##");
 
 	private enum GlobalData {
 
@@ -33,13 +33,13 @@ public final class Leaderboards {
 		PETITS("Petits au bout", false, false, stats -> stats.petits);
 
 		private final String header;
-		private final boolean average;
+		private final boolean averaged;
 		private final boolean pluralizeKey;
 		private final Function<GlobalStats, Map<? extends Nameable, Integer>> resolver;
 
-		GlobalData(String header, boolean average, boolean pluralizeKey, Function<GlobalStats, Map<? extends Nameable, Integer>> resolver) {
+		GlobalData(String header, boolean averaged, boolean pluralizeKey, Function<GlobalStats, Map<? extends Nameable, Integer>> resolver) {
 			this.header = header;
-			this.average = average;
+			this.averaged = averaged;
 			this.pluralizeKey = pluralizeKey;
 			this.resolver = resolver;
 		}
@@ -314,12 +314,13 @@ public final class Leaderboards {
 				if (data.pluralizeKey)
 					name += "s";
 				ws.value(row + i, column, name);
-				if (data.average) {
+				if (data.averaged) {
 					Nameable nameable = entry.getKey();
 					if (nameable instanceof Contract contract) {
-						ws.value(row + i, column + 1, DECIMAL_FORMAT.format((double) entry.getValue() / stats.contracts.get(contract)));
+						double value = (double) entry.getValue() / stats.contracts.get(contract);
+						ws.value(row + i, column + 1, DOUBLE_DECIMAL_FORMAT.format(value));
 					} else {
-						throw new IllegalArgumentException("Map keys need to be an instance of Contract for average data");
+						throw new IllegalArgumentException("Keys need to extend Contract for averaged data");
 					}
 				} else {
 					ws.value(row + i, column + 1, entry.getValue());
@@ -330,8 +331,9 @@ public final class Leaderboards {
 			ws.value(row + i, column, "Total");
 			ws.style(row + i, column).bold().verticalAlignment("center").set();
 
-			if (data.average) {
-				ws.value(row + i, column + 1, DECIMAL_FORMAT.format((double) Maps.sum(map) / Maps.sum(stats.contracts)));
+			if (data.averaged) {
+				double value = (double) Maps.sum(map) / Maps.sum(stats.contracts);
+				ws.value(row + i, column + 1, DOUBLE_DECIMAL_FORMAT.format(value));
 			} else {
 				ws.value(row + i, column + 1, Maps.sum(map));
 			}
