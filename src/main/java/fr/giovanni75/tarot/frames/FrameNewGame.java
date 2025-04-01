@@ -53,10 +53,11 @@ class FrameNewGame extends JFrame implements ActionListener {
 
 	private final JButton submitButton;
 
-	private static JComboBox<String> getEnumNameList(Nameable[] values, int x, int y, int width) {
-		String[] names = new String[values.length];
-		for (int i = 0; i < values.length; i++)
-			names[i] = values[i].getName();
+	private static JComboBox<String> getEnumNameList(Nameable[] values, String none, int x, int y, int width) {
+		String[] names = new String[values.length + 1];
+		names[0] = none;
+		for (int i = 1; i <= values.length; i++)
+			names[i] = values[i - 1].getName();
 		JComboBox<String> box = new JComboBox<>(names);
 		box.setFont(Components.getFont(12));
 		box.setLocation(x, y);
@@ -94,8 +95,8 @@ class FrameNewGame extends JFrame implements ActionListener {
 		for (int i = 0; i < 5; i++) {
 			int x = COMBO_BOX_BASE_X + PLAYER_X_SPACING * i;
 			playerNameBoxes[i] = getPlayerNameList(names, i, x);
-			miseryBoxes[i] = getEnumNameList(Misery.values(), x, 120, SMALL_TEXT_WIDTH);
-			handfulBoxes[i] = getEnumNameList(Handful.values(), x, 160, SMALL_TEXT_WIDTH);
+			miseryBoxes[i] = getEnumNameList(Misery.values(), "Aucune", x, 120, SMALL_TEXT_WIDTH);
+			handfulBoxes[i] = getEnumNameList(Handful.values(), "Aucune", x, 160, SMALL_TEXT_WIDTH);
 			mainPanel.add(playerNameBoxes[i]);
 			mainPanel.add(miseryBoxes[i]);
 			mainPanel.add(handfulBoxes[i]);
@@ -171,10 +172,10 @@ class FrameNewGame extends JFrame implements ActionListener {
 		}
 
 		mainPanel.add(Components.getSimpleText("Petit au bout", 18, 100, 500, 120, TEXT_HEIGHT));
-		mainPanel.add(petitAuBoutBox = getEnumNameList(PetitAuBout.values(), 240, 520, SMALL_TEXT_WIDTH));
+		mainPanel.add(petitAuBoutBox = getEnumNameList(PetitAuBout.values(), "Non", 240, 520, SMALL_TEXT_WIDTH));
 
 		mainPanel.add(Components.getSimpleText("Chelem", 18, 410, 500, SMALL_TEXT_WIDTH, TEXT_HEIGHT));
-		mainPanel.add(slamBox = getEnumNameList(Slam.values(), 500, 520, 170));
+		mainPanel.add(slamBox = getEnumNameList(Slam.values(), "Non déclaré", 500, 520, 170));
 
 		submitButton = new JButton("Ajouter");
 		submitButton.addActionListener(this);

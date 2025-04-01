@@ -18,9 +18,9 @@ public record LocalPlayer(int id, Side side, Handful handful, Misery misery) imp
 		object.addProperty("id", id);
 		if (side != Side.DEFENSE)
 			object.addProperty("side", side.toString());
-		if (handful != Handful.NONE)
+		if (handful != null)
 			object.addProperty("handful", handful.name());
-		if (misery != Misery.NONE)
+		if (misery != null)
 			object.addProperty("misery", misery.name());
 		return object;
 	}

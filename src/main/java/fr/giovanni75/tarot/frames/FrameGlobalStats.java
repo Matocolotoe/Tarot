@@ -3,9 +3,9 @@ package fr.giovanni75.tarot.frames;
 import fr.giovanni75.tarot.DateRecord;
 import fr.giovanni75.tarot.Tarot;
 import fr.giovanni75.tarot.enums.Contract;
-import fr.giovanni75.tarot.enums.PetitAuBout;
 import fr.giovanni75.tarot.objects.Game;
 import fr.giovanni75.tarot.objects.Player;
+import fr.giovanni75.tarot.stats.LocalStats;
 
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
@@ -83,8 +83,8 @@ class FrameGlobalStats extends JFrame {
 	}
 
 	private static void showMaxPlayerStats(JPanel panel, DateRecord date, int players, String header, String details,
-									Function<Player.LocalStats, Map<Contract, Integer>> provider, int multiplier,
-									boolean includeTotal, boolean includeDetailsByContract) {
+										   Function<LocalStats, Map<Contract, Integer>> provider, int multiplier,
+										   boolean includeTotal, boolean includeDetailsByContract) {
 		Map<Contract, Integer> maxAmounts = new EnumMap<>(Contract.class);
 		Map<Contract, List<Player>> maxPlayers = new EnumMap<>(Contract.class);
 		int maxAmountAll = 0;
@@ -180,7 +180,7 @@ class FrameGlobalStats extends JFrame {
 
 		showGlobalStats(mainPanel, date, players, "Parties jouées", ignored -> true);
 		showAverageStats(mainPanel, date, players, "Nombre moyen de bouts", game -> game.oudlers.ordinal());
-		showGlobalStats(mainPanel, date, players, "Petits au bout", game -> game.petitAuBout != PetitAuBout.NONE);
+		showGlobalStats(mainPanel, date, players, "Petits au bout", game -> game.petitAuBout != null);
 
 		showMaxPlayerStats(mainPanel, date, players, "Le plus de parties jouées", "%s (%d)",
 				stats -> stats.playedGames, 1, true, false);

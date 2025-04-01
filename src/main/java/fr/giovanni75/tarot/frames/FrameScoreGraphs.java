@@ -6,6 +6,7 @@ import fr.giovanni75.tarot.Tarot;
 import fr.giovanni75.tarot.objects.Game;
 import fr.giovanni75.tarot.objects.LocalPlayer;
 import fr.giovanni75.tarot.objects.Player;
+import fr.giovanni75.tarot.stats.LocalStats;
 import org.knowm.xchart.XChartPanel;
 import org.knowm.xchart.XYChart;
 import org.knowm.xchart.XYChartBuilder;
@@ -140,7 +141,7 @@ class FrameScoreGraphs extends JFrame implements ActionListener {
 			if (i > 0)
 				games.get(i - 1).applyResults(temporaryProfiles::get);
 			for (Player player : temporaryProfiles.values()) {
-				Player.LocalStats stats = player.getStats(date, players);
+				LocalStats stats = player.getStats(date, players);
 				yDataMap.get(player)[i] = stats.totalScore;
 			}
 		}

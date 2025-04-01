@@ -7,6 +7,8 @@ import fr.giovanni75.tarot.DateRecord;
 import fr.giovanni75.tarot.Maps;
 import fr.giovanni75.tarot.Tarot;
 import fr.giovanni75.tarot.enums.*;
+import fr.giovanni75.tarot.stats.GlobalStats;
+import fr.giovanni75.tarot.stats.LocalStats;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -51,10 +53,10 @@ public class Game implements Serializable {
 		this.oudlers = Oudlers.ALL_OUDLERS[json.get("oudlers").getAsInt()];
 
 		element = json.get("petit_au_bout");
-		this.petitAuBout = element == null ? PetitAuBout.NONE : PetitAuBout.valueOf(element.getAsString());
+		this.petitAuBout = element == null ? null : PetitAuBout.valueOf(element.getAsString());
 
 		element = json.get("slam");
-		this.slam = element == null ? Slam.UNANNOUNCED : Slam.valueOf(element.getAsString());
+		this.slam = element == null ? null : Slam.valueOf(element.getAsString());
 
 		JsonArray playersArray = json.get("players").getAsJsonArray();
 		int size = playersArray.size();
@@ -66,9 +68,9 @@ public class Game implements Serializable {
 			element = object.get("side");
 			Side side = element == null ? Side.DEFENSE : Side.valueOf(element.getAsString());
 			element = object.get("handful");
-			Handful handful = element == null ? Handful.NONE : Handful.valueOf(element.getAsString());
+			Handful handful = element == null ? null : Handful.valueOf(element.getAsString());
 			element = object.get("misery");
-			Misery misery = element == null ? Misery.NONE : Misery.valueOf(element.getAsString());
+			Misery misery = element == null ? null : Misery.valueOf(element.getAsString());
 			this.players[i] = new LocalPlayer(id, side, handful, misery);
 		}
 	}
@@ -85,11 +87,16 @@ public class Game implements Serializable {
 
 		int numberOfPlayers = players.length;
 
+		GlobalStats globalStats = Tarot.getGlobalStats(date, numberOfPlayers);
+		Maps.increment(contract, globalStats.contracts);
+		Maps.increment(contract, globalStats.oudlers, oudlers.ordinal());
+
 		/* Handfuls */
 		for (LocalPlayer local : players) {
-			int points = local.handful().getExtraPoints();
-			if (points == 0)
+			Handful handful = local.handful();
+			if (handful == null)
 				continue;
+			int points = handful.getExtraPoints();
 			if (diff < 0) {
 				attackFinalScore -= points;
 			} else {
@@ -97,25 +104,24 @@ public class Game implements Serializable {
 			}
 			Player player = localConverter.apply(local.id());
 			Maps.increment(contract, player.getStats(date, numberOfPlayers).handfuls);
+			Maps.increment(handful, globalStats.handfuls);
 		}
 
 		/* Petit au bout */
-		switch (petitAuBout) {
-			case ATTACK -> attackFinalScore += 10 * contract.getMultiplier();
-			case DEFENSE -> attackFinalScore -= 10 * contract.getMultiplier();
+		if (petitAuBout != null) {
+			Maps.increment(petitAuBout, globalStats.petits);
+			attackFinalScore += petitAuBout.getAttackPoints() * contract.getMultiplier();
 		}
 
 		/* Slam */
-		switch (slam) {
-			case ATTACK -> attackFinalScore += attackScore == 91 ? 400 : -200;
-			case DEFENSE -> attackFinalScore += attackScore == 0 ? -400 : 200;
-			case UNANNOUNCED -> {
-				if (attackScore == 91) {
-					attackFinalScore += 200;
-				} else if (attackScore == 0) {
-					attackFinalScore -= 200;
-				}
-			}
+		if (slam == Slam.ATTACK) {
+			attackFinalScore += attackScore == 91 ? 400 : -200;
+		} else if (slam == Slam.DEFENSE) {
+			attackFinalScore += attackScore == 0 ? -400 : 200;
+		} else if (attackScore == 91) {
+			attackFinalScore += 200;
+		} else if (attackScore == 0) {
+			attackFinalScore -= 200;
 		}
 
 		List<Player> defenders = getDefenders(Function.identity(), localConverter);
@@ -148,23 +154,26 @@ public class Game implements Serializable {
 
 		/* Miseries */
 		for (LocalPlayer local : players) {
-			int points = local.misery().getExtraPoints();
-			if (points == 0)
+			Misery misery = local.misery();
+			if (misery == null)
 				continue;
+			int points = misery.getExtraPoints();
 			Player player = localConverter.apply(local.id());
 			Maps.increment(player, finalScores, points * (numberOfPlayers - 1));
 			Maps.increment(contract, player.getStats(date, numberOfPlayers).miseries);
+			Maps.increment(misery, globalStats.miseries);
 			for (LocalPlayer other : players)
 				if (!local.equals(other))
 					Maps.increment(localConverter.apply(other.id()), finalScores, -points);
 		}
 
-		Player.LocalStats stats = attacker.getStats(date, numberOfPlayers);
+		LocalStats stats = attacker.getStats(date, numberOfPlayers);
 		Maps.increment(contract, diff >= 0 ? stats.successfulTakes : stats.failedTakes);
 
 		if (ally != null) {
 			if (ally == attacker) {
 				Maps.increment(contract, stats.selfCalls);
+				Maps.increment(contract, globalStats.selfCalls);
 			} else {
 				stats = ally.getStats(date, numberOfPlayers);
 				Maps.increment(contract, stats.calledTimes);
@@ -239,14 +248,14 @@ public class Game implements Serializable {
 		StringJoiner details = new StringJoiner(" – ");
 		for (LocalPlayer local : players) {
 			Handful handful = local.handful();
-			if (handful != Handful.NONE)
+			if (handful != null)
 				details.add(handful.getFullName() + " " + getOfWord(DEFAULT_LOCAL_PLAYER_CONVERTER.apply(local.id()).getName()));
 			Misery misery = local.misery();
-			if (misery != Misery.NONE)
+			if (misery != null)
 				details.add(misery.getFullName() + " " + getOfWord(DEFAULT_LOCAL_PLAYER_CONVERTER.apply(local.id()).getName()));
 		}
 
-		if (petitAuBout != PetitAuBout.NONE)
+		if (petitAuBout != null)
 			details.add(petitAuBout.getFullName());
 
 		if (details.length() > 0)
@@ -277,7 +286,7 @@ public class Game implements Serializable {
 		object.addProperty("contract", contract.name());
 		object.addProperty("attack_score", attackScore);
 		object.addProperty("oudlers", oudlers.ordinal());
-		if (petitAuBout != PetitAuBout.NONE)
+		if (petitAuBout != null)
 			object.addProperty("petit_au_bout", petitAuBout.name());
 
 		JsonArray playersArray = new JsonArray();
