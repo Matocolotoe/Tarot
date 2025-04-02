@@ -1,6 +1,7 @@
 package fr.giovanni75.tarot.stats;
 
 import fr.giovanni75.tarot.Maps;
+import fr.giovanni75.tarot.Tarot;
 import fr.giovanni75.tarot.enums.Contract;
 
 import java.util.ArrayList;
@@ -45,17 +46,18 @@ public final class LocalStats {
 			result.add(" ‣ " + contract.getName() + " : " + playedGames.getOrDefault(contract, 0));
 
 		int successes = Maps.sum(successfulTakes);
+		int total = successes + Maps.sum(failedTakes);
 		result.add(" ");
-		result.add("Prises totales : " + (successes + Maps.sum(failedTakes)));
-		result.add("Prises réussies : " + successes);
+		result.add("Prises réussies : " + (total == 0 ? Tarot.NONE_STRING : successes + "/" + total));
 		for (Contract contract : Contract.ALL_CONTRACTS) {
-			result.add(" ‣ " + contract.getName() + " : " + successfulTakes.getOrDefault(contract, 0)
-					+ " \uD83C\uDFC6 / " + failedTakes.getOrDefault(contract, 0) + " ✖");
+			successes = successfulTakes.getOrDefault(contract, 0);
+			total = successes + failedTakes.getOrDefault(contract, 0);
+			result.add(" ‣ " + contract.getName() + " : " + (total == 0 ? Tarot.NONE_STRING : successes + "/" + total));
 		}
 
 		int totalSelfCalls = Maps.sum(selfCalls);
 		result.add(" ");
-		result.add("Appelé(e) " + Maps.sum(calledTimes) + " fois"
+		result.add("Appelé·e " + Maps.sum(calledTimes) + " fois"
 				+ (totalSelfCalls == 0 ? "" : ", dont " + totalSelfCalls + " soi-même"));
 		for (Contract contract : Contract.ALL_CONTRACTS) {
 			totalSelfCalls = selfCalls.getOrDefault(contract, 0);
