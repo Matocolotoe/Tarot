@@ -1,8 +1,6 @@
 package fr.giovanni75.tarot.frames;
 
-import javax.swing.BorderFactory;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
+import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.Font;
 
@@ -10,6 +8,20 @@ final class Components {
 
 	private static final String FONT_NAME = "Helvetica";
 	private static final String INVALID_DAY_MESSAGE = "Veuillez entrer un jour valide.";
+
+	static JButton getClickableText(String text, int size) {
+		JButton button = new JButton(text);
+		button.setBorderPainted(false);
+		button.setRolloverEnabled(false);
+		button.setFocusPainted(false);
+		button.setFont(getFont(size));
+		button.setHorizontalAlignment(SwingConstants.LEFT);
+		return button;
+	}
+
+	static JLabel getEmptyText(int size) {
+		return getSimpleText(" ", size);
+	}
 
 	static Font getFont(int size) {
 		return new Font(FONT_NAME, Font.PLAIN, size);
@@ -38,6 +50,10 @@ final class Components {
 
 	static String prompt(String message, String title) {
 		return JOptionPane.showInputDialog(null, message, title, JOptionPane.INFORMATION_MESSAGE);
+	}
+
+	static int promptConfirmation(String message, String title) {
+		return JOptionPane.showConfirmDialog(null, message, title, JOptionPane.YES_NO_OPTION);
 	}
 
 	static int promptDay(String message, String title) {

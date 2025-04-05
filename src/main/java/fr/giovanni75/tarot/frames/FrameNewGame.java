@@ -1,5 +1,7 @@
 package fr.giovanni75.tarot.frames;
 
+import com.google.gson.JsonArray;
+import fr.giovanni75.tarot.Files;
 import fr.giovanni75.tarot.Tarot;
 import fr.giovanni75.tarot.enums.*;
 import fr.giovanni75.tarot.objects.Game;
@@ -31,6 +33,8 @@ class FrameNewGame extends JFrame implements ActionListener {
 		for (int i = 0; i < 5; i++)
 			LAST_SELECTED_NAMES[i] = Tarot.NONE_STRING;
 	}
+
+	private final Game baseGame;
 
 	@SuppressWarnings("unchecked")
 	private final JComboBox<String>[] handfulBoxes = new JComboBox[5];
@@ -74,10 +78,11 @@ class FrameNewGame extends JFrame implements ActionListener {
 		return box;
 	}
 
-	FrameNewGame() {
+	FrameNewGame(Game baseGame) {
+		this.baseGame = baseGame;
 		setBounds(300, 200, 800, 700);
 		setResizable(false);
-		setTitle("Ajouter une partie");
+		setTitle(baseGame == null ? "Ajouter une partie" : "Modifier une partie");
 
 		JPanel mainPanel = new JPanel();
 		mainPanel.setLayout(null);
@@ -177,12 +182,35 @@ class FrameNewGame extends JFrame implements ActionListener {
 		mainPanel.add(Components.getSimpleText("Chelem", 18, 410, 500, SMALL_TEXT_WIDTH, TEXT_HEIGHT));
 		mainPanel.add(slamBox = getEnumNameList(Slam.values(), "Non déclaré", 500, 520, 170));
 
-		submitButton = new JButton("Ajouter");
+		submitButton = new JButton(baseGame == null ? "Ajouter" : "Modifier");
 		submitButton.addActionListener(this);
 		submitButton.setFont(Components.getFont(18));
-		submitButton.setLocation(325, 600);
-		submitButton.setSize(100, 25);
+		submitButton.setLocation(310, 600);
+		submitButton.setSize(115, 25);
 		mainPanel.add(submitButton);
+
+		if (baseGame != null) {
+			int numberOfPlayers = baseGame.players.length;
+			for (int i = 0; i < numberOfPlayers; i++) {
+				LocalPlayer local = baseGame.players[i];
+				Misery misery = local.misery();
+				Handful handful = local.handful();
+				Side side = local.side();
+				playerNameBoxes[i].setSelectedIndex(Tarot.ORDERED_PLAYERS.indexOf(Tarot.getPlayer(local.id())) + 1);
+				miseryBoxes[i].setSelectedIndex(misery == null ? 0 : misery.ordinal() + 1);
+				handfulBoxes[i].setSelectedIndex(handful == null ? 0 : handful.ordinal() + 1);
+				if (side == Side.ATTACK) {
+					attackerButtons[i].setSelected(true);
+				} else if (side == Side.ATTACK_ALLY) {
+					calledButtons[i].setSelected(true);
+				}
+			}
+			contractButtons[baseGame.contract.ordinal()].setSelected(true);
+			oudlersButtons[baseGame.oudlers.ordinal()].setSelected(true);
+			scoreSlider.setValue(baseGame.attackScore);
+			petitAuBoutBox.setSelectedIndex(baseGame.petitAuBout == null ? 0 : baseGame.petitAuBout.ordinal() + 1);
+			slamBox.setSelectedIndex(baseGame.slam == null ? 0 : baseGame.slam.ordinal() + 1);
+		}
 
 		setVisible(true);
 	}
@@ -307,8 +335,28 @@ class FrameNewGame extends JFrame implements ActionListener {
 			}
 		}
 
+		// An already existing game was edited
+		if (baseGame != null) {
+			baseGame.attackScore = attackScore;
+			baseGame.contract = contract;
+			baseGame.oudlers = oudlers;
+			baseGame.petitAuBout = petitAuBout;
+			baseGame.slam = slam;
+
+			// Number of players might have changed
+			if (numberOfPlayers != baseGame.players.length)
+				baseGame.players = new LocalPlayer[numberOfPlayers];
+			System.arraycopy(players, 0, baseGame.players, 0, numberOfPlayers);
+
+			baseGame.edit();
+			Components.popup("Partie modifiée avec succès.");
+			dispose();
+			FrameMainMenu.MAIN_MENU.reloadGames();
+			return;
+		}
+
 		Game game = new Game(month, contract, attackScore, oudlers, petitAuBout, slam, players);
-		game.write("games/games_" + game.date.getShortName("_"));
+		game.write(game.date.getFileName());
 
 		// Add first so that game is shown on top
 		// Use computeIfAbsent since this might be the first game having the corresponding DateRecord

@@ -157,7 +157,7 @@ class FrameScoreGraphs extends JFrame implements ActionListener {
 		rightPanel.setVisible(true);
 
 		rightPanel.add(Components.getSimpleText("Affichage", 20));
-		rightPanel.add(Components.getSimpleText(" ", 15));
+		rightPanel.add(Components.getEmptyText(15));
 
 		// If we check for zero scores before, we might retain no players if the first selected game is the first one of the month
 		// Instead, check for scores which remained constant during the selected period
@@ -187,9 +187,9 @@ class FrameScoreGraphs extends JFrame implements ActionListener {
 		// Need to have the number of displayed players calculated before
 		recalculateColors();
 
-		rightPanel.add(Components.getSimpleText(" ", 15));
+		rightPanel.add(Components.getEmptyText(15));
 		rightPanel.add(showAllButton);
-		rightPanel.add(Components.getSimpleText(" ", 5));
+		rightPanel.add(Components.getEmptyText(5));
 		rightPanel.add(hideAllButton);
 
 		JSplitPane splitPane = new JSplitPane();
