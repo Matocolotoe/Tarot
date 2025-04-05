@@ -2,8 +2,8 @@ package fr.giovanni75.tarot.objects;
 
 import com.google.gson.JsonObject;
 import fr.giovanni75.tarot.DateRecord;
-import fr.giovanni75.tarot.stats.LocalStats;
 import fr.giovanni75.tarot.Tarot;
+import fr.giovanni75.tarot.stats.LocalStats;
 
 import java.util.HashMap;
 import java.util.Map;

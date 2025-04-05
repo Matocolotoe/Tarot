@@ -13,6 +13,10 @@ public record DateRecord(Month month, int year) implements Comparable<DateRecord
 		return -month.compareTo(other.month);
 	}
 
+	public String getFileName() {
+		return "games/games_" + getShortName("_");
+	}
+
 	public String getName() {
 		return month.getName() + " " + year;
 	}

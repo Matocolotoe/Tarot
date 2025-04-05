@@ -38,14 +38,14 @@ class FramePlayerStats extends JFrame {
 
 		mainPanel.add(Components.getSimpleText("Statistiques individuelles", 20));
 		mainPanel.add(Components.getSimpleText(date.getName() + " – " + players + " joueurs", 20));
-		mainPanel.add(Components.getSimpleText(" ", 25));
+		mainPanel.add(Components.getEmptyText(25));
 
 		for (Map.Entry<Player, List<String>> entry : displays.entrySet()) {
 			mainPanel.add(Components.getSimpleText(entry.getKey().getName(), 18));
-			mainPanel.add(Components.getSimpleText(" ", 15));
+			mainPanel.add(Components.getEmptyText(15));
 			for (String line : entry.getValue())
 				mainPanel.add(Components.getSimpleText(line, 15));
-			mainPanel.add(Components.getSimpleText(" ", 35));
+			mainPanel.add(Components.getEmptyText(35));
 		}
 
 		JScrollPane scrollPane = new JScrollPane(mainPanel);

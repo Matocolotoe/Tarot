@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import fr.giovanni75.tarot.DateRecord;
+import fr.giovanni75.tarot.Files;
 import fr.giovanni75.tarot.Maps;
 import fr.giovanni75.tarot.Tarot;
 import fr.giovanni75.tarot.enums.*;
@@ -21,15 +22,14 @@ public class Game implements Serializable {
 	public final int dayOfMonth;
 	public final DateRecord date;
 
-	public final Contract contract;
-	public final Oudlers oudlers;
-	public final PetitAuBout petitAuBout;
-	public final LocalPlayer[] players;
+	public int attackScore;
+	public Contract contract;
+	public Oudlers oudlers;
+	public PetitAuBout petitAuBout;
+	public Slam slam;
+	public LocalPlayer[] players;
 
-	private final int attackScore;
-	private final Slam slam;
-
-	public int attackFinalScore;
+	private int attackFinalScore;
 
 	public Game(Month month, Contract contract, int attackScore, Oudlers oudlers, PetitAuBout petitAuBout, Slam slam, LocalPlayer[] players) {
 		LocalDate now = LocalDate.now();
@@ -191,6 +191,26 @@ public class Game implements Serializable {
 		}
 
 		this.attackFinalScore = attackFinalScore;
+	}
+
+	public void delete() {
+		List<Game> games = Tarot.ALL_GAMES.get(date);
+		int index = games.indexOf(this);
+		games.remove(this);
+
+		String fileName = date.getFileName();
+		JsonArray array = Files.getJsonArrayFromFile(fileName);
+		array.remove(games.size() - index); // Games are reversed in the list, so make indices start from the end (off by 1 since it was removed)
+		Files.write(fileName, array);
+	}
+
+	public void edit() {
+		List<Game> games = Tarot.ALL_GAMES.get(date);
+		int index = games.indexOf(this);
+		String fileName = date.getFileName();
+		JsonArray array = Files.getJsonArrayFromFile(fileName);
+		array.set(games.size() - index - 1, toJson());
+		Files.write(fileName, array);
 	}
 
 	private Player getAlly(int defenders, Function<Integer, Player> localConverter) {

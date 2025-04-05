@@ -55,7 +55,7 @@ class FrameGlobalStats extends JFrame {
 			}
 		}
 
-		panel.add(Components.getSimpleText(" ", 20));
+		panel.add(Components.getEmptyText(20));
 	}
 
 	private static void showGlobalStats(JPanel panel, DateRecord date, int players, String header, Predicate<Game> matcher) {
@@ -79,7 +79,7 @@ class FrameGlobalStats extends JFrame {
 			}
 		}
 
-		panel.add(Components.getSimpleText(" ", 20));
+		panel.add(Components.getEmptyText(20));
 	}
 
 	private static void showMaxPlayerStats(JPanel panel, DateRecord date, int players, String header, String details,
@@ -148,7 +148,7 @@ class FrameGlobalStats extends JFrame {
 			}
 		}
 
-		panel.add(Components.getSimpleText(" ", 20));
+		panel.add(Components.getEmptyText(20));
 	}
 
 	FrameGlobalStats(DateRecord date, int players) {
@@ -176,7 +176,7 @@ class FrameGlobalStats extends JFrame {
 
 		mainPanel.add(Components.getSimpleText("Statistiques générales", 20));
 		mainPanel.add(Components.getSimpleText(date.getName() + " – " + players + " joueurs", 20));
-		mainPanel.add(Components.getSimpleText(" ", 25));
+		mainPanel.add(Components.getEmptyText(25));
 
 		showGlobalStats(mainPanel, date, players, "Parties jouées", ignored -> true);
 		showAverageStats(mainPanel, date, players, "Nombre moyen de bouts", game -> game.oudlers.ordinal());
@@ -189,7 +189,7 @@ class FrameGlobalStats extends JFrame {
 		showMaxPlayerStats(mainPanel, date, players, "Le plus de misères", "%s (%d)",
 				stats -> stats.miseries, 1, true, false);
 
-		mainPanel.add(Components.getSimpleText(" ", 20));
+		mainPanel.add(Components.getEmptyText(20));
 
 		showMaxPlayerStats(mainPanel, date, players, "Le plus de fois appelé·e", "%s, %d fois",
 				stats -> stats.calledTimes, 1, true, true);
