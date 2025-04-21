@@ -24,6 +24,7 @@ public final class Leaderboards {
 	private static final DecimalFormat PERCENTAGE_DECIMAL_FORMAT = new DecimalFormat("#0.0%");
 
 	private static final int WINRATE_MINIMUM_TAKES = 2;
+	private static final String NONE_STRING = "–";
 
 	private enum GlobalData {
 
@@ -56,18 +57,18 @@ public final class Leaderboards {
 
 		CALLED_TIMES("Appelé·e", null,
 				stats -> Maps.sum(stats.calledTimes),
-				value -> value.intValue() == 0 ? "–" : value + " fois"),
+				value -> value.intValue() == 0 ? NONE_STRING : value + " fois"),
 
 		SELF_CALLED_TIMES("Seul·e", null,
 				stats -> Maps.sum(stats.selfCalls),
-				value -> value.intValue() == 0 ? "–" : value + " fois"),
+				value -> value.intValue() == 0 ? NONE_STRING : value + " fois"),
 
 		TAKES("Prises", null,
 				stats -> {
 					int successes = Maps.sum(stats.successfulTakes);
 					int total = successes + Maps.sum(stats.failedTakes);
 					return total == 0 ? -1 : new Fraction(successes, total);
-				}, value -> value.intValue() == -1 ? "–" : value.toString()),
+				}, value -> value.intValue() == -1 ? NONE_STRING : value.toString()),
 
 		WIN_RATE("Réussite", "Taux de réussite",
 				stats -> {
@@ -311,8 +312,12 @@ public final class Leaderboards {
 				if (data.averaged) {
 					Nameable nameable = entry.getKey();
 					if (nameable instanceof Contract contract) {
-						double value = (double) entry.getValue() / stats.contracts.get(contract);
-						ws.value(row + i, column + 1, DOUBLE_DECIMAL_FORMAT.format(value));
+						double value = (double) entry.getValue();
+						if (value == 0) {
+							ws.value(row + i, column + 1, NONE_STRING);
+						} else {
+							ws.value(row + i, column + 1, DOUBLE_DECIMAL_FORMAT.format(value / stats.contracts.get(contract)));
+						}
 					} else {
 						throw new IllegalArgumentException("Keys need to extend Contract for averaged data");
 					}
