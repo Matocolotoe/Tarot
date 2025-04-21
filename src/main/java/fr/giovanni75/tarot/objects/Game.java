@@ -261,6 +261,9 @@ public class Game implements Serializable {
 		if (details.length() > 0)
 			lines.add(details.toString());
 
+		if (slam != null)
+			lines.add("Chelem " + slam.getName().toLowerCase());
+
 		return lines;
 	}
 
