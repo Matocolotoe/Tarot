@@ -269,7 +269,7 @@ public class Game implements Serializable {
 
 	private String getOfWord(String name) {
 		return switch (name.charAt(0)) {
-			case 'A', 'E', 'I', 'O', 'U', 'Y' -> "d'" + name;
+			case 'A', 'E', 'H', 'I', 'O', 'U', 'Y' -> "d'" + name;
 			default -> "de " + name;
 		};
 	}
