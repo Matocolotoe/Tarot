@@ -18,4 +18,13 @@ public final class GlobalStats {
 	public final Map<Contract, Integer> oudlers = new EnumMap<>(Contract.class);
 	public final Map<Contract, Integer> selfCalls = new EnumMap<>(Contract.class);
 
+	public GlobalStats() {
+		// Always populate fields with contracts to make global data display look more uniform
+		for (Contract contract : Contract.ALL_CONTRACTS) {
+			contracts.put(contract, 0);
+			oudlers.put(contract, 0);
+			selfCalls.put(contract, 0);
+		}
+	}
+
 }
