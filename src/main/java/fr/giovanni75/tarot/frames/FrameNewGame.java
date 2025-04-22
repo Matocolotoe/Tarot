@@ -309,7 +309,8 @@ class FrameNewGame extends JFrame implements ActionListener {
 
 			String name = selectedItem.toString();
 			int id = Tarot.getPlayer(name).getID();
-			LAST_SELECTED_NAMES[i] = name;
+			if (baseGame != null)
+				LAST_SELECTED_NAMES[i] = name;
 
 			selectedItem = handfulBoxes[i].getSelectedItem();
 			if (selectedItem == null)
