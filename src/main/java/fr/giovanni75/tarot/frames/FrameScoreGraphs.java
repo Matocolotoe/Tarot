@@ -124,7 +124,7 @@ class FrameScoreGraphs extends JFrame implements ActionListener {
 		// Grant stats until the first game to the temporary profiles
 		for (Game game : allPossibleGames)
 			if (game.players.length == players && game.dayOfMonth < minDay)
-				game.applyResults(temporaryProfiles::get);
+				game.applyResults(temporaryProfiles::get, Game.ADD_GAME);
 
 		chart.getStyler().setZoomEnabled(true);
 
@@ -139,7 +139,7 @@ class FrameScoreGraphs extends JFrame implements ActionListener {
 		for (int i = 0; i < size; i++) {
 			// First iteration stores the total score earned before the first game
 			if (i > 0)
-				games.get(i - 1).applyResults(temporaryProfiles::get);
+				games.get(i - 1).applyResults(temporaryProfiles::get, Game.ADD_GAME);
 			for (Player player : temporaryProfiles.values()) {
 				LocalStats stats = player.getStats(date, players);
 				yDataMap.get(player)[i] = stats.totalScore;

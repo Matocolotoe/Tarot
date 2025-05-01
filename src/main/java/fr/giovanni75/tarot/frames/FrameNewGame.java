@@ -338,6 +338,10 @@ class FrameNewGame extends JFrame implements ActionListener {
 
 		// An already existing game was edited
 		if (baseGame != null) {
+			// Figuring out what to change precisely would be way too complicated
+			// Instead, undo previous calculations then redo required changes
+			baseGame.applyResults(Game.DEFAULT_LOCAL_PLAYER_CONVERTER, Game.REMOVE_GAME);
+
 			baseGame.attackScore = attackScore;
 			baseGame.contract = contract;
 			baseGame.oudlers = oudlers;
@@ -350,6 +354,7 @@ class FrameNewGame extends JFrame implements ActionListener {
 			System.arraycopy(players, 0, baseGame.players, 0, numberOfPlayers);
 
 			baseGame.edit();
+			baseGame.applyResults(Game.DEFAULT_LOCAL_PLAYER_CONVERTER, Game.ADD_GAME);
 			Components.popup("Partie modifiée avec succès.");
 			dispose();
 			FrameMainMenu.MAIN_MENU.reloadGames();

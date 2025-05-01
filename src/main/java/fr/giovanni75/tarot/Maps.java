@@ -12,12 +12,8 @@ public final class Maps {
 			map.put(key, value);
 	}
 
-	public static <K> void increment(K key, Map<K, Integer> map) {
-		increment(key, map, 1);
-	}
-
-	public static <K> void increment(K key, Map<K, Integer> map, int increment) {
-		map.put(key, map.getOrDefault(key, 0) + increment);
+	public static <K> void increment(K key, Map<K, Integer> map, int increment, int multiplier) {
+		map.put(key, map.getOrDefault(key, 0) + multiplier * increment);
 	}
 
 	public static <K extends Nameable> String max(Map<K, Integer> map, String display, int multiplier) {
