@@ -1,8 +1,5 @@
 package fr.giovanni75.tarot.enums;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public enum Misery implements Nameable {
 
 	SIMPLE("Simple", "Misère", 10),
@@ -31,11 +28,7 @@ public enum Misery implements Nameable {
 		return name;
 	}
 
-	public static final Map<String, Misery> BY_NAME = new HashMap<>();
-
-	static {
-		for (Misery misery : values())
-			BY_NAME.put(misery.name, misery);
-	}
+	// Insert null first since button index 0 corresponds to nothing
+	public static final Misery[] ALL_MISERIES = {null, SIMPLE, DOUBLE};
 
 }

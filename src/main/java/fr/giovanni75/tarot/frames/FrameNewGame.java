@@ -1,7 +1,5 @@
 package fr.giovanni75.tarot.frames;
 
-import com.google.gson.JsonArray;
-import fr.giovanni75.tarot.Files;
 import fr.giovanni75.tarot.Tarot;
 import fr.giovanni75.tarot.enums.*;
 import fr.giovanni75.tarot.objects.Game;
@@ -53,7 +51,7 @@ class FrameNewGame extends JFrame implements ActionListener {
 	private final JRadioButton[] attackerButtons = new JRadioButton[5];
 	private final JRadioButton[] calledButtons = new JRadioButton[5];
 	private final JRadioButton[] contractButtons = new JRadioButton[Contract.ALL_CONTRACTS.length];
-	private final JRadioButton[] oudlersButtons = new JRadioButton[Oudlers.values().length];
+	private final JRadioButton[] oudlersButtons = new JRadioButton[Oudlers.ALL_OUDLERS.length];
 
 	private final JButton submitButton;
 
@@ -167,7 +165,7 @@ class FrameNewGame extends JFrame implements ActionListener {
 		}
 
 		mainPanel.add(Components.getSimpleText("Bouts", 18, 100, 450, SMALL_TEXT_WIDTH, TEXT_HEIGHT));
-		for (Oudlers oudler : Oudlers.values()) {
+		for (Oudlers oudler : Oudlers.ALL_OUDLERS) {
 			JRadioButton button = new JRadioButton(String.valueOf(oudler.ordinal()));
 			oudlersButtons[oudler.ordinal()] = button;
 			button.setLocation(SECONDARY_BUTTON_BASE_X + oudler.ordinal() * 50, 470);
@@ -238,9 +236,9 @@ class FrameNewGame extends JFrame implements ActionListener {
 		Slam slam;
 		LocalPlayer[] players;
 
-		for (JRadioButton contractButton : contractButtons) {
-			if (contractButton.isSelected()) {
-				contract = Contract.BY_NAME.get(contractButton.getText());
+		for (int i = 0; i < contractButtons.length; i++) {
+			if (contractButtons[i].isSelected()) {
+				contract = Contract.ALL_CONTRACTS[i];
 				break;
 			}
 		}
@@ -252,7 +250,7 @@ class FrameNewGame extends JFrame implements ActionListener {
 
 		for (int i = 0; i < oudlersButtons.length; i++) {
 			if (oudlersButtons[i].isSelected()) {
-				oudlers = Oudlers.values()[i];
+				oudlers = Oudlers.ALL_OUDLERS[i];
 				break;
 			}
 		}
@@ -262,15 +260,8 @@ class FrameNewGame extends JFrame implements ActionListener {
 			return;
 		}
 
-		Object selectedItem = petitAuBoutBox.getSelectedItem();
-		if (selectedItem == null)
-			throw new IllegalStateException("Petit au bout box cannot have null selection");
-		petitAuBout = PetitAuBout.BY_NAME.get(selectedItem.toString());
-
-		selectedItem = slamBox.getSelectedItem();
-		if (selectedItem == null)
-			throw new IllegalStateException("Slam box cannot have null selection");
-		slam = Slam.BY_NAME.get(selectedItem.toString());
+		petitAuBout = PetitAuBout.ALL_PETITS[petitAuBoutBox.getSelectedIndex()];
+		slam = Slam.ALL_SLAMS[slamBox.getSelectedIndex()];
 
 		int attackerIndex = -1;
 		int calledPlayerIndex = -1;
@@ -303,7 +294,7 @@ class FrameNewGame extends JFrame implements ActionListener {
 		// Count up to 5 since names need not be empty after last index
 		int nonEmptyIndex = 0;
 		for (int i = 0; i < 5; i++) {
-			selectedItem = playerNameBoxes[i].getSelectedItem();
+			Object selectedItem = playerNameBoxes[i].getSelectedItem();
 			if (selectedItem == null || Tarot.NONE_STRING.equals(selectedItem))
 				continue;
 
@@ -312,16 +303,8 @@ class FrameNewGame extends JFrame implements ActionListener {
 			if (baseGame != null)
 				LAST_SELECTED_NAMES[i] = name;
 
-			selectedItem = handfulBoxes[i].getSelectedItem();
-			if (selectedItem == null)
-				throw new IllegalStateException("Handful box cannot have null selection");
-			Handful handful = Handful.BY_NAME.get(selectedItem.toString());
-
-			selectedItem = miseryBoxes[i].getSelectedItem();
-			if (selectedItem == null)
-				throw new IllegalStateException("Misery box cannot have null selection");
-			Misery misery = Misery.BY_NAME.get(selectedItem.toString());
-
+			Handful handful = Handful.ALL_HANDFULS[handfulBoxes[i].getSelectedIndex()];
+			Misery misery = Misery.ALL_MISERIES[miseryBoxes[i].getSelectedIndex()];
 			players[nonEmptyIndex] = new LocalPlayer(id, sides[i], handful, misery);
 			nonEmptyIndex++;
 		}

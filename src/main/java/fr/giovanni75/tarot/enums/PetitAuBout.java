@@ -1,8 +1,5 @@
 package fr.giovanni75.tarot.enums;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public enum PetitAuBout implements Nameable {
 
 	ATTACK("Attaque", "Petit au bout à l'attaque", 10),
@@ -31,11 +28,7 @@ public enum PetitAuBout implements Nameable {
 		return name;
 	}
 
-	public static final Map<String, PetitAuBout> BY_NAME = new HashMap<>();
-
-	static {
-		for (PetitAuBout petit : values())
-			BY_NAME.put(petit.name, petit);
-	}
+	// Insert null first since button index 0 corresponds to nothing
+	public static final PetitAuBout[] ALL_PETITS = {null, ATTACK, DEFENSE};
 
 }

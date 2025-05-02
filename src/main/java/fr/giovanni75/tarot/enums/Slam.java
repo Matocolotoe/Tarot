@@ -1,8 +1,5 @@
 package fr.giovanni75.tarot.enums;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public enum Slam implements Nameable {
 
 	ATTACK("Annoncé à l'attaque"),
@@ -19,11 +16,7 @@ public enum Slam implements Nameable {
 		return name;
 	}
 
-	public static final Map<String, Slam> BY_NAME = new HashMap<>();
-
-	static {
-		for (Slam slam : values())
-			BY_NAME.put(slam.name, slam);
-	}
+	// Insert null first since button index 0 corresponds to nothing
+	public static final Slam[] ALL_SLAMS = {null, ATTACK, DEFENSE};
 
 }
