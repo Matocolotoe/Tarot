@@ -10,7 +10,7 @@ public record DateRecord(Month month, int year) implements Comparable<DateRecord
 			return 1;
 		if (this.year > other.year)
 			return -1;
-		return -month.compareTo(other.month);
+		return other.month.compareTo(month); // Put most recent months first
 	}
 
 	public String getFileName() {
