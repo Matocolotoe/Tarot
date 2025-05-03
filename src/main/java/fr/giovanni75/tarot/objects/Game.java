@@ -19,8 +19,8 @@ public class Game implements Serializable {
 
 	private static final int SLAM_SCORE = 200;
 
-	public static final int ADD_GAME = 1;
-	public static final int REMOVE_GAME = -1;
+	public static final int ADD_GAME_DIRECTION = 1;
+	public static final int REMOVE_GAME_DIRECTION = -1;
 
 	public static final Function<Integer, Player> DEFAULT_LOCAL_PLAYER_CONVERTER = Tarot::getPlayer;
 
@@ -81,10 +81,10 @@ public class Game implements Serializable {
 	}
 
 	public void applyResults() {
-		applyResults(DEFAULT_LOCAL_PLAYER_CONVERTER, ADD_GAME);
+		applyResults(DEFAULT_LOCAL_PLAYER_CONVERTER, ADD_GAME_DIRECTION);
 	}
 
-	public void applyResults(Function<Integer, Player> localConverter, int multiplier) {
+	public void applyResults(Function<Integer, Player> localConverter, int direction) {
 		int diff = attackScore - oudlers.getRequiredScore();
 		int attackFinalScore = (25 + Math.abs(diff)) * contract.getMultiplier();
 		if (diff < 0)
@@ -94,8 +94,8 @@ public class Game implements Serializable {
 
 		/* Overall stats */
 		GlobalStats globalStats = Tarot.getGlobalStats(date, numberOfPlayers);
-		Maps.increment(contract, globalStats.contracts, 1, multiplier);
-		Maps.increment(contract, globalStats.oudlers, oudlers.ordinal(), multiplier);
+		Maps.increment(contract, globalStats.contracts, 1, direction);
+		Maps.increment(contract, globalStats.oudlers, oudlers.ordinal(), direction);
 
 		/* Handfuls */
 		for (LocalPlayer local : players) {
@@ -109,13 +109,13 @@ public class Game implements Serializable {
 				attackFinalScore += points;
 			}
 			Player player = localConverter.apply(local.id());
-			Maps.increment(contract, player.getStats(date, numberOfPlayers).handfuls, 1, multiplier);
-			Maps.increment(handful, globalStats.handfuls, 1, multiplier);
+			Maps.increment(contract, player.getStats(date, numberOfPlayers).handfuls, 1, direction);
+			Maps.increment(handful, globalStats.handfuls, 1, direction);
 		}
 
 		/* Petit au bout */
 		if (petitAuBout != null) {
-			Maps.increment(petitAuBout, globalStats.petits, 1, multiplier);
+			Maps.increment(petitAuBout, globalStats.petits, 1, direction);
 			attackFinalScore += petitAuBout.getAttackPoints() * contract.getMultiplier();
 		}
 
@@ -143,19 +143,19 @@ public class Game implements Serializable {
 			if (ally == null)
 				throw new IllegalStateException("Ally cannot be null with 5+ players");
 			if (ally == attacker) {
-				Maps.increment(attacker, finalScores, attackFinalScore * 4, multiplier);
+				Maps.increment(attacker, finalScores, attackFinalScore * 4, direction);
 				for (Player defender : defenders)
-					Maps.increment(defender, finalScores, -attackFinalScore, multiplier);
+					Maps.increment(defender, finalScores, -attackFinalScore, direction);
 			} else {
-				Maps.increment(attacker, finalScores, attackFinalScore * 2, multiplier);
-				Maps.increment(ally, finalScores, attackFinalScore, multiplier);
+				Maps.increment(attacker, finalScores, attackFinalScore * 2, direction);
+				Maps.increment(ally, finalScores, attackFinalScore, direction);
 				for (Player defender : defenders)
-					Maps.increment(defender, finalScores, -attackFinalScore, multiplier);
+					Maps.increment(defender, finalScores, -attackFinalScore, direction);
 			}
 		} else {
-			Maps.increment(attacker, finalScores, attackFinalScore * (numberOfPlayers - 1), multiplier);
+			Maps.increment(attacker, finalScores, attackFinalScore * (numberOfPlayers - 1), direction);
 			for (Player defender : defenders)
-				Maps.increment(defender, finalScores, -attackFinalScore, multiplier);
+				Maps.increment(defender, finalScores, -attackFinalScore, direction);
 		}
 
 		/* Miseries */
@@ -165,24 +165,24 @@ public class Game implements Serializable {
 				continue;
 			int points = misery.getExtraPoints();
 			Player player = localConverter.apply(local.id());
-			Maps.increment(player, finalScores, points * (numberOfPlayers - 1), multiplier);
-			Maps.increment(contract, player.getStats(date, numberOfPlayers).miseries, 1, multiplier);
-			Maps.increment(misery, globalStats.miseries, 1, multiplier);
+			Maps.increment(player, finalScores, points * (numberOfPlayers - 1), direction);
+			Maps.increment(contract, player.getStats(date, numberOfPlayers).miseries, 1, direction);
+			Maps.increment(misery, globalStats.miseries, 1, direction);
 			for (LocalPlayer other : players)
 				if (!local.equals(other))
-					Maps.increment(localConverter.apply(other.id()), finalScores, -points, multiplier);
+					Maps.increment(localConverter.apply(other.id()), finalScores, -points, direction);
 		}
 
 		LocalStats stats = attacker.getStats(date, numberOfPlayers);
-		Maps.increment(contract, diff >= 0 ? stats.successfulTakes : stats.failedTakes, 1, multiplier);
+		Maps.increment(contract, diff >= 0 ? stats.successfulTakes : stats.failedTakes, 1, direction);
 
 		if (ally != null) {
 			if (ally == attacker) {
-				Maps.increment(contract, stats.selfCalls, 1, multiplier);
-				Maps.increment(contract, globalStats.selfCalls, 1, multiplier);
+				Maps.increment(contract, stats.selfCalls, 1, direction);
+				Maps.increment(contract, globalStats.selfCalls, 1, direction);
 			} else {
 				stats = ally.getStats(date, numberOfPlayers);
-				Maps.increment(contract, stats.calledTimes, 1, multiplier);
+				Maps.increment(contract, stats.calledTimes, 1, direction);
 			}
 		}
 
@@ -192,7 +192,7 @@ public class Game implements Serializable {
 			stats = player.getStats(date, numberOfPlayers);
 			Maps.computeIfHigher(contract, score, stats.bestTurns, 1);
 			Maps.computeIfHigher(contract, score, stats.worstTurns, -1);
-			Maps.increment(contract, stats.playedGames, 1, multiplier);
+			Maps.increment(contract, stats.playedGames, 1, direction);
 			stats.totalScore += score;
 		}
 
@@ -210,7 +210,7 @@ public class Game implements Serializable {
 		Files.write(fileName, array);
 
 		// Undo all calculations in global and player stats
-		applyResults(DEFAULT_LOCAL_PLAYER_CONVERTER, REMOVE_GAME);
+		applyResults(DEFAULT_LOCAL_PLAYER_CONVERTER, REMOVE_GAME_DIRECTION);
 	}
 
 	public void edit() {
