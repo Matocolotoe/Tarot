@@ -32,6 +32,8 @@ class FrameNewGame extends JFrame implements ActionListener {
 			LAST_SELECTED_NAMES[i] = Tarot.NONE_STRING;
 	}
 
+	private final Game baseGame;
+
 	@SuppressWarnings("unchecked")
 	private final JComboBox<String>[] handfulBoxes = new JComboBox[5];
 
@@ -49,7 +51,7 @@ class FrameNewGame extends JFrame implements ActionListener {
 	private final JRadioButton[] attackerButtons = new JRadioButton[5];
 	private final JRadioButton[] calledButtons = new JRadioButton[5];
 	private final JRadioButton[] contractButtons = new JRadioButton[Contract.ALL_CONTRACTS.length];
-	private final JRadioButton[] oudlersButtons = new JRadioButton[Oudlers.values().length];
+	private final JRadioButton[] oudlersButtons = new JRadioButton[Oudlers.ALL_OUDLERS.length];
 
 	private final JButton submitButton;
 
@@ -74,10 +76,11 @@ class FrameNewGame extends JFrame implements ActionListener {
 		return box;
 	}
 
-	FrameNewGame() {
+	FrameNewGame(Game baseGame) {
+		this.baseGame = baseGame;
 		setBounds(300, 200, 800, 700);
 		setResizable(false);
-		setTitle("Ajouter une partie");
+		setTitle(baseGame == null ? "Ajouter une partie" : "Modifier une partie");
 
 		JPanel mainPanel = new JPanel();
 		mainPanel.setLayout(null);
@@ -95,8 +98,8 @@ class FrameNewGame extends JFrame implements ActionListener {
 		for (int i = 0; i < 5; i++) {
 			int x = COMBO_BOX_BASE_X + PLAYER_X_SPACING * i;
 			playerNameBoxes[i] = getPlayerNameList(names, i, x);
-			miseryBoxes[i] = getEnumNameList(Misery.values(), "Aucune", x, 120, SMALL_TEXT_WIDTH);
-			handfulBoxes[i] = getEnumNameList(Handful.values(), "Aucune", x, 160, SMALL_TEXT_WIDTH);
+			miseryBoxes[i] = getEnumNameList(Misery.values(), "Aucune", x, COMBO_BOX_BASE_Y + 40, SMALL_TEXT_WIDTH);
+			handfulBoxes[i] = getEnumNameList(Handful.values(), "Aucune", x, COMBO_BOX_BASE_Y + 80, SMALL_TEXT_WIDTH);
 			mainPanel.add(playerNameBoxes[i]);
 			mainPanel.add(miseryBoxes[i]);
 			mainPanel.add(handfulBoxes[i]);
@@ -162,7 +165,7 @@ class FrameNewGame extends JFrame implements ActionListener {
 		}
 
 		mainPanel.add(Components.getSimpleText("Bouts", 18, 100, 450, SMALL_TEXT_WIDTH, TEXT_HEIGHT));
-		for (Oudlers oudler : Oudlers.values()) {
+		for (Oudlers oudler : Oudlers.ALL_OUDLERS) {
 			JRadioButton button = new JRadioButton(String.valueOf(oudler.ordinal()));
 			oudlersButtons[oudler.ordinal()] = button;
 			button.setLocation(SECONDARY_BUTTON_BASE_X + oudler.ordinal() * 50, 470);
@@ -177,12 +180,35 @@ class FrameNewGame extends JFrame implements ActionListener {
 		mainPanel.add(Components.getSimpleText("Chelem", 18, 410, 500, SMALL_TEXT_WIDTH, TEXT_HEIGHT));
 		mainPanel.add(slamBox = getEnumNameList(Slam.values(), "Non déclaré", 500, 520, 170));
 
-		submitButton = new JButton("Ajouter");
+		submitButton = new JButton(baseGame == null ? "Ajouter" : "Modifier");
 		submitButton.addActionListener(this);
 		submitButton.setFont(Components.getFont(18));
-		submitButton.setLocation(325, 600);
-		submitButton.setSize(100, 25);
+		submitButton.setLocation(310, 600);
+		submitButton.setSize(115, 25);
 		mainPanel.add(submitButton);
+
+		if (baseGame != null) {
+			int numberOfPlayers = baseGame.players.length;
+			for (int i = 0; i < numberOfPlayers; i++) {
+				LocalPlayer local = baseGame.players[i];
+				Misery misery = local.misery();
+				Handful handful = local.handful();
+				Side side = local.side();
+				playerNameBoxes[i].setSelectedIndex(Tarot.ORDERED_PLAYERS.indexOf(Tarot.getPlayer(local.id())) + 1);
+				miseryBoxes[i].setSelectedIndex(misery == null ? 0 : misery.ordinal() + 1);
+				handfulBoxes[i].setSelectedIndex(handful == null ? 0 : handful.ordinal() + 1);
+				if (side == Side.ATTACK) {
+					attackerButtons[i].setSelected(true);
+				} else if (side == Side.ATTACK_ALLY) {
+					calledButtons[i].setSelected(true);
+				}
+			}
+			contractButtons[baseGame.contract.ordinal()].setSelected(true);
+			oudlersButtons[baseGame.oudlers.ordinal()].setSelected(true);
+			scoreSlider.setValue(baseGame.attackScore);
+			petitAuBoutBox.setSelectedIndex(baseGame.petitAuBout == null ? 0 : baseGame.petitAuBout.ordinal() + 1);
+			slamBox.setSelectedIndex(baseGame.slam == null ? 0 : baseGame.slam.ordinal() + 1);
+		}
 
 		setVisible(true);
 	}
@@ -210,9 +236,9 @@ class FrameNewGame extends JFrame implements ActionListener {
 		Slam slam;
 		LocalPlayer[] players;
 
-		for (JRadioButton contractButton : contractButtons) {
-			if (contractButton.isSelected()) {
-				contract = Contract.BY_NAME.get(contractButton.getText());
+		for (int i = 0; i < contractButtons.length; i++) {
+			if (contractButtons[i].isSelected()) {
+				contract = Contract.ALL_CONTRACTS[i];
 				break;
 			}
 		}
@@ -224,7 +250,7 @@ class FrameNewGame extends JFrame implements ActionListener {
 
 		for (int i = 0; i < oudlersButtons.length; i++) {
 			if (oudlersButtons[i].isSelected()) {
-				oudlers = Oudlers.values()[i];
+				oudlers = Oudlers.ALL_OUDLERS[i];
 				break;
 			}
 		}
@@ -234,15 +260,8 @@ class FrameNewGame extends JFrame implements ActionListener {
 			return;
 		}
 
-		Object selectedItem = petitAuBoutBox.getSelectedItem();
-		if (selectedItem == null)
-			throw new IllegalStateException("Petit au bout box cannot have null selection");
-		petitAuBout = PetitAuBout.BY_NAME.get(selectedItem.toString());
-
-		selectedItem = slamBox.getSelectedItem();
-		if (selectedItem == null)
-			throw new IllegalStateException("Slam box cannot have null selection");
-		slam = Slam.BY_NAME.get(selectedItem.toString());
+		petitAuBout = PetitAuBout.ALL_PETITS[petitAuBoutBox.getSelectedIndex()];
+		slam = Slam.ALL_SLAMS[slamBox.getSelectedIndex()];
 
 		int attackerIndex = -1;
 		int calledPlayerIndex = -1;
@@ -275,24 +294,17 @@ class FrameNewGame extends JFrame implements ActionListener {
 		// Count up to 5 since names need not be empty after last index
 		int nonEmptyIndex = 0;
 		for (int i = 0; i < 5; i++) {
-			selectedItem = playerNameBoxes[i].getSelectedItem();
+			Object selectedItem = playerNameBoxes[i].getSelectedItem();
 			if (selectedItem == null || Tarot.NONE_STRING.equals(selectedItem))
 				continue;
 
 			String name = selectedItem.toString();
 			int id = Tarot.getPlayer(name).getID();
-			LAST_SELECTED_NAMES[i] = name;
+			if (baseGame != null)
+				LAST_SELECTED_NAMES[i] = name;
 
-			selectedItem = handfulBoxes[i].getSelectedItem();
-			if (selectedItem == null)
-				throw new IllegalStateException("Handful box cannot have null selection");
-			Handful handful = Handful.BY_NAME.get(selectedItem.toString());
-
-			selectedItem = miseryBoxes[i].getSelectedItem();
-			if (selectedItem == null)
-				throw new IllegalStateException("Misery box cannot have null selection");
-			Misery misery = Misery.BY_NAME.get(selectedItem.toString());
-
+			Handful handful = Handful.ALL_HANDFULS[handfulBoxes[i].getSelectedIndex()];
+			Misery misery = Misery.ALL_MISERIES[miseryBoxes[i].getSelectedIndex()];
 			players[nonEmptyIndex] = new LocalPlayer(id, sides[i], handful, misery);
 			nonEmptyIndex++;
 		}
@@ -307,8 +319,33 @@ class FrameNewGame extends JFrame implements ActionListener {
 			}
 		}
 
+		// An already existing game was edited
+		if (baseGame != null) {
+			// Figuring out what to change precisely would be way too complicated
+			// Instead, undo previous calculations then redo required changes
+			baseGame.applyResults(Game.DEFAULT_LOCAL_PLAYER_CONVERTER, Game.REMOVE_GAME_DIRECTION);
+
+			baseGame.attackScore = attackScore;
+			baseGame.contract = contract;
+			baseGame.oudlers = oudlers;
+			baseGame.petitAuBout = petitAuBout;
+			baseGame.slam = slam;
+
+			// Number of players might have changed
+			if (numberOfPlayers != baseGame.players.length)
+				baseGame.players = new LocalPlayer[numberOfPlayers];
+			System.arraycopy(players, 0, baseGame.players, 0, numberOfPlayers);
+
+			baseGame.edit();
+			baseGame.applyResults(Game.DEFAULT_LOCAL_PLAYER_CONVERTER, Game.ADD_GAME_DIRECTION);
+			Components.popup("Partie modifiée avec succès.");
+			dispose();
+			FrameMainMenu.MAIN_MENU.reloadGames();
+			return;
+		}
+
 		Game game = new Game(month, contract, attackScore, oudlers, petitAuBout, slam, players);
-		game.write("games/games_" + game.date.getShortName("_"));
+		game.write(game.date.getFileName());
 
 		// Add first so that game is shown on top
 		// Use computeIfAbsent since this might be the first game having the corresponding DateRecord

@@ -41,7 +41,7 @@ public final class Files {
 			backupIndex++;
 		try (ZipOutputStream zip = new ZipOutputStream(new FileOutputStream(backupTarget))) {
 			for (DateRecord date : Tarot.ALL_GAMES.keySet())
-				addZipEntry(zip, "games/games_" + date.getShortName("_"));
+				addZipEntry(zip, date.getFileName());
 			addZipEntry(zip, "players");
 		} catch (IOException e) {
 			throw new RuntimeException("Could not create backup", e);
@@ -79,7 +79,7 @@ public final class Files {
 
 	static DateRecord getDateFromFile(File file) {
 		String name = file.getName();
-		
+
 		// Expected format :
 		// split[0] = "games"
 		// split[1] = month
@@ -110,6 +110,16 @@ public final class Files {
 	public static JsonArray getJsonArrayFromFile(String fileName) {
 		createJsonFile(fileName); // File might not exist, for instance when serializing data
 		return getJsonArrayFromFile(new File("data/" + fileName + ".json"));
+	}
+
+	public static void write(String fileName, JsonArray array) {
+		try {
+			FileWriter writer = new FileWriter("data/" + fileName + ".json");
+			writer.write(array.toString());
+			writer.close();
+		} catch (IOException e) {
+			throw new RuntimeException("Could not write to " + fileName + ".json", e);
+		}
 	}
 
 }

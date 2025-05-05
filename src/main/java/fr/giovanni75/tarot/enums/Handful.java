@@ -1,8 +1,5 @@
 package fr.giovanni75.tarot.enums;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public enum Handful implements Nameable {
 
 	SIMPLE("Simple", "Poignée", 20),
@@ -32,11 +29,7 @@ public enum Handful implements Nameable {
 		return name;
 	}
 
-	public static final Map<String, Handful> BY_NAME = new HashMap<>();
-
-	static {
-		for (Handful handful : values())
-			BY_NAME.put(handful.name, handful);
-	}
+	// Insert null first since button index 0 corresponds to nothing
+	public static final Handful[] ALL_HANDFULS = {null, SIMPLE, DOUBLE, TRIPLE};
 
 }

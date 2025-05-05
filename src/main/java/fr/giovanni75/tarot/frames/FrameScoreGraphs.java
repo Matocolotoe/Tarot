@@ -124,7 +124,7 @@ class FrameScoreGraphs extends JFrame implements ActionListener {
 		// Grant stats until the first game to the temporary profiles
 		for (Game game : allPossibleGames)
 			if (game.players.length == players && game.dayOfMonth < minDay)
-				game.applyResults(temporaryProfiles::get);
+				game.applyResults(temporaryProfiles::get, Game.ADD_GAME_DIRECTION);
 
 		chart.getStyler().setZoomEnabled(true);
 
@@ -139,7 +139,7 @@ class FrameScoreGraphs extends JFrame implements ActionListener {
 		for (int i = 0; i < size; i++) {
 			// First iteration stores the total score earned before the first game
 			if (i > 0)
-				games.get(i - 1).applyResults(temporaryProfiles::get);
+				games.get(i - 1).applyResults(temporaryProfiles::get, Game.ADD_GAME_DIRECTION);
 			for (Player player : temporaryProfiles.values()) {
 				LocalStats stats = player.getStats(date, players);
 				yDataMap.get(player)[i] = stats.totalScore;
@@ -157,7 +157,7 @@ class FrameScoreGraphs extends JFrame implements ActionListener {
 		rightPanel.setVisible(true);
 
 		rightPanel.add(Components.getSimpleText("Affichage", 20));
-		rightPanel.add(Components.getSimpleText(" ", 15));
+		rightPanel.add(Components.getEmptyText(15));
 
 		// If we check for zero scores before, we might retain no players if the first selected game is the first one of the month
 		// Instead, check for scores which remained constant during the selected period
@@ -187,9 +187,9 @@ class FrameScoreGraphs extends JFrame implements ActionListener {
 		// Need to have the number of displayed players calculated before
 		recalculateColors();
 
-		rightPanel.add(Components.getSimpleText(" ", 15));
+		rightPanel.add(Components.getEmptyText(15));
 		rightPanel.add(showAllButton);
-		rightPanel.add(Components.getSimpleText(" ", 5));
+		rightPanel.add(Components.getEmptyText(5));
 		rightPanel.add(hideAllButton);
 
 		JSplitPane splitPane = new JSplitPane();

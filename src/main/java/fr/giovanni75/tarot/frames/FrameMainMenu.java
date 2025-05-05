@@ -7,8 +7,14 @@ import fr.giovanni75.tarot.objects.Game;
 import fr.giovanni75.tarot.objects.Player;
 
 import javax.swing.*;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +24,10 @@ public class FrameMainMenu extends JFrame {
 
 	static FrameMainMenu MAIN_MENU;
 
-	private static final int MAX_GAMES_DISPLAYED = 250;
+	private static final Color DEFAULT_BUTTON_COLOR = new Color(247, 247, 247);
+	private static final Color SELECTED_BUTTON_COLOR = new Color(235, 245, 255);
+
+	private static final int MAX_GAMES_DISPLAYED = 100;
 
 	private static void inputPlayer() {
 		String name = Components.prompt("Nom du joueur ?", "Ajouter un joueur");
@@ -43,57 +52,16 @@ public class FrameMainMenu extends JFrame {
 	}
 
 	private final JPanel mainPanel;
-	private final List<JLabel> textComponents = new ArrayList<>();
+	private final List<Component> components = new ArrayList<>();
 
-	void reloadGames() {
-		for (JLabel label : textComponents)
-			mainPanel.remove(label);
-		textComponents.clear();
-		showAllGames();
-		repaint();
-		revalidate();
-	}
-
-	private void showAllGames() {
-		int total = 0;
-		for (Map.Entry<DateRecord, List<Game>> entry : Tarot.ALL_GAMES.entrySet()) {
-			// Avoid executing one iteration if threshold has already been reached
-			if (total >= MAX_GAMES_DISPLAYED)
-				break;
-			textComponents.add(Components.getSimpleText(entry.getKey().getName(), 20));
-			textComponents.add(Components.getSimpleText(" ", 18));
-			for (Game game : entry.getValue()) {
-				total++;
-				for (String line : game.getDescription())
-					textComponents.add(Components.getSimpleText(line, 15));
-				textComponents.add(Components.getSimpleText(" ", 15));
-				if (total >= MAX_GAMES_DISPLAYED)
-					break;
-			}
-		}
-		for (JLabel label : textComponents)
-			mainPanel.add(label);
-	}
-
-	public FrameMainMenu() {
-		MAIN_MENU = this;
-
-		setBounds(300, 100, 800, 600);
-		setDefaultCloseOperation(EXIT_ON_CLOSE);
-		setResizable(false);
-		setTitle("Tarot – Compteur de points");
-
-		mainPanel = new JPanel();
-		mainPanel.setBorder(Components.getStandardBorder());
-		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
-
+	private void initializeMenus() {
 		JMenuBar menuBar = new JMenuBar();
 		setJMenuBar(menuBar);
 
 		JMenu addMenu = new JMenu("Ajouter");
 		JMenuItem addGameItem = new JMenuItem("Ajouter une partie...");
 		JMenuItem addPlayerItem = new JMenuItem("Ajouter un joueur...");
-		addGameItem.addActionListener(event -> new FrameNewGame());
+		addGameItem.addActionListener(event -> new FrameNewGame(null));
 		addPlayerItem.addActionListener(event -> inputPlayer());
 		addMenu.add(addGameItem);
 		addMenu.add(addPlayerItem);
@@ -153,7 +121,93 @@ public class FrameMainMenu extends JFrame {
 			statsMenu.add(playerStatsMenu);
 			menuBar.add(statsMenu);
 		}
+	}
 
+	private void onGameRightClick(Game game, JButton button, int x, int y) {
+		JPopupMenu menu = new JPopupMenu("Partie");
+		JMenuItem editMenuItem = new JMenuItem("Éditer");
+		JMenuItem deleteMenuItem = new JMenuItem("Supprimer");
+		menu.add(editMenuItem);
+		menu.add(deleteMenuItem);
+		button.setBackground(SELECTED_BUTTON_COLOR);
+		menu.addPopupMenuListener(new PopupMenuListener() {
+			@Override
+			public void popupMenuCanceled(PopupMenuEvent e) {}
+			@Override
+			public void popupMenuWillBecomeVisible(PopupMenuEvent e) {}
+			@Override
+			public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+				button.setBackground(DEFAULT_BUTTON_COLOR);
+			}
+		});
+		editMenuItem.addActionListener(event -> new FrameNewGame(game));
+		deleteMenuItem.addActionListener(event -> promptGameDeletion(game));
+		menu.show(button, x, y);
+	}
+
+	private void promptGameDeletion(Game game) {
+		int option = Components.promptConfirmation("Voulez-vous supprimer la partie ?", "Suppression de partie");
+		if (option == JOptionPane.YES_OPTION) {
+			game.delete();
+			reloadGames();
+			Components.popup("Partie supprimée avec succès.");
+		}
+	}
+
+	void reloadGames() {
+		for (Component component : components)
+			mainPanel.remove(component);
+		components.clear();
+		showAllGames();
+		repaint();
+		revalidate();
+	}
+
+	private void showAllGames() {
+		int total = 0;
+		for (Map.Entry<DateRecord, List<Game>> entry : Tarot.ALL_GAMES.entrySet()) {
+			// Avoid executing one iteration if threshold has already been reached
+			if (total == MAX_GAMES_DISPLAYED)
+				break;
+			components.add(Components.getSimpleText(entry.getKey().getName(), 20));
+			components.add(Components.getEmptyText(18));
+			for (Game game : entry.getValue()) {
+				total++;
+				// Text inside a button ignores "\n", convert it to HTML and skip lines this way
+				String text = "<html>" + String.join("<br>", game.getDescription()) + "</html>";
+				JButton button = Components.getClickableText(text, 15);
+				button.addMouseListener(new MouseAdapter() {
+					@Override
+					public void mouseClicked(MouseEvent e) {
+						if (SwingUtilities.isRightMouseButton(e))
+							onGameRightClick(game, button, e.getX(), e.getY());
+					}
+				});
+				button.setBackground(DEFAULT_BUTTON_COLOR);
+				components.add(button);
+				components.add(Components.getEmptyText(15));
+				if (total >= MAX_GAMES_DISPLAYED)
+					break;
+			}
+			components.add(Components.getEmptyText(12));
+		}
+		for (Component component : components)
+			mainPanel.add(component);
+	}
+
+	public FrameMainMenu() {
+		MAIN_MENU = this;
+
+		setBounds(300, 100, 800, 600);
+		setDefaultCloseOperation(EXIT_ON_CLOSE);
+		setResizable(false);
+		setTitle("Tarot – Compteur de points");
+
+		mainPanel = new JPanel();
+		mainPanel.setBorder(BorderFactory.createEmptyBorder(30, 30, 0, 280));
+		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+
+		initializeMenus();
 		showAllGames();
 
 		JScrollPane scrollPane = new JScrollPane(mainPanel);

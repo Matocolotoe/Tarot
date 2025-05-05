@@ -148,8 +148,8 @@ public final class Leaderboards {
 			return;
 		}
 
-		final Map<PlayerData, List<NumberPair>> unsortedPairs = new EnumMap<>(PlayerData.class);
-		final Map<PlayerData, List<NumberPair>> sortedPairs = new EnumMap<>(PlayerData.class);
+		Map<PlayerData, List<NumberPair>> unsortedPairs = new EnumMap<>(PlayerData.class);
+		Map<PlayerData, List<NumberPair>> sortedPairs = new EnumMap<>(PlayerData.class);
 		for (PlayerData data : PLAYER_DATA) {
 			List<NumberPair> entries = new ArrayList<>();
 			for (Player player : playerList) {

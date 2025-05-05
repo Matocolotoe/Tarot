@@ -1,8 +1,5 @@
 package fr.giovanni75.tarot.enums;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public enum Contract implements Nameable {
 
 	SMALL("Petite", 1),
@@ -28,11 +25,5 @@ public enum Contract implements Nameable {
 	}
 
 	public static final Contract[] ALL_CONTRACTS = values();
-	public static final Map<String, Contract> BY_NAME = new HashMap<>();
-
-	static {
-		for (Contract contract : ALL_CONTRACTS)
-			BY_NAME.put(contract.name, contract);
-	}
 
 }
