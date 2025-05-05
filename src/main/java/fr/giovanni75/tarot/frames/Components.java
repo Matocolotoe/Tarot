@@ -62,7 +62,7 @@ final class Components {
 			return -1;
 
 		if (prompt.isBlank()) {
-			Components.popup(INVALID_DAY_MESSAGE);
+			popup(INVALID_DAY_MESSAGE);
 			return promptDay(message, title);
 		}
 
@@ -70,12 +70,12 @@ final class Components {
 		try {
 			result = Integer.parseInt(prompt);
 		} catch (NumberFormatException e) {
-			Components.popup(INVALID_DAY_MESSAGE);
+			popup(INVALID_DAY_MESSAGE);
 			return promptDay(message, title);
 		}
 
 		if (result < 1 || result > 31) {
-			Components.popup(INVALID_DAY_MESSAGE);
+			popup(INVALID_DAY_MESSAGE);
 			return promptDay(message, title);
 		}
 
