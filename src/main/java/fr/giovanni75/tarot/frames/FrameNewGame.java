@@ -98,8 +98,8 @@ class FrameNewGame extends JFrame implements ActionListener {
 		for (int i = 0; i < 5; i++) {
 			int x = COMBO_BOX_BASE_X + PLAYER_X_SPACING * i;
 			playerNameBoxes[i] = getPlayerNameList(names, i, x);
-			miseryBoxes[i] = getEnumNameList(Misery.values(), "Aucune", x, 120, SMALL_TEXT_WIDTH);
-			handfulBoxes[i] = getEnumNameList(Handful.values(), "Aucune", x, 160, SMALL_TEXT_WIDTH);
+			miseryBoxes[i] = getEnumNameList(Misery.values(), "Aucune", x, COMBO_BOX_BASE_Y + 40, SMALL_TEXT_WIDTH);
+			handfulBoxes[i] = getEnumNameList(Handful.values(), "Aucune", x, COMBO_BOX_BASE_Y + 80, SMALL_TEXT_WIDTH);
 			mainPanel.add(playerNameBoxes[i]);
 			mainPanel.add(miseryBoxes[i]);
 			mainPanel.add(handfulBoxes[i]);
