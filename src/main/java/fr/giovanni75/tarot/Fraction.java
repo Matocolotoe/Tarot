@@ -12,6 +12,10 @@ public final class Fraction extends Number {
 		this.denominator = denominator;
 	}
 
+	public int compareDenominators(Fraction other) {
+		return Integer.compare(this.denominator, other.denominator);
+	}
+
 	@Override
 	public double doubleValue() {
 		return (double) numerator / denominator;
@@ -19,7 +23,7 @@ public final class Fraction extends Number {
 
 	@Override
 	public boolean equals(Object other) {
-		return other instanceof Fraction fraction && numerator == fraction.numerator && denominator == fraction.denominator;
+		return other instanceof Fraction fraction && this.numerator * fraction.denominator == this.denominator * fraction.numerator;
 	}
 
 	@Override

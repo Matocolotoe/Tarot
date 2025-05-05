@@ -101,10 +101,13 @@ public final class Leaderboards {
 
 	}
 
-	private record NumberPair(Player player, Number value) implements Comparable<NumberPair> {
+	private record StatsPair(Player player, Number value) implements Comparable<StatsPair> {
 
 		@Override
-		public int compareTo(NumberPair other) {
+		public int compareTo(StatsPair other) {
+			// Put higher denominators first when win rates are equal
+			if (value instanceof Fraction && value.equals(other.value))
+				return ((Fraction) value).compareDenominators((Fraction) other.value);
 			return Double.compare(value.doubleValue(), other.value.doubleValue());
 		}
 
@@ -148,13 +151,13 @@ public final class Leaderboards {
 			return;
 		}
 
-		Map<PlayerData, List<NumberPair>> unsortedPairs = new EnumMap<>(PlayerData.class);
-		Map<PlayerData, List<NumberPair>> sortedPairs = new EnumMap<>(PlayerData.class);
+		Map<PlayerData, List<StatsPair>> unsortedPairs = new EnumMap<>(PlayerData.class);
+		Map<PlayerData, List<StatsPair>> sortedPairs = new EnumMap<>(PlayerData.class);
 		for (PlayerData data : PLAYER_DATA) {
-			List<NumberPair> entries = new ArrayList<>();
+			List<StatsPair> entries = new ArrayList<>();
 			for (Player player : playerList) {
 				Number value = data.getValue(date, player, players);
-				entries.add(new NumberPair(player, value));
+				entries.add(new StatsPair(player, value));
 			}
 			// Store entries that will be displayed in the left column, sorted by player names
 			entries.sort(Comparator.comparing(individualEntry -> individualEntry.player.getName()));
@@ -162,7 +165,7 @@ public final class Leaderboards {
 			// Store entries that will be displayed in the leaderboards on the right, only if needed
 			if (data.leaderboardName != null) {
 				// Copy to avoid modifying the previous reference
-				List<NumberPair> copy = new ArrayList<>(entries);
+				List<StatsPair> copy = new ArrayList<>(entries);
 				copy.sort(Comparator.reverseOrder());
 				sortedPairs.put(data, copy);
 			}
@@ -191,8 +194,8 @@ public final class Leaderboards {
 	}
 
 	private static int writeLeaderboards(DateRecord date, int players, List<Player> playerList,
-										 Map<PlayerData, List<NumberPair>> unsortedPairs,
-										 Map<PlayerData, List<NumberPair>> sortedPairs,
+										 Map<PlayerData, List<StatsPair>> unsortedPairs,
+										 Map<PlayerData, List<StatsPair>> sortedPairs,
 										 Worksheet ws, int initialRow) {
 		/* Global column width */
 		int column;
@@ -231,7 +234,7 @@ public final class Leaderboards {
 					.set();
 
 			row = initialRow + 2;
-			for (NumberPair pair : entry.getValue()) {
+			for (StatsPair pair : entry.getValue()) {
 				ws.value(row, column, data.getDisplay(pair.value));
 				row++;
 			}
@@ -258,7 +261,7 @@ public final class Leaderboards {
 					.merge().set();
 
 			row = initialRow + 2;
-			for (NumberPair pair : entry.getValue()) {
+			for (StatsPair pair : entry.getValue()) {
 				ws.value(row, column - 1, row - initialRow - 1); // Place in the leaderboard
 				ws.value(row, column, pair.player.getName());
 				ws.value(row, column + 1, data.getDisplay(pair.value));
