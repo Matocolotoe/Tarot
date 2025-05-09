@@ -19,7 +19,7 @@ public final class Files {
 	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd-MM-yyyy");
 
 	private static void addZipEntry(ZipOutputStream zip, String path) {
-		path = "data/" + path + ".json";
+		path = getJsonPath(path);
 		File target = new File(path);
 		try (FileInputStream is = new FileInputStream(target)) {
 			ZipEntry entry = new ZipEntry(target.getName()); // Avoid messing up paths
@@ -56,7 +56,7 @@ public final class Files {
 	}
 
 	static void createJsonFile(String fileName) {
-		File file = new File("data/" + fileName + ".json");
+		File file = new File(getJsonPath(fileName));
 		try {
 			if (file.createNewFile()) {
 				FileWriter writer = new FileWriter(file);
@@ -109,12 +109,16 @@ public final class Files {
 
 	public static JsonArray getJsonArrayFromFile(String fileName) {
 		createJsonFile(fileName); // File might not exist, for instance when serializing data
-		return getJsonArrayFromFile(new File("data/" + fileName + ".json"));
+		return getJsonArrayFromFile(new File(getJsonPath(fileName)));
+	}
+
+	private static String getJsonPath(String fileName) {
+		return "data/" + fileName + ".json";
 	}
 
 	public static void write(String fileName, JsonArray array) {
 		try {
-			FileWriter writer = new FileWriter("data/" + fileName + ".json");
+			FileWriter writer = new FileWriter(getJsonPath(fileName));
 			writer.write(array.toString());
 			writer.close();
 		} catch (IOException e) {
