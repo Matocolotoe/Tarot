@@ -86,14 +86,14 @@ public final class Files {
 		// split[2] = year.json
 		String[] split = name.split("_");
 		if (split.length != 3 || !split[0].equals("games"))
-			throw new IllegalArgumentException("Invalid format for game file " + name);
+			throw new IllegalArgumentException("Invalid format for game file " + name + " (regex check failed)");
 
 		try {
 			int month = Integer.parseInt(split[1]);
 			int year = Integer.parseInt(split[2].substring(0, 4));
 			return new DateRecord(Month.ALL_MONTHS[month - 1], year);
 		} catch (NumberFormatException e) {
-			throw new IllegalArgumentException("Invalid format for game file " + name);
+			throw new IllegalArgumentException("Invalid format for game file " + name + " (number parsing failed)");
 		}
 	}
 
