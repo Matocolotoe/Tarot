@@ -203,14 +203,10 @@ public class Game implements Serializable {
 		List<Game> games = Tarot.ALL_GAMES.get(date);
 		int index = games.indexOf(this);
 		games.remove(this);
-
 		String fileName = date.getFileName();
 		JsonArray array = Files.getJsonArrayFromFile(fileName);
 		array.remove(games.size() - index); // Games are reversed in the list, so make indices start from the end (off by 1 since it was removed)
 		Files.write(fileName, array);
-
-		// Undo all calculations in global and player stats
-		applyResults(DEFAULT_LOCAL_PLAYER_CONVERTER, REMOVE_GAME_DIRECTION);
 	}
 
 	public void edit() {

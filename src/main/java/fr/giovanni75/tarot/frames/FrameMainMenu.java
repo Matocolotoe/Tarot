@@ -148,6 +148,7 @@ public class FrameMainMenu extends JFrame {
 	private void promptGameDeletion(Game game) {
 		int option = Components.promptConfirmation("Voulez-vous supprimer la partie ?", "Suppression de partie");
 		if (option == JOptionPane.YES_OPTION) {
+			game.applyResults(Game.DEFAULT_LOCAL_PLAYER_CONVERTER, Game.REMOVE_GAME_DIRECTION);
 			game.delete();
 			reloadGames();
 			Components.popup("Partie supprimée avec succès.");
