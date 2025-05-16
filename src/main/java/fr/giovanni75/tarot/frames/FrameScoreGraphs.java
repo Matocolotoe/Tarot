@@ -2,7 +2,7 @@ package fr.giovanni75.tarot.frames;
 
 import fr.giovanni75.tarot.DateRecord;
 import fr.giovanni75.tarot.Maps;
-import fr.giovanni75.tarot.Tarot;
+import fr.giovanni75.tarot.Utils;
 import fr.giovanni75.tarot.objects.Game;
 import fr.giovanni75.tarot.objects.LocalPlayer;
 import fr.giovanni75.tarot.objects.Player;
@@ -19,37 +19,42 @@ import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.*;
+import java.util.function.Function;
 
 class FrameScoreGraphs extends JFrame implements ActionListener {
 
+	private static final int GLOBAL_PANEL_HEIGHT = 800;
 	private static final int LEFT_PANEL_WIDTH = 1050;
 	private static final int MINIMUM_PLAYED_GAMES = 10;
-	private static final int RIGHT_PANEL_WIDTH = 1050;
+	private static final int RIGHT_PANEL_WIDTH = 175;
 
 	private final double[] xData;
 	private final Map<Player, double[]> yDataMap = new TreeMap<>();
 
-	private final List<JCheckBox> checkBoxes = new ArrayList<>();
+	private final Map<String, JCheckBox> checkBoxes = new HashMap<>();
 	private final Map<String, Player> temporaryProfilesByName = new HashMap<>();
 	private final Set<String> displayedPlayerNames = new HashSet<>();
+	private final Set<String> minimumPlayedNames = new TreeSet<>(); // Requires sorting for showMinimumButton
 
 	private final XChartPanel<XYChart> leftPanel;
 
 	private final XYChart chart = new XYChartBuilder()
-			.width(1050)
-			.height(600)
+			.width(LEFT_PANEL_WIDTH)
+			.height(GLOBAL_PANEL_HEIGHT)
 			.xAxisTitle("Numéro de partie")
 			.yAxisTitle("Score total")
 			.theme(Styler.ChartTheme.Matlab)
 			.build();
 
-	private final JButton hideAllButton = getButton("Tout masquer");
-	private final JButton showAllButton = getButton("Tout afficher");
+	private final ButtonGroup buttonGroup = new ButtonGroup();
+	private final JRadioButton hideAllButton = getButton("Personne");
+	private final JRadioButton showAllButton = getButton("Tout le monde");
+	private final JRadioButton showMinimumButton = getButton("≥ " + MINIMUM_PLAYED_GAMES + " parties");
 
-	private JButton getButton(String text) {
-		JButton button = new JButton(text);
+	private JRadioButton getButton(String text) {
+		JRadioButton button = new JRadioButton(text);
 		button.addActionListener(this);
-		button.setFont(Components.getFont(11));
+		button.setFont(Components.getFont(13));
 		button.setSize(50, 15);
 		return button;
 	}
@@ -68,67 +73,61 @@ class FrameScoreGraphs extends JFrame implements ActionListener {
 		}
 	}
 
-	private void updateAllData(boolean show) {
-		if (show) {
+	private void updateAllData(ViewMode mode) {
+		if (mode == ViewMode.SHOW_ALL_PLAYERS || mode == ViewMode.SHOW_MINIMUM_PLAYED) {
 			// Remove all data first to preserve name order
 			for (String name : displayedPlayerNames)
 				chart.removeSeries(name);
-			for (Map.Entry<Player, double[]> entry : yDataMap.entrySet()) {
-				String name = entry.getKey().getName();
-				chart.addSeries(name, xData, entry.getValue());
-				displayedPlayerNames.add(name);
+			// Recalculate displayed player names for colors
+			displayedPlayerNames.clear();
+			if (mode == ViewMode.SHOW_ALL_PLAYERS) {
+				for (Map.Entry<Player, double[]> entry : yDataMap.entrySet()) {
+					String name = entry.getKey().getName();
+					chart.addSeries(name, xData, entry.getValue());
+					displayedPlayerNames.add(name);
+				}
+				for (JCheckBox box : checkBoxes.values())
+					box.setSelected(true);
+			} else {
+				// Some boxes might have to disappear when switching from SHOW_ALL to SHOW_MINIMUM_PLAYED
+				for (JCheckBox box : checkBoxes.values())
+					box.setSelected(false);
+				for (String name : minimumPlayedNames) {
+					chart.addSeries(name, xData, yDataMap.get(temporaryProfilesByName.get(name)));
+					checkBoxes.get(name).setSelected(true);
+					displayedPlayerNames.add(name);
+				}
 			}
 		} else {
+			for (JCheckBox box : checkBoxes.values())
+				box.setSelected(false);
 			for (String name : displayedPlayerNames)
 				chart.removeSeries(name);
 			displayedPlayerNames.clear();
 		}
 		recalculateColors();
-		for (JCheckBox box : checkBoxes)
-			box.setSelected(show);
 		leftPanel.revalidate();
 		leftPanel.repaint();
 	}
 
-	FrameScoreGraphs(int minDay, int maxDay, DateRecord date, int players) {
-		String dateName = date.getShortName("/");
-		setBounds(300, 150, 1200, 800);
+	FrameScoreGraphs(List<Game> displayedGames, List<Game> selectedGames, DateRecord date, int players) {
+		setBounds(300, 150, LEFT_PANEL_WIDTH + RIGHT_PANEL_WIDTH, GLOBAL_PANEL_HEIGHT);
 		setResizable(false);
-		setTitle("Statistiques – " + players + " joueurs – " + minDay + "/" + dateName + " ➝ " + maxDay + "/" + dateName);
-
-		// Games stored in ALL_GAMES are sorted in descending order
-		List<Game> allPossibleGames = Tarot.ALL_GAMES.get(date).reversed();
-
-		// Store all games that have been played between minDay and maxDay
-		// Need to add all players to recalculate stats for now
-		List<Game> games = new ArrayList<>();
-		Set<Integer> ids = new HashSet<>();
-		for (Game game : allPossibleGames) {
-			if (game.players.length == players) {
-				for (LocalPlayer local : game.players)
-					ids.add(local.id());
-				if (game.dayOfMonth == 0 || (game.dayOfMonth >= minDay && game.dayOfMonth <= maxDay))
-					games.add(game);
-			}
-		}
+		setTitle("Évolution des scores – " + players + " joueurs – " + Utils.getTitle(selectedGames, date));
 
 		// Create a virtual profile for every player involved in those games to avoid conflicts with actual pre-calculated stats
 		Map<Integer, Player> temporaryProfiles = new HashMap<>();
-		for (int id : ids) {
-			String name = Tarot.getPlayer(id).getName();
-			Player player = new Player(-id, name);
-			temporaryProfiles.put(id, player);
-			temporaryProfilesByName.put(name, player);
+		for (Player player : Utils.getAllPlayers(displayedGames)) {
+			Player copy = player.copy();
+			temporaryProfiles.put(player.getID(), copy);
+			temporaryProfilesByName.put(player.getName(), copy);
 		}
 
 		// Grant stats until the first game to the temporary profiles
-		for (Game game : allPossibleGames)
-			if (game.players.length == players && game.dayOfMonth < minDay)
-				game.applyResults(temporaryProfiles::get, Game.ADD_GAME_DIRECTION);
+		Function<LocalPlayer, Player> converter = Utils.getConverter(temporaryProfiles);
+		Utils.calculateScores(displayedGames, selectedGames, converter);
 
-		chart.getStyler().setZoomEnabled(true);
-
-		int size = games.size() + 1;
+		int size = selectedGames.size() + 1;
 		xData = new double[size];
 		for (int i = 0; i < size; i++)
 			xData[i] = i;
@@ -139,64 +138,88 @@ class FrameScoreGraphs extends JFrame implements ActionListener {
 		for (int i = 0; i < size; i++) {
 			// First iteration stores the total score earned before the first game
 			if (i > 0)
-				games.get(i - 1).applyResults(temporaryProfiles::get, Game.ADD_GAME_DIRECTION);
+				selectedGames.get(i - 1).applyResults(converter, Game.ADD_GAME_DIRECTION, Game.PLAYER_SCORES);
 			for (Player player : temporaryProfiles.values()) {
 				LocalStats stats = player.getStats(date, players);
 				yDataMap.get(player)[i] = stats.totalScore;
 			}
 		}
 
+		chart.getStyler().setMarkerSize(Math.max(3, 8 - selectedGames.size() / 20));
+		chart.getStyler().setZoomEnabled(true);
 		leftPanel = new XChartPanel<>(chart);
-		leftPanel.setSize(LEFT_PANEL_WIDTH, 600);
+		leftPanel.setSize(LEFT_PANEL_WIDTH, GLOBAL_PANEL_HEIGHT);
 		leftPanel.setVisible(true);
 
 		JPanel rightPanel = new JPanel();
 		rightPanel.setBorder(Components.getStandardBorder());
 		rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));
-		rightPanel.setSize(RIGHT_PANEL_WIDTH, 600);
+		rightPanel.setSize(RIGHT_PANEL_WIDTH, GLOBAL_PANEL_HEIGHT);
 		rightPanel.setVisible(true);
 
-		rightPanel.add(Components.getSimpleText("Affichage", 20));
-		rightPanel.add(Components.getEmptyText(15));
+		rightPanel.add(Components.getSimpleText("Joueurs", 20));
+		rightPanel.add(Components.getEmptySpace(12));
 
 		// If we check for zero scores before, we might retain no players if the first selected game is the first one of the month
 		// Instead, check for scores which remained constant during the selected period
+		// We also need to check every game since scores might cancel out at the end
 		Iterator<Map.Entry<Player, double[]>> iterator = yDataMap.entrySet().iterator();
 		yIter: while (iterator.hasNext()) {
-			double[] yData = iterator.next().getValue();
+			var entry = iterator.next();
+			double[] yData = entry.getValue();
 			for (double y : yData)
 				if (y != yData[0])
 					continue yIter; // There exists at least two distinct elements
+			// Score has not changed, remove associated profile to keep a correct count
+			// Perform before Iterator#remove to ensure it's executed properly (huh)
+			temporaryProfilesByName.remove(entry.getKey().getName());
 			iterator.remove();
 		}
 
+		boolean filterGames = players == 5 && selectedGames.size() >= MINIMUM_PLAYED_GAMES;
 		for (Map.Entry<Player, double[]> entry : yDataMap.entrySet()) {
 			Player player = entry.getKey();
 			String name = player.getName();
 			JCheckBox box = new JCheckBox(name);
 			box.addActionListener(this);
-			checkBoxes.add(box);
+			checkBoxes.put(name, box);
 			rightPanel.add(box);
-			if (players == 5 && Maps.sum(player.getStats(date, players).playedGames) < MINIMUM_PLAYED_GAMES)
+			if (filterGames && Maps.sum(player.getStats(date, players).playedGames) < MINIMUM_PLAYED_GAMES)
 				continue;
 			box.setSelected(true);
 			chart.addSeries(name, entry.getValue());
 			displayedPlayerNames.add(name);
+			minimumPlayedNames.add(name);
 		}
 
 		// Need to have the number of displayed players calculated before
 		recalculateColors();
 
-		rightPanel.add(Components.getEmptyText(15));
+		buttonGroup.add(showAllButton);
+		buttonGroup.add(hideAllButton);
+
+		rightPanel.add(Components.getEmptySpace(30));
+		rightPanel.add(Components.getSimpleText("Affichage", 20));
+		rightPanel.add(Components.getEmptySpace(10));
 		rightPanel.add(showAllButton);
-		rightPanel.add(Components.getEmptyText(5));
+		rightPanel.add(Components.getEmptySpace(5));
 		rightPanel.add(hideAllButton);
+
+		// Only show ">= MINIMUM_PLAYED_GAMES" button when necessary
+		if (filterGames && displayedPlayerNames.size() < temporaryProfilesByName.size()) {
+			buttonGroup.add(showMinimumButton);
+			rightPanel.add(Components.getEmptySpace(5));
+			rightPanel.add(showMinimumButton);
+			showMinimumButton.setSelected(true);
+		} else {
+			showAllButton.setSelected(true);
+		}
 
 		JSplitPane splitPane = new JSplitPane();
 		splitPane.setDividerLocation(LEFT_PANEL_WIDTH);
 		splitPane.setDividerSize(0);
 		splitPane.setOrientation(JSplitPane.HORIZONTAL_SPLIT);
-		splitPane.setSize(LEFT_PANEL_WIDTH + RIGHT_PANEL_WIDTH, 600);
+		splitPane.setSize(LEFT_PANEL_WIDTH + RIGHT_PANEL_WIDTH, GLOBAL_PANEL_HEIGHT);
 
 		splitPane.setLeftComponent(leftPanel);
 		splitPane.setRightComponent(rightPanel);
@@ -209,12 +232,17 @@ class FrameScoreGraphs extends JFrame implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		Object source = e.getSource();
 		if (source == hideAllButton) {
-			updateAllData(false);
+			updateAllData(ViewMode.HIDE_ALL_PLAYERS);
+			return;
+		}
+
+		if (source == showMinimumButton) {
+			updateAllData(ViewMode.SHOW_MINIMUM_PLAYED);
 			return;
 		}
 
 		if (source == showAllButton) {
-			updateAllData(true);
+			updateAllData(ViewMode.SHOW_ALL_PLAYERS);
 			return;
 		}
 
@@ -227,12 +255,13 @@ class FrameScoreGraphs extends JFrame implements ActionListener {
 			displayedPlayerNames.add(name); // Add before to pass condition below and ensure all data is properly refreshed
 			for (Map.Entry<Player, double[]> entry : yDataMap.entrySet()) {
 				Player other = entry.getKey();
+				// Only rebuild series of players with a higher name in alphabetical order
 				if (other.compareTo(player) < 0)
 					continue;
 				name = other.getName();
+				// Only rebuild series of shown players
 				if (!displayedPlayerNames.contains(name))
 					continue;
-				// Only rebuild series of shown players with a higher name in alphabetical order
 				chart.removeSeries(name);
 				chart.addSeries(name, xData, entry.getValue());
 			}
@@ -241,9 +270,28 @@ class FrameScoreGraphs extends JFrame implements ActionListener {
 			displayedPlayerNames.remove(name);
 		}
 
+		// Make button selection consistent with selected boxes at all times
+		if (displayedPlayerNames.size() == temporaryProfilesByName.size()) {
+			showAllButton.setSelected(true);
+		} else if (displayedPlayerNames.isEmpty()) {
+			hideAllButton.setSelected(false);
+		} else if (displayedPlayerNames.equals(minimumPlayedNames)) {
+			showMinimumButton.setSelected(true);
+		} else {
+			buttonGroup.clearSelection();
+		}
+
 		recalculateColors();
 		leftPanel.revalidate();
 		leftPanel.repaint();
+	}
+
+	private enum ViewMode {
+
+		HIDE_ALL_PLAYERS,
+		SHOW_ALL_PLAYERS,
+		SHOW_MINIMUM_PLAYED
+
 	}
 
 }

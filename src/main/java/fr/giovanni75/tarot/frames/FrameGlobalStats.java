@@ -10,7 +10,6 @@ import fr.giovanni75.tarot.stats.LocalStats;
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.function.Function;
@@ -28,12 +27,41 @@ class FrameGlobalStats extends JFrame {
 		return String.join(", ", names);
 	}
 
-	private static void showAverageStats(JPanel panel, DateRecord date, int players, String header, Function<Game, Integer> adder) {
+	static void showAllStats(JPanel panel, DateRecord date, int players, Collection<Game> selectedGames, Collection<Player> selectedPlayers) {
+		showGlobalStats(panel, players, "Parties jouées", ignored -> true, selectedGames);
+		showAverageStats(panel, players, "Nombre moyen de bouts", game -> game.oudlers.ordinal(), selectedGames);
+		showGlobalStats(panel, players, "Petits au bout", game -> game.petitAuBout != null, selectedGames);
+
+		showMaxPlayerStats(panel, date, players, "Le plus de parties jouées", "%s (%d)",
+				stats -> stats.playedGames, 1, true, false, selectedPlayers);
+		showMaxPlayerStats(panel, date, players, "Le plus de poignées", "%s (%d)",
+				stats -> stats.handfuls, 1, true, false, selectedPlayers);
+		showMaxPlayerStats(panel, date, players, "Le plus de misères", "%s (%d)",
+				stats -> stats.miseries, 1, true, false, selectedPlayers);
+
+		panel.add(Components.getEmptySpace(20));
+
+		showMaxPlayerStats(panel, date, players, "Le plus de fois appelé·e", "%s, %d fois",
+				stats -> stats.calledTimes, 1, true, true, selectedPlayers);
+		showMaxPlayerStats(panel, date, players, "Le plus de prises réussies", "%s (%d)",
+				stats -> stats.successfulTakes, 1, true, true, selectedPlayers);
+		showMaxPlayerStats(panel, date, players, "Le plus de prises ratées", "%s (%d)",
+				stats -> stats.failedTakes, 1, true, true, selectedPlayers);
+		showMaxPlayerStats(panel, date, players, "Le plus d'appels à soi-même", "%s (%d)",
+				stats -> stats.selfCalls, 1, true, true, selectedPlayers);
+
+		showMaxPlayerStats(panel, date, players, "Meilleurs tours", "%s (%d pts)",
+				stats -> stats.bestTurns, 1, false, true, selectedPlayers);
+		showMaxPlayerStats(panel, date, players, "Pires tours", "%s (%d pts)",
+				stats -> stats.worstTurns, -1, false, true, selectedPlayers);
+	}
+
+	static void showAverageStats(JPanel panel, int players, String header, Function<Game, Integer> adder, Collection<Game> gameList) {
 		int matchingAmount = 0;
 		int totalAmount = 0;
 		Map<Contract, Integer> matchingAmounts = new EnumMap<>(Contract.class);
 		Map<Contract, Integer> totalAmounts = new EnumMap<>(Contract.class);
-		for (Game game : Tarot.ALL_GAMES.get(date)) {
+		for (Game game : gameList) {
 			if (game.players.length == players) {
 				Contract contract = game.contract;
 				int amount = adder.apply(game);
@@ -55,13 +83,13 @@ class FrameGlobalStats extends JFrame {
 			}
 		}
 
-		panel.add(Components.getEmptyText(20));
+		panel.add(Components.getEmptySpace(20));
 	}
 
-	private static void showGlobalStats(JPanel panel, DateRecord date, int players, String header, Predicate<Game> matcher) {
+	static void showGlobalStats(JPanel panel, int players, String header, Predicate<Game> matcher, Collection<Game> gameList) {
 		int totalAmount = 0;
 		Map<Contract, Integer> amounts = new EnumMap<>(Contract.class);
-		for (Game game : Tarot.ALL_GAMES.get(date)) {
+		for (Game game : gameList) {
 			if (game.players.length == players && matcher.test(game)) {
 				Contract contract = game.contract;
 				amounts.put(contract, amounts.getOrDefault(contract, 0) + 1);
@@ -79,12 +107,12 @@ class FrameGlobalStats extends JFrame {
 			}
 		}
 
-		panel.add(Components.getEmptyText(20));
+		panel.add(Components.getEmptySpace(20));
 	}
 
-	private static void showMaxPlayerStats(JPanel panel, DateRecord date, int players, String header, String details,
+	static void showMaxPlayerStats(JPanel panel, DateRecord date, int players, String header, String details,
 										   Function<LocalStats, Map<Contract, Integer>> provider, int multiplier,
-										   boolean includeTotal, boolean includeDetailsByContract) {
+										   boolean includeTotal, boolean includeDetailsByContract, Collection<Player> playerListAll) {
 		Map<Contract, Integer> maxAmounts = new EnumMap<>(Contract.class);
 		Map<Contract, List<Player>> maxPlayers = new EnumMap<>(Contract.class);
 		int maxAmountAll = 0;
@@ -92,7 +120,7 @@ class FrameGlobalStats extends JFrame {
 		for (Contract contract : Contract.ALL_CONTRACTS)
 			maxPlayers.put(contract, new ArrayList<>());
 
-		for (Player player : Tarot.ORDERED_PLAYERS) {
+		for (Player player : playerListAll) {
 			int totalAmount = 0;
 			for (Contract contract : Contract.ALL_CONTRACTS) {
 				int amount = provider.apply(player.getStats(date, players)).getOrDefault(contract, 0);
@@ -148,7 +176,7 @@ class FrameGlobalStats extends JFrame {
 			}
 		}
 
-		panel.add(Components.getEmptyText(20));
+		panel.add(Components.getEmptySpace(20));
 	}
 
 	FrameGlobalStats(DateRecord date, int players) {
@@ -176,39 +204,16 @@ class FrameGlobalStats extends JFrame {
 
 		mainPanel.add(Components.getSimpleText("Statistiques générales", 20));
 		mainPanel.add(Components.getSimpleText(date.getName() + " – " + players + " joueurs", 20));
-		mainPanel.add(Components.getEmptyText(25));
+		mainPanel.add(Components.getEmptySpace(25));
 
-		showGlobalStats(mainPanel, date, players, "Parties jouées", ignored -> true);
-		showAverageStats(mainPanel, date, players, "Nombre moyen de bouts", game -> game.oudlers.ordinal());
-		showGlobalStats(mainPanel, date, players, "Petits au bout", game -> game.petitAuBout != null);
+		List<Game> games = new ArrayList<>();
+		for (Game game : Tarot.ALL_GAMES.get(date))
+			if (game.players.length == players)
+				games.add(game);
 
-		showMaxPlayerStats(mainPanel, date, players, "Le plus de parties jouées", "%s (%d)",
-				stats -> stats.playedGames, 1, true, false);
-		showMaxPlayerStats(mainPanel, date, players, "Le plus de poignées", "%s (%d)",
-				stats -> stats.handfuls, 1, true, false);
-		showMaxPlayerStats(mainPanel, date, players, "Le plus de misères", "%s (%d)",
-				stats -> stats.miseries, 1, true, false);
+		showAllStats(mainPanel, date, players, games, Tarot.ORDERED_PLAYERS);
 
-		mainPanel.add(Components.getEmptyText(20));
-
-		showMaxPlayerStats(mainPanel, date, players, "Le plus de fois appelé·e", "%s, %d fois",
-				stats -> stats.calledTimes, 1, true, true);
-		showMaxPlayerStats(mainPanel, date, players, "Le plus de prises réussies", "%s (%d)",
-				stats -> stats.successfulTakes, 1, true, true);
-		showMaxPlayerStats(mainPanel, date, players, "Le plus de prises ratées", "%s (%d)",
-				stats -> stats.failedTakes, 1, true, true);
-		showMaxPlayerStats(mainPanel, date, players, "Le plus d'appels à soi-même", "%s (%d)",
-				stats -> stats.selfCalls, 1, true, true);
-
-		showMaxPlayerStats(mainPanel, date, players, "Meilleurs tours", "%s (%d pts)",
-				stats -> stats.bestTurns, 1, false, true);
-		showMaxPlayerStats(mainPanel, date, players, "Pires tours", "%s (%d pts)",
-				stats -> stats.worstTurns, -1, false, true);
-
-		JScrollPane scrollPane = new JScrollPane(mainPanel);
-		scrollPane.getVerticalScrollBar().setUnitIncrement(18);
-		add(scrollPane);
-
+		add(Components.getStandardScrollPane(mainPanel));
 		setVisible(true);
 	}
 

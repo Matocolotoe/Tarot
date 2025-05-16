@@ -14,16 +14,12 @@ public record DateRecord(Month month, int year) implements Comparable<DateRecord
 	}
 
 	public String getFileName() {
-		return "games/games_" + getShortName("_");
+		int month = this.month.ordinal() + 1;
+		return "games/games_" + (month < 10 ? "0" + month : month) + "_" + year;
 	}
 
 	public String getName() {
 		return month.getName() + " " + year;
-	}
-
-	public String getShortName(String separator) {
-		int m = month.ordinal() + 1;
-		return (m < 10 ? "0" + m : m) + separator + year;
 	}
 
 }

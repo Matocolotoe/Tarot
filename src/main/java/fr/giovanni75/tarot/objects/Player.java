@@ -20,16 +20,29 @@ public class Player implements Comparable<Player>, Serializable {
 	public Player(int id, String name) {
 		this.id = id;
 		this.name = name;
-		for (DateRecord record : Tarot.ALL_GAMES.keySet()) {
-			statsFivePlayers.put(record, new LocalStats());
-			statsFourPlayers.put(record, new LocalStats());
-			statsThreePlayers.put(record, new LocalStats());
-		}
 	}
 
 	@Override
 	public int compareTo(Player other) {
 		return name.compareTo(other.name);
+	}
+
+	public Player copy() {
+		Player player = new Player(-id, name);
+		for (DateRecord date : Tarot.ALL_GAMES.keySet())
+			player.createStats(date);
+		return player;
+	}
+
+	public void createStats(DateRecord date) {
+		statsFivePlayers.put(date, new LocalStats());
+		statsFourPlayers.put(date, new LocalStats());
+		statsThreePlayers.put(date, new LocalStats());
+	}
+
+	@Override
+	public boolean equals(Object other) {
+		return other instanceof Player && id == ((Player) other).id;
 	}
 
 	public int getID() {
