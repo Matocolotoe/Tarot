@@ -35,9 +35,8 @@ class FramePeriodicStats extends JFrame {
 		for (Player player : temporaryProfiles.values())
 			scoresBefore.put(player, player.getStats(date, players).totalScore);
 
-		// Only calculate scores first
 		for (Game game : selectedGames)
-			game.applyResults(converter, Game.ADD_GAME_DIRECTION, Game.PLAYER_SCORES);
+			game.applyResults(converter, Game.ADD_GAME_DIRECTION, Game.GLOBAL_STATS | Game.PLAYER_SCORES | Game.PLAYER_STATS);
 
 		Map<Player, Integer> orderedEvolutions = new TreeMap<>((k1, k2) -> {
 			int diff1 = k1.getStats(date, players).totalScore - scoresBefore.get(k1);
@@ -50,10 +49,6 @@ class FramePeriodicStats extends JFrame {
 			if (diff != 0)
 				orderedEvolutions.put(entry.getKey(), diff);
 		}
-
-		// Scores have been calculated, only calculate other required stats
-		for (Game game : selectedGames)
-			game.applyResults(converter, Game.ADD_GAME_DIRECTION, Game.GLOBAL_STATS);
 
 		JPanel mainPanel = new JPanel();
 		mainPanel.setBorder(Components.getStandardBorder());

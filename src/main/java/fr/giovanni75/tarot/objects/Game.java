@@ -22,10 +22,11 @@ public class Game implements Serializable {
 	public static final int ADD_GAME_DIRECTION = 1;
 	public static final int REMOVE_GAME_DIRECTION = -1;
 
-	public static final int GLOBAL_STATS = 1;
-	public static final int PLAYER_SCORES = 2;
-	public static final int PLAYER_STATS = 4;
-	public static final int WRITE_INFO = 8;
+	public static final int ATTACK_SCORE = 1;
+	public static final int GLOBAL_STATS = 2;
+	public static final int PLAYER_SCORES = 4;
+	public static final int PLAYER_STATS = 8;
+	public static final int WRITE_INFO = 16;
 
 	private final List<String> description = new ArrayList<>();
 	private final List<String> details = new ArrayList<>();
@@ -99,7 +100,7 @@ public class Game implements Serializable {
 	}
 
 	public void applyResults(Function<LocalPlayer, Player> converter, int direction) {
-		applyResults(converter, direction, GLOBAL_STATS | PLAYER_SCORES | PLAYER_STATS | WRITE_INFO);
+		applyResults(converter, direction, ATTACK_SCORE | GLOBAL_STATS | PLAYER_SCORES | PLAYER_STATS | WRITE_INFO);
 	}
 
 	public void applyResults(Function<LocalPlayer, Player> converter, int direction, int flags) {
@@ -117,18 +118,16 @@ public class Game implements Serializable {
 				miseries.put(local, misery);
 		}
 
-		if (direction == ADD_GAME_DIRECTION) {
-			calculateAttackScore(diff, absoluteDiff, handfuls.values(), miseries);
-			if (((flags >> 3) & 1) == 1)
-				writeInformation(diff, absoluteDiff, handfuls, miseries);
-		}
-
 		if ((flags & 1) == 1)
-			calculateGlobalStats(handfuls.values(), miseries.values(), direction);
+			calculateAttackScore(diff, absoluteDiff, handfuls.values(), miseries);
 		if (((flags >> 1) & 1) == 1)
-			calculatePlayerScores(converter, direction);
+			calculateGlobalStats(handfuls.values(), miseries.values(), direction);
 		if (((flags >> 2) & 1) == 1)
+			calculatePlayerScores(converter, direction);
+		if (((flags >> 3) & 1) == 1)
 			calculatePlayerStats(diff, converter, handfuls.keySet(), miseries.keySet(), direction);
+		if (direction == ADD_GAME_DIRECTION && ((flags >> 4) & 1) == 1)
+			writeInformation(diff, absoluteDiff, handfuls, miseries);
 	}
 
 	private void calculateAttackScore(int diff, int absoluteDiff, Collection<Handful> handfuls, Map<LocalPlayer, Misery> miseries) {
