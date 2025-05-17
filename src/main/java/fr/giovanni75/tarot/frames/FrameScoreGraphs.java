@@ -115,12 +115,17 @@ class FrameScoreGraphs extends JFrame implements ActionListener {
 		setResizable(false);
 		setTitle("Évolution des scores – " + players + " joueurs – " + Utils.getTitle(selectedGames, date));
 
+		boolean filterGames = players == 5 && selectedGames.size() >= MINIMUM_PLAYED_GAMES;
+
 		// Create a virtual profile for every player involved in those games to avoid conflicts with actual pre-calculated stats
 		Map<Integer, Player> temporaryProfiles = new HashMap<>();
 		for (Player player : Utils.getAllPlayers(displayedGames)) {
 			Player copy = player.copy();
+			String name = player.getName();
 			temporaryProfiles.put(player.getID(), copy);
-			temporaryProfilesByName.put(player.getName(), copy);
+			temporaryProfilesByName.put(name, copy);
+			if (filterGames && Maps.sum(player.getStats(date, players).playedGames) >= MINIMUM_PLAYED_GAMES)
+				minimumPlayedNames.add(name);
 		}
 
 		// Grant stats until the first game to the temporary profiles
@@ -176,7 +181,6 @@ class FrameScoreGraphs extends JFrame implements ActionListener {
 			iterator.remove();
 		}
 
-		boolean filterGames = players == 5 && selectedGames.size() >= MINIMUM_PLAYED_GAMES;
 		for (Map.Entry<Player, double[]> entry : yDataMap.entrySet()) {
 			Player player = entry.getKey();
 			String name = player.getName();
@@ -184,12 +188,12 @@ class FrameScoreGraphs extends JFrame implements ActionListener {
 			box.addActionListener(this);
 			checkBoxes.put(name, box);
 			rightPanel.add(box);
-			if (filterGames && Maps.sum(player.getStats(date, players).playedGames) < MINIMUM_PLAYED_GAMES)
+			// Previously filled with stats from the original player, which were not copied
+			if (!minimumPlayedNames.contains(name))
 				continue;
 			box.setSelected(true);
 			chart.addSeries(name, entry.getValue());
 			displayedPlayerNames.add(name);
-			minimumPlayedNames.add(name);
 		}
 
 		// Need to have the number of displayed players calculated before
