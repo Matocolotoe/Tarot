@@ -41,7 +41,7 @@ class FramePeriodicStats extends JFrame {
 		Map<Player, Integer> orderedEvolutions = new TreeMap<>((k1, k2) -> {
 			int diff1 = k1.getStats(date, players).totalScore - scoresBefore.get(k1);
 			int diff2 = k2.getStats(date, players).totalScore - scoresBefore.get(k2);
-			return Integer.compare(diff2, diff1); // FIXME if players have equal scores, they are merged into a single entry in the map
+			return diff1 == diff2 ? k1.getName().compareTo(k2.getName()) : Integer.compare(diff2, diff1);
 		});
 
 		for (var entry : scoresBefore.entrySet()) {
