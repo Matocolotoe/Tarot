@@ -118,16 +118,16 @@ class FrameGlobalStats extends JFrame {
 		private final String details;
 		private final boolean includeTotal;
 		private final boolean includeDetailsByContract;
-		private final int multiplier;
+		private final int direction;
 
 		MaximumStatistic(String description, Function<LocalStats, Map<Contract, Integer>> provider,
-						 String details, boolean includeTotal, boolean includeDetailsByContract, int multiplier) {
+						 String details, boolean includeTotal, boolean includeDetailsByContract, int direction) {
 			this.description = description;
 			this.provider = provider;
 			this.details = details;
 			this.includeTotal = includeTotal;
 			this.includeDetailsByContract = includeDetailsByContract;
-			this.multiplier = multiplier;
+			this.direction = direction;
 		}
 
 		private void display(JPanel panel, DateRecord date, int players, Collection<Player> playerCollection) {
@@ -146,7 +146,7 @@ class FrameGlobalStats extends JFrame {
 					// Skip calculations if details are not required
 					if (!includeDetailsByContract)
 						continue;
-					int diff = multiplier * (amount - maxAmounts.getOrDefault(contract, 0));
+					int diff = direction * (amount - maxAmounts.getOrDefault(contract, 0));
 					if (diff >= 0) {
 						List<Player> playerList = maxPlayers.get(contract);
 						if (diff != 0) {
@@ -160,7 +160,7 @@ class FrameGlobalStats extends JFrame {
 						}
 					}
 				}
-				int diff = multiplier * (totalAmount - maxAmountAll);
+				int diff = direction * (totalAmount - maxAmountAll);
 				if (diff > 0) {
 					// Amount is strictly greater than any value seen before, reset data
 					maxAmountAll = totalAmount;
