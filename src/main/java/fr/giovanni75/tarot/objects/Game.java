@@ -124,8 +124,10 @@ public class Game implements Serializable {
 			calculateGlobalStats(handfuls.values(), miseries.values(), direction);
 		if (((flags >> 2) & 1) == 1)
 			calculatePlayerScores(converter, direction);
-		if (((flags >> 3) & 1) == 1)
+		if (((flags >> 3) & 1) == 1) {
 			calculatePlayerStats(diff, converter, handfuls.keySet(), miseries.keySet(), direction);
+			computeBestTurns();
+		}
 		if (direction == ADD_GAME_DIRECTION && ((flags >> 4) & 1) == 1)
 			writeInformation(diff, absoluteDiff, handfuls, miseries);
 	}
@@ -241,6 +243,15 @@ public class Game implements Serializable {
 		for (LocalPlayer local : miseryOwners) {
 			stats = getStats(local, converter);
 			Maps.increment(contract, stats.miseries, 1, direction);
+		}
+	}
+
+	private void computeBestTurns() {
+		int length = players.length;
+		for (LocalPlayer local : players) {
+			LocalStats stats = local.player.getStats(date, length);
+			Maps.computeIfHigher(contract, local.score, stats.bestTurns, 1);
+			Maps.computeIfHigher(contract, local.score, stats.worstTurns, -1);
 		}
 	}
 

@@ -6,6 +6,12 @@ import java.util.Map;
 
 public final class Maps {
 
+	public static <K> void computeIfHigher(K key, int value, Map<K, Integer> map, int direction) {
+		Integer current = map.get(key);
+		if (current == null || direction * value > direction * current)
+			map.put(key, value);
+	}
+
 	public static <K> void increment(K key, Map<K, Integer> map, int increment, int direction) {
 		map.put(key, map.getOrDefault(key, 0) + direction * increment);
 	}
