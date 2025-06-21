@@ -9,10 +9,7 @@ import fr.giovanni75.tarot.objects.Player;
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.function.Function;
 
 class FramePeriodicStats extends JFrame {
@@ -23,15 +20,16 @@ class FramePeriodicStats extends JFrame {
 		setTitle("Statistiques périodiques – " + players + " joueurs – " + selectedGames.size() + " parties");
 
 		// Create a temporary profile for each player to track score evolution
-		Map<Integer, Player> temporaryProfiles = new HashMap<>();
-		for (Player player : Utils.getAllPlayers(displayedGames))
+		Set<Player> playerSet = Utils.getAllPlayers(displayedGames);
+		Map<Integer, Player> temporaryProfiles = new HashMap<>(playerSet.size());
+		for (Player player : playerSet)
 			temporaryProfiles.put(player.getID(), player.copy());
 
 		// Grant scores until the first game to the temporary profiles
 		Function<LocalPlayer, Player> converter = Utils.getConverter(temporaryProfiles);
 		Utils.calculateScores(displayedGames, selectedGames, converter);
 
-		Map<Player, Integer> scoresBefore = new HashMap<>();
+		Map<Player, Integer> scoresBefore = new HashMap<>(playerSet.size());
 		for (Player player : temporaryProfiles.values())
 			scoresBefore.put(player, player.getStats(date, players).totalScore);
 
@@ -45,13 +43,14 @@ class FramePeriodicStats extends JFrame {
 		});
 
 		for (var entry : scoresBefore.entrySet()) {
-			int diff = entry.getKey().getStats(date, players).totalScore - entry.getValue();
+			Player player = entry.getKey();
+			int diff = player.getStats(date, players).totalScore - entry.getValue();
 			if (diff != 0)
-				orderedEvolutions.put(entry.getKey(), diff);
+				orderedEvolutions.put(player, diff);
 		}
 
 		JPanel mainPanel = new JPanel();
-		mainPanel.setBorder(Components.getStandardBorder());
+		mainPanel.setBorder(Components.getStandardBorder(0));
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 		add(mainPanel);
 
@@ -64,11 +63,9 @@ class FramePeriodicStats extends JFrame {
 			int diff = entry.getValue();
 			mainPanel.add(Components.getSimpleText(" ‣ " + entry.getKey().getName() + " : " + (diff >= 0 ? "+" : "") + diff, 15));
 		}
+		mainPanel.add(Components.getEmptySpace(20));
 
-		mainPanel.add(Components.getSimpleText(" ", 20));
-
-		FrameGlobalStats.showAllStats(mainPanel, date, players, selectedGames, temporaryProfiles.values());
-
+		FrameGlobalStats.displayAll(mainPanel, date, players, selectedGames, temporaryProfiles.values());
 		add(Components.getStandardScrollPane(mainPanel));
 		setVisible(true);
 	}

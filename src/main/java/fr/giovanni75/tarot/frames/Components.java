@@ -8,6 +8,7 @@ import java.awt.Font;
 final class Components {
 
 	static final Color DEFAULT_BUTTON_COLOR = new Color(247, 247, 247);
+	static final String NO_GAME_AVAILABLE = "Aucune partie n'est disponible pour cette période.";
 
 	private static final int BORDER_TOP_LEFT_MARGIN = 30;
 	private static final int SCROLL_VERTICAL_INCREMENT = 18;
@@ -44,8 +45,8 @@ final class Components {
 		return label;
 	}
 
-	static Border getStandardBorder() {
-		return BorderFactory.createEmptyBorder(BORDER_TOP_LEFT_MARGIN, BORDER_TOP_LEFT_MARGIN, 0, 0);
+	static Border getStandardBorder(int rightMargin) {
+		return BorderFactory.createEmptyBorder(BORDER_TOP_LEFT_MARGIN, BORDER_TOP_LEFT_MARGIN, 0, rightMargin);
 	}
 
 	static JScrollPane getStandardScrollPane(JPanel panel) {

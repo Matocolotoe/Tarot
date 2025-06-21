@@ -20,7 +20,7 @@ import java.util.function.Function;
 
 public final class Leaderboards {
 
-	private static final DecimalFormat DOUBLE_DECIMAL_FORMAT = new DecimalFormat("#.##");
+	public static final DecimalFormat DOUBLE_DECIMAL_FORMAT = new DecimalFormat("#.##");
 	private static final DecimalFormat PERCENTAGE_DECIMAL_FORMAT = new DecimalFormat("#0.0%");
 
 	private static final int WINRATE_MINIMUM_TAKES = 2;

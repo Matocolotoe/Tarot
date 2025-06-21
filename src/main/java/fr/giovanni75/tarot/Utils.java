@@ -1,13 +1,11 @@
 package fr.giovanni75.tarot;
 
+import fr.giovanni75.tarot.enums.Contract;
 import fr.giovanni75.tarot.objects.Game;
 import fr.giovanni75.tarot.objects.LocalPlayer;
 import fr.giovanni75.tarot.objects.Player;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 
 public final class Utils {
@@ -20,7 +18,15 @@ public final class Utils {
 		}
 	}
 
-	public static Set<Player> getAllPlayers(List<Game> games) {
+	public static int count(Collection<Game> games, Contract contract) {
+		int count = 0;
+		for (Game game : games)
+			if (game.contract == contract)
+				count++;
+		return count;
+	}
+
+	public static Set<Player> getAllPlayers(Collection<Game> games) {
 		Set<Player> players = new HashSet<>();
 		for (Game game : games)
 			for (LocalPlayer local : game.players)

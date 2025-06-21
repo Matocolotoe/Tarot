@@ -26,7 +26,7 @@ class FrameSelection extends JFrame {
 				displayed.add(game);
 
 		if (displayed.isEmpty()) {
-			Components.popup("Aucune partie n'est disponible pour cette période.");
+			Components.popup(Components.NO_GAME_AVAILABLE);
 			return;
 		}
 
@@ -35,7 +35,7 @@ class FrameSelection extends JFrame {
 		setTitle(header + " – Choix de parties");
 
 		JPanel mainPanel = new JPanel();
-		mainPanel.setBorder(BorderFactory.createEmptyBorder(30, 30, 0, 280));
+		mainPanel.setBorder(Components.getStandardBorder(200));
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 
 		mainPanel.add(Components.getSimpleText(date.getName() + " – " + players + " joueurs", 20));

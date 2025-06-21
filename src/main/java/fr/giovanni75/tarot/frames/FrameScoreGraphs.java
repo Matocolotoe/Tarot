@@ -157,7 +157,7 @@ class FrameScoreGraphs extends JFrame implements ActionListener {
 		leftPanel.setVisible(true);
 
 		JPanel rightPanel = new JPanel();
-		rightPanel.setBorder(Components.getStandardBorder());
+		rightPanel.setBorder(Components.getStandardBorder(0));
 		rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));
 		rightPanel.setSize(RIGHT_PANEL_WIDTH, GLOBAL_PANEL_HEIGHT);
 		rightPanel.setVisible(true);

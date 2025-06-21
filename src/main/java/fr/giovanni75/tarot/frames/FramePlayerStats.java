@@ -22,7 +22,7 @@ class FramePlayerStats extends JFrame {
 		}
 
 		if (displays.isEmpty()) {
-			Components.popup("Aucune partie n'est disponible pour cette période.");
+			Components.popup(Components.NO_GAME_AVAILABLE);
 			return;
 		}
 
@@ -31,7 +31,7 @@ class FramePlayerStats extends JFrame {
 		setTitle("Statistiques individiuelles – " + players + " joueurs – " + date.getName());
 
 		JPanel mainPanel = new JPanel();
-		mainPanel.setBorder(Components.getStandardBorder());
+		mainPanel.setBorder(Components.getStandardBorder(0));
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 		add(mainPanel);
 
