@@ -6,7 +6,6 @@ import fr.giovanni75.tarot.Utils;
 import fr.giovanni75.tarot.enums.Contract;
 import fr.giovanni75.tarot.objects.Game;
 import fr.giovanni75.tarot.objects.Player;
-import fr.giovanni75.tarot.stats.Leaderboards;
 import fr.giovanni75.tarot.stats.LocalStats;
 
 import javax.swing.BoxLayout;
@@ -61,7 +60,7 @@ class FrameGlobalStats extends JFrame {
 
 			if (averaged) {
 				panel.add(Components.getSimpleText(description + " : "
-						+ Leaderboards.DOUBLE_DECIMAL_FORMAT.format((double) totalAmount / gameCollection.size()), 15));
+						+ Utils.format((double) totalAmount / gameCollection.size()), 15));
 			} else {
 				panel.add(Components.getSimpleText(description + " : " + totalAmount, 15));
 			}
@@ -72,7 +71,7 @@ class FrameGlobalStats extends JFrame {
 					panel.add(Components.getSimpleText(" ‣ " + contract.getName() + " : " + Tarot.NONE_STRING, 15));
 				} else if (averaged) {
 					panel.add(Components.getSimpleText(" ‣ " + contract.getName() + " : " +
-							Leaderboards.DOUBLE_DECIMAL_FORMAT.format((double) amount / Utils.count(gameCollection, contract)), 15));
+							Utils.format((double) amount / Utils.count(gameCollection, contract)), 15));
 				} else {
 					panel.add(Components.getSimpleText(" ‣ " + contract.getName() + " : "
 							+ amount + " (" + 100 * amount / totalAmount + "%)", 15));
@@ -84,7 +83,7 @@ class FrameGlobalStats extends JFrame {
 
 	}
 
-	enum MaximumStatistic {
+	private enum MaximumStatistic {
 
 		PLAYED_GAMES("Le plus de parties jouées", stats -> stats.playedGames,
 				"%s (%d)", true, false, 1),

@@ -5,10 +5,13 @@ import fr.giovanni75.tarot.objects.Game;
 import fr.giovanni75.tarot.objects.LocalPlayer;
 import fr.giovanni75.tarot.objects.Player;
 
+import java.text.DecimalFormat;
 import java.util.*;
 import java.util.function.Function;
 
 public final class Utils {
+
+	private static final DecimalFormat DOUBLE_DECIMAL_FORMAT = new DecimalFormat("#.##");
 
 	public static void calculateScores(List<Game> displayedGames, List<Game> selectedGames, Function<LocalPlayer, Player> converter) {
 		int minIndex = displayedGames.indexOf(selectedGames.getFirst());
@@ -24,6 +27,10 @@ public final class Utils {
 			if (game.contract == contract)
 				count++;
 		return count;
+	}
+
+	public static String format(double value) {
+		return DOUBLE_DECIMAL_FORMAT.format(value);
 	}
 
 	public static Set<Player> getAllPlayers(Collection<Game> games) {
