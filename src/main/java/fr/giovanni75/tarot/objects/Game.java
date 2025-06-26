@@ -307,18 +307,16 @@ public class Game implements Serializable {
 	}
 
 	private void reorderPlayers() {
-		for (int i = 0; i < players.length; i++) {
-			LocalPlayer local = players[i];
-			if (local.side == Side.ATTACK) {
+		for (int i = 0; i < players.length; i++)
+			if (players[i].side == Side.ATTACK)
 				Utils.swap(players, i, 0);
-			} else if (local.side == Side.ATTACK_ALLY) {
+		// Index 0 is attacker, we can start at 1
+		for (int i = 1; i < players.length; i++)
+			if (players[i].side == Side.ATTACK_ALLY)
 				Utils.swap(players, i, 1);
-			}
-		}
-		//FIXME what the fuck
-		int minIndex = selfCalled() ? 1 : 2;
-		Arrays.sort(players, minIndex, players.length - 1,
-				Comparator.comparing(local -> DEFAULT_CONVERTER.apply(local).getName())); // Order by name
+		// Order defenders by name
+		int minIndex = players.length < 5 || selfCalled() ? 1 : 2;
+		Arrays.sort(players, minIndex, players.length, Comparator.comparing(local -> DEFAULT_CONVERTER.apply(local).getName()));
 	}
 
 	private boolean selfCalled() {
