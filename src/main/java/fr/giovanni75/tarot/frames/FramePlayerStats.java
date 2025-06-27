@@ -7,7 +7,6 @@ import fr.giovanni75.tarot.objects.Player;
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -23,35 +22,32 @@ class FramePlayerStats extends JFrame {
 		}
 
 		if (displays.isEmpty()) {
-			Components.popup("Aucune partie n'est disponible pour cette période.");
+			Components.popup(Components.NO_GAME_AVAILABLE);
 			return;
 		}
 
-		setBounds(900, 150, 500, 800);
+		setBounds(300, 150, 500, 800);
 		setResizable(false);
-		setTitle("Statistiques – " + players + " joueurs – " + date.getName());
+		setTitle("Statistiques individiuelles – " + players + " joueurs – " + date.getName());
 
 		JPanel mainPanel = new JPanel();
-		mainPanel.setBorder(Components.getStandardBorder());
+		mainPanel.setBorder(Components.getStandardBorder(0));
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 		add(mainPanel);
 
 		mainPanel.add(Components.getSimpleText("Statistiques individuelles", 20));
 		mainPanel.add(Components.getSimpleText(date.getName() + " – " + players + " joueurs", 20));
-		mainPanel.add(Components.getEmptyText(25));
+		mainPanel.add(Components.getEmptySpace(25));
 
-		for (Map.Entry<Player, List<String>> entry : displays.entrySet()) {
+		for (var entry : displays.entrySet()) {
 			mainPanel.add(Components.getSimpleText(entry.getKey().getName(), 18));
-			mainPanel.add(Components.getEmptyText(15));
+			mainPanel.add(Components.getEmptySpace(15));
 			for (String line : entry.getValue())
 				mainPanel.add(Components.getSimpleText(line, 15));
-			mainPanel.add(Components.getEmptyText(35));
+			mainPanel.add(Components.getEmptySpace(35));
 		}
 
-		JScrollPane scrollPane = new JScrollPane(mainPanel);
-		scrollPane.getVerticalScrollBar().setUnitIncrement(18);
-		add(scrollPane);
-
+		add(Components.getStandardScrollPane(mainPanel));
 		setVisible(true);
 	}
 

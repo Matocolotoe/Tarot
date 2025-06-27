@@ -1,9 +1,6 @@
 package fr.giovanni75.tarot.stats;
 
-import fr.giovanni75.tarot.DateRecord;
-import fr.giovanni75.tarot.Fraction;
-import fr.giovanni75.tarot.Maps;
-import fr.giovanni75.tarot.Tarot;
+import fr.giovanni75.tarot.*;
 import fr.giovanni75.tarot.enums.Contract;
 import fr.giovanni75.tarot.enums.Nameable;
 import fr.giovanni75.tarot.objects.Player;
@@ -20,7 +17,6 @@ import java.util.function.Function;
 
 public final class Leaderboards {
 
-	private static final DecimalFormat DOUBLE_DECIMAL_FORMAT = new DecimalFormat("#.##");
 	private static final DecimalFormat PERCENTAGE_DECIMAL_FORMAT = new DecimalFormat("#0.0%");
 
 	private static final int WINRATE_MINIMUM_TAKES = 2;
@@ -319,7 +315,7 @@ public final class Leaderboards {
 						if (value == 0) {
 							ws.value(row + i, column + 1, NONE_STRING);
 						} else {
-							ws.value(row + i, column + 1, DOUBLE_DECIMAL_FORMAT.format(value / stats.contracts.get(contract)));
+							ws.value(row + i, column + 1, Utils.format(value / stats.contracts.get(contract)));
 						}
 					} else {
 						throw new IllegalArgumentException("Keys need to extend Contract for averaged data");
@@ -334,8 +330,7 @@ public final class Leaderboards {
 			ws.style(row + i, column).bold().verticalAlignment("center").set();
 
 			if (data.averaged) {
-				double value = (double) Maps.sum(map) / Maps.sum(stats.contracts);
-				ws.value(row + i, column + 1, DOUBLE_DECIMAL_FORMAT.format(value));
+				ws.value(row + i, column + 1, Utils.format((double) Maps.sum(map) / Maps.sum(stats.contracts)));
 			} else {
 				ws.value(row + i, column + 1, Maps.sum(map));
 			}

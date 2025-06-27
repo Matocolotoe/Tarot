@@ -6,12 +6,14 @@ import fr.giovanni75.tarot.objects.Game;
 import fr.giovanni75.tarot.objects.LocalPlayer;
 
 import javax.swing.*;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
 class FrameNewGame extends JFrame implements ActionListener {
 
@@ -46,6 +48,10 @@ class FrameNewGame extends JFrame implements ActionListener {
 	private final JComboBox<String> petitAuBoutBox;
 	private final JComboBox<String> slamBox;
 
+	private final JLabel calledLabel;
+	private final JLabel[] noneStrings = new JLabel[5];
+	private int emptyNames = 5;
+
 	private final JSlider scoreSlider = new JSlider(JSlider.HORIZONTAL, 0, 91, 51);
 
 	private final JRadioButton[] attackerButtons = new JRadioButton[5];
@@ -54,6 +60,13 @@ class FrameNewGame extends JFrame implements ActionListener {
 	private final JRadioButton[] oudlersButtons = new JRadioButton[Oudlers.ALL_OUDLERS.length];
 
 	private final JButton submitButton;
+
+	private static boolean exists(Object[] array, Predicate<Object> predicate) {
+		for (Object element : array)
+			if (predicate.test(element))
+				return true;
+		return false;
+	}
 
 	private static JComboBox<String> getEnumNameList(Nameable[] values, String none, int x, int y, int width) {
 		String[] names = new String[values.length + 1];
@@ -74,6 +87,20 @@ class FrameNewGame extends JFrame implements ActionListener {
 		box.setSelectedItem(LAST_SELECTED_NAMES[index]);
 		box.setSize(SMALL_TEXT_WIDTH, SMALL_TEXT_HEIGHT);
 		return box;
+	}
+
+	private boolean hasEmptyName(JComboBox<String> box) {
+		return box.getSelectedIndex() == 0;
+	}
+
+	private void updateCalledLine(boolean showButtons) {
+		calledLabel.setForeground(showButtons ? Color.BLACK : Color.LIGHT_GRAY);
+		for (JRadioButton button : calledButtons)
+			button.setVisible(showButtons);
+		for (JLabel label : noneStrings)
+			label.setVisible(!showButtons);
+		repaint();
+		revalidate();
 	}
 
 	FrameNewGame(Game baseGame) {
@@ -103,6 +130,7 @@ class FrameNewGame extends JFrame implements ActionListener {
 			mainPanel.add(playerNameBoxes[i]);
 			mainPanel.add(miseryBoxes[i]);
 			mainPanel.add(handfulBoxes[i]);
+			playerNameBoxes[i].addActionListener(this);
 		}
 
 		final ButtonGroup attackerButtonGroup = new ButtonGroup();
@@ -120,14 +148,37 @@ class FrameNewGame extends JFrame implements ActionListener {
 			mainPanel.add(button);
 		}
 
-		mainPanel.add(Components.getSimpleText("Appelé", 18, COMBO_BOX_BASE_X - 80, COMBO_BOX_BASE_Y + 140, SMALL_TEXT_WIDTH, TEXT_HEIGHT));
+		calledLabel = Components.getSimpleText("Appelé", 18, COMBO_BOX_BASE_X - 80, COMBO_BOX_BASE_Y + 140, SMALL_TEXT_WIDTH, TEXT_HEIGHT);
+		mainPanel.add(calledLabel);
+
+		boolean hideCalledButtons = (baseGame == null || baseGame.players.length < 5) && exists(LAST_SELECTED_NAMES, Tarot.NONE_STRING::equals);
+		if (hideCalledButtons)
+			calledLabel.setForeground(Color.LIGHT_GRAY);
+
 		for (int i = 0; i < 5; i++) {
+			int x = PLAYER_BUTTON_BASE_X + PLAYER_X_SPACING * i;
+			int y = COMBO_BOX_BASE_Y + 160;
+
 			JRadioButton button = new JRadioButton();
 			calledButtons[i] = button;
 			calledPlayerButtonGroup.add(button);
-			button.setLocation(PLAYER_BUTTON_BASE_X + PLAYER_X_SPACING * i, COMBO_BOX_BASE_Y + 160);
+			button.setLocation(x, y);
 			button.setSize(20, SMALL_TEXT_HEIGHT);
 			mainPanel.add(button);
+
+			JLabel label = new JLabel(Tarot.NONE_STRING);
+			noneStrings[i] = label;
+			label.setFont(Components.getFont(12));
+			label.setLocation(x + 3, y);
+			label.setSize(20, SMALL_TEXT_HEIGHT);
+			mainPanel.add(label);
+
+			if (hideCalledButtons) {
+				button.setVisible(false);
+				label.setForeground(Color.LIGHT_GRAY);
+			} else {
+				label.setVisible(false);
+			}
 		}
 
 		scoreSlider.setMajorTickSpacing(10);
@@ -189,20 +240,29 @@ class FrameNewGame extends JFrame implements ActionListener {
 
 		if (baseGame != null) {
 			int numberOfPlayers = baseGame.players.length;
+			boolean hasAlly = false;
+			int attackerIndex = -1;
 			for (int i = 0; i < numberOfPlayers; i++) {
 				LocalPlayer local = baseGame.players[i];
-				Misery misery = local.misery();
-				Handful handful = local.handful();
-				Side side = local.side();
-				playerNameBoxes[i].setSelectedIndex(Tarot.ORDERED_PLAYERS.indexOf(Tarot.getPlayer(local.id())) + 1);
+				Misery misery = local.misery;
+				Handful handful = local.handful;
+				Side side = local.side;
+				playerNameBoxes[i].setSelectedIndex(Tarot.ORDERED_PLAYERS.indexOf(Tarot.getPlayer(local.getID())) + 1);
 				miseryBoxes[i].setSelectedIndex(misery == null ? 0 : misery.ordinal() + 1);
 				handfulBoxes[i].setSelectedIndex(handful == null ? 0 : handful.ordinal() + 1);
 				if (side == Side.ATTACK) {
 					attackerButtons[i].setSelected(true);
+					attackerIndex = i;
 				} else if (side == Side.ATTACK_ALLY) {
 					calledButtons[i].setSelected(true);
+					hasAlly = true;
 				}
 			}
+			if (attackerIndex == -1)
+				throw new IllegalStateException("what");
+			// Attacker has called themselves
+			if (numberOfPlayers == 5 && !hasAlly)
+				calledButtons[attackerIndex].setSelected(true);
 			contractButtons[baseGame.contract.ordinal()].setSelected(true);
 			oudlersButtons[baseGame.oudlers.ordinal()].setSelected(true);
 			scoreSlider.setValue(baseGame.attackScore);
@@ -215,12 +275,25 @@ class FrameNewGame extends JFrame implements ActionListener {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() != submitButton)
+		Object source = e.getSource();
+		if (exists(playerNameBoxes, element -> element == source)) {
+			int empty = 0;
+			for (var box : playerNameBoxes)
+				if (hasEmptyName(box))
+					empty++;
+			if (empty != emptyNames) {
+				emptyNames = empty;
+				updateCalledLine(empty == 0);
+				return;
+			}
+		}
+
+		if (source != submitButton)
 			return;
 
 		int numberOfPlayers = 0;
-		for (int i = 0; i < 5; i++)
-			if (!Tarot.NONE_STRING.equals(playerNameBoxes[i].getSelectedItem()))
+		for (var box : playerNameBoxes)
+			if (!hasEmptyName(box))
 				numberOfPlayers++;
 
 		if (numberOfPlayers < 3) {
@@ -299,13 +372,12 @@ class FrameNewGame extends JFrame implements ActionListener {
 				continue;
 
 			String name = selectedItem.toString();
-			int id = Tarot.getPlayer(name).getID();
 			if (baseGame != null)
 				LAST_SELECTED_NAMES[i] = name;
 
 			Handful handful = Handful.ALL_HANDFULS[handfulBoxes[i].getSelectedIndex()];
 			Misery misery = Misery.ALL_MISERIES[miseryBoxes[i].getSelectedIndex()];
-			players[nonEmptyIndex] = new LocalPlayer(id, sides[i], handful, misery);
+			players[nonEmptyIndex] = new LocalPlayer(Tarot.getPlayer(name), sides[i], handful, misery);
 			nonEmptyIndex++;
 		}
 
@@ -323,7 +395,7 @@ class FrameNewGame extends JFrame implements ActionListener {
 		if (baseGame != null) {
 			// Figuring out what to change precisely would be way too complicated
 			// Instead, undo previous calculations then redo required changes
-			baseGame.applyResults(Game.DEFAULT_LOCAL_PLAYER_CONVERTER, Game.REMOVE_GAME_DIRECTION);
+			baseGame.applyResults(Game.DEFAULT_CONVERTER, Game.REMOVE_GAME_DIRECTION);
 
 			baseGame.attackScore = attackScore;
 			baseGame.contract = contract;
@@ -337,7 +409,7 @@ class FrameNewGame extends JFrame implements ActionListener {
 			System.arraycopy(players, 0, baseGame.players, 0, numberOfPlayers);
 
 			baseGame.edit();
-			baseGame.applyResults(Game.DEFAULT_LOCAL_PLAYER_CONVERTER, Game.ADD_GAME_DIRECTION);
+			baseGame.applyResults(Game.DEFAULT_CONVERTER, Game.ADD_GAME_DIRECTION);
 			Components.popup("Partie modifiée avec succès.");
 			dispose();
 			FrameMainMenu.MAIN_MENU.reloadGames();
@@ -347,21 +419,19 @@ class FrameNewGame extends JFrame implements ActionListener {
 		Game game = new Game(month, contract, attackScore, oudlers, petitAuBout, slam, players);
 		game.write(game.date.getFileName());
 
-		// Add first so that game is shown on top
 		// Use computeIfAbsent since this might be the first game having the corresponding DateRecord
-		Tarot.ALL_GAMES.computeIfAbsent(game.date, key -> new ArrayList<>()).addFirst(game);
+		Tarot.ALL_GAMES.computeIfAbsent(game.date, key -> new ArrayList<>()).add(game);
 
 		for (JComboBox<String> handfulBox : handfulBoxes)
 			handfulBox.setSelectedIndex(0);
 		for (JComboBox<String> miseryBox : miseryBoxes)
 			miseryBox.setSelectedIndex(0);
-
 		petitAuBoutBox.setSelectedIndex(0);
 		slamBox.setSelectedIndex(0);
 		scoreSlider.setValue(51);
 
 		game.applyResults();
-		Components.popup("Partie ajoutée avec succès !\n\n" + String.join("\n", game.getDescription()));
+		Components.popup("Partie ajoutée avec succès.");
 		FrameMainMenu.MAIN_MENU.reloadGames();
 	}
 

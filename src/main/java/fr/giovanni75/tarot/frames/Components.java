@@ -2,12 +2,17 @@ package fr.giovanni75.tarot.frames;
 
 import javax.swing.*;
 import javax.swing.border.Border;
+import java.awt.Color;
 import java.awt.Font;
 
 final class Components {
 
+	static final Color DEFAULT_BUTTON_COLOR = new Color(247, 247, 247);
+	static final String NO_GAME_AVAILABLE = "Aucune partie n'est disponible pour cette période.";
+
+	private static final int BORDER_TOP_LEFT_MARGIN = 30;
+	private static final int SCROLL_VERTICAL_INCREMENT = 18;
 	private static final String FONT_NAME = "Helvetica";
-	private static final String INVALID_DAY_MESSAGE = "Veuillez entrer un jour valide.";
 
 	static JButton getClickableText(String text, int size) {
 		JButton button = new JButton(text);
@@ -19,7 +24,7 @@ final class Components {
 		return button;
 	}
 
-	static JLabel getEmptyText(int size) {
+	static JLabel getEmptySpace(int size) {
 		return getSimpleText(" ", size);
 	}
 
@@ -40,12 +45,22 @@ final class Components {
 		return label;
 	}
 
-	static Border getStandardBorder() {
-		return BorderFactory.createEmptyBorder(30, 30, 0, 0);
+	static Border getStandardBorder(int rightMargin) {
+		return BorderFactory.createEmptyBorder(BORDER_TOP_LEFT_MARGIN, BORDER_TOP_LEFT_MARGIN, 0, rightMargin);
+	}
+
+	static JScrollPane getStandardScrollPane(JPanel panel) {
+		JScrollPane pane = new JScrollPane(panel);
+		pane.getVerticalScrollBar().setUnitIncrement(SCROLL_VERTICAL_INCREMENT);
+		return pane;
 	}
 
 	static void popup(String message) {
-		JOptionPane.showMessageDialog(null, message, "Information", JOptionPane.INFORMATION_MESSAGE);
+		popup(message, "Information");
+	}
+
+	static void popup(String message, String title) {
+		JOptionPane.showMessageDialog(null, message, title, JOptionPane.INFORMATION_MESSAGE);
 	}
 
 	static String prompt(String message, String title) {
@@ -54,32 +69,6 @@ final class Components {
 
 	static int promptConfirmation(String message, String title) {
 		return JOptionPane.showConfirmDialog(null, message, title, JOptionPane.YES_NO_OPTION);
-	}
-
-	static int promptDay(String message, String title) {
-		String prompt = prompt(message, title);
-		if (prompt == null) // Window was just closed
-			return -1;
-
-		if (prompt.isBlank()) {
-			popup(INVALID_DAY_MESSAGE);
-			return promptDay(message, title);
-		}
-
-		int result;
-		try {
-			result = Integer.parseInt(prompt);
-		} catch (NumberFormatException e) {
-			popup(INVALID_DAY_MESSAGE);
-			return promptDay(message, title);
-		}
-
-		if (result < 1 || result > 31) {
-			popup(INVALID_DAY_MESSAGE);
-			return promptDay(message, title);
-		}
-
-		return result;
 	}
 
 }

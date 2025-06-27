@@ -18,14 +18,12 @@ import java.awt.event.MouseEvent;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class FrameMainMenu extends JFrame {
 
 	static FrameMainMenu MAIN_MENU;
 
-	private static final Color DEFAULT_BUTTON_COLOR = new Color(247, 247, 247);
-	private static final Color SELECTED_BUTTON_COLOR = new Color(235, 245, 255);
+	private static final Color RIGHT_CLICKED_COLOR = new Color(235, 245, 255);
 
 	private static final int MAX_GAMES_DISPLAYED = 100;
 
@@ -48,7 +46,7 @@ public class FrameMainMenu extends JFrame {
 
 		Player player = Tarot.addPlayer(Tarot.ORDERED_PLAYERS.size() + 1, name);
 		player.write("players");
-		Components.popup("Joueur ajouté avec succès.\nNom : " + name);
+		Components.popup("Joueur ajouté avec succès.");
 	}
 
 	private final JPanel mainPanel;
@@ -95,41 +93,42 @@ public class FrameMainMenu extends JFrame {
 			JMenu statsMenu = new JMenu("Tarot à " + players);
 			JMenu graphMenu = new JMenu("Graphiques");
 			JMenu globalStatsMenu = new JMenu("Stats générales");
-			JMenu playerStatsMenu = new JMenu("Stats individuelles");
+			JMenu invidiualStatsMenu = new JMenu("Stats individuelles");
+			JMenu periodicStatsMenu = new JMenu("Stats périodiques");
 			for (DateRecord date : dates) {
 				String dateName = date.getName();
 				JMenuItem graphItem = new JMenuItem(dateName);
 				JMenuItem globalStatsItem = new JMenuItem(dateName);
 				JMenuItem playerStatsItem = new JMenuItem(dateName);
-				graphItem.addActionListener(event -> {
-					int minDay = Components.promptDay("De quel jour ?", "Graphiques – " + dateName);
-					if (minDay == -1) // Window was just closed
-						return;
-					int maxDay = Components.promptDay("À quel jour ?", "Graphiques – " + dateName);
-					if (maxDay == -1) // Window was just closed
-						return;
-					new FrameScoreGraphs(minDay, maxDay, date, players);
-				});
+				JMenuItem periodicStatsItem = new JMenuItem(dateName);
+				graphItem.addActionListener(event -> new FrameSelection("Évolution des scores", date, players,
+						(displayed, selected) -> new FrameScoreGraphs(displayed, selected, date, players)));
 				globalStatsItem.addActionListener(event -> new FrameGlobalStats(date, players));
 				playerStatsItem.addActionListener(event -> new FramePlayerStats(date, players));
+				periodicStatsItem.addActionListener(event -> new FrameSelection("Statistiques périodiques", date, players,
+						(displayed, selected) -> new FramePeriodicStats(displayed, selected, date, players)));
 				graphMenu.add(graphItem);
 				globalStatsMenu.add(globalStatsItem);
-				playerStatsMenu.add(playerStatsItem);
+				invidiualStatsMenu.add(playerStatsItem);
+				periodicStatsMenu.add(periodicStatsItem);
 			}
 			statsMenu.add(graphMenu);
 			statsMenu.add(globalStatsMenu);
-			statsMenu.add(playerStatsMenu);
+			statsMenu.add(invidiualStatsMenu);
+			statsMenu.add(periodicStatsMenu);
 			menuBar.add(statsMenu);
 		}
 	}
 
 	private void onGameRightClick(Game game, JButton button, int x, int y) {
 		JPopupMenu menu = new JPopupMenu("Partie");
-		JMenuItem editMenuItem = new JMenuItem("Éditer");
+		JMenuItem detailsMenuItem = new JMenuItem("Détails");
+		JMenuItem editMenuItem = new JMenuItem("Modifier");
 		JMenuItem deleteMenuItem = new JMenuItem("Supprimer");
+		menu.add(detailsMenuItem);
 		menu.add(editMenuItem);
 		menu.add(deleteMenuItem);
-		button.setBackground(SELECTED_BUTTON_COLOR);
+		button.setBackground(RIGHT_CLICKED_COLOR);
 		menu.addPopupMenuListener(new PopupMenuListener() {
 			@Override
 			public void popupMenuCanceled(PopupMenuEvent e) {}
@@ -137,18 +136,19 @@ public class FrameMainMenu extends JFrame {
 			public void popupMenuWillBecomeVisible(PopupMenuEvent e) {}
 			@Override
 			public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
-				button.setBackground(DEFAULT_BUTTON_COLOR);
+				button.setBackground(Components.DEFAULT_BUTTON_COLOR);
 			}
 		});
+		detailsMenuItem.addActionListener(event -> Components.popup(game.getDetails(), "Détails de la partie"));
 		editMenuItem.addActionListener(event -> new FrameNewGame(game));
 		deleteMenuItem.addActionListener(event -> promptGameDeletion(game));
 		menu.show(button, x, y);
 	}
 
 	private void promptGameDeletion(Game game) {
-		int option = Components.promptConfirmation("Voulez-vous supprimer la partie ?", "Suppression de partie");
+		int option = Components.promptConfirmation("Voulez-vous supprimer cette partie ?", "Suppression de partie");
 		if (option == JOptionPane.YES_OPTION) {
-			game.applyResults(Game.DEFAULT_LOCAL_PLAYER_CONVERTER, Game.REMOVE_GAME_DIRECTION);
+			game.applyResults(Game.DEFAULT_CONVERTER, Game.REMOVE_GAME_DIRECTION);
 			game.delete();
 			reloadGames();
 			Components.popup("Partie supprimée avec succès.");
@@ -166,17 +166,16 @@ public class FrameMainMenu extends JFrame {
 
 	private void showAllGames() {
 		int total = 0;
-		for (Map.Entry<DateRecord, List<Game>> entry : Tarot.ALL_GAMES.entrySet()) {
+		for (var entry : Tarot.ALL_GAMES.entrySet()) {
 			// Avoid executing one iteration if threshold has already been reached
 			if (total == MAX_GAMES_DISPLAYED)
 				break;
-			components.add(Components.getSimpleText(entry.getKey().getName(), 20));
-			components.add(Components.getEmptyText(18));
-			for (Game game : entry.getValue()) {
+			List<Game> games = entry.getValue();
+			components.add(Components.getSimpleText(entry.getKey().getName() + " – " + games.size() + " parties", 20));
+			components.add(Components.getEmptySpace(18));
+			for (Game game : games.reversed()) {
 				total++;
-				// Text inside a button ignores "\n", convert it to HTML and skip lines this way
-				String text = "<html>" + String.join("<br>", game.getDescription()) + "</html>";
-				JButton button = Components.getClickableText(text, 15);
+				JButton button = Components.getClickableText(game.getDescription(), 15);
 				button.addMouseListener(new MouseAdapter() {
 					@Override
 					public void mouseClicked(MouseEvent e) {
@@ -184,13 +183,13 @@ public class FrameMainMenu extends JFrame {
 							onGameRightClick(game, button, e.getX(), e.getY());
 					}
 				});
-				button.setBackground(DEFAULT_BUTTON_COLOR);
+				button.setBackground(Components.DEFAULT_BUTTON_COLOR);
 				components.add(button);
-				components.add(Components.getEmptyText(15));
+				components.add(Components.getEmptySpace(15));
 				if (total >= MAX_GAMES_DISPLAYED)
 					break;
 			}
-			components.add(Components.getEmptyText(12));
+			components.add(Components.getEmptySpace(12));
 		}
 		for (Component component : components)
 			mainPanel.add(component);
@@ -211,9 +210,7 @@ public class FrameMainMenu extends JFrame {
 		initializeMenus();
 		showAllGames();
 
-		JScrollPane scrollPane = new JScrollPane(mainPanel);
-		scrollPane.getVerticalScrollBar().setUnitIncrement(18);
-		add(scrollPane);
+		add(Components.getStandardScrollPane(mainPanel));
 
 		URL url = ClassLoader.getSystemResource("logo.png");
 		setIconImage(new ImageIcon(url).getImage());

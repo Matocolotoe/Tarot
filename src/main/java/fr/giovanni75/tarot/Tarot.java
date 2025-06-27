@@ -2,6 +2,7 @@ package fr.giovanni75.tarot;
 
 import com.formdev.flatlaf.FlatLightLaf;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import fr.giovanni75.tarot.frames.FrameMainMenu;
 import fr.giovanni75.tarot.objects.Game;
@@ -17,13 +18,13 @@ public final class Tarot {
 	private static final Map<DateRecord, GlobalStats> GLOBAL_STATS_FOUR = new HashMap<>();
 	private static final Map<DateRecord, GlobalStats> GLOBAL_STATS_THREE = new HashMap<>();
 
+	private static final Map<Integer, Player> PLAYER_ID_MAP = new HashMap<>();
+	private static final Map<String, Player> PLAYER_NAME_MAP = new HashMap<>();
+
 	public static final List<Player> ORDERED_PLAYERS = new ArrayList<>();
 	public static final List<String> PLAYER_NAMES = new ArrayList<>();
 	public static final Map<DateRecord, List<Game>> ALL_GAMES = new TreeMap<>();
 	public static final String NONE_STRING = "—";
-
-	private static final Map<Integer, Player> PLAYER_ID_MAP = new HashMap<>();
-	private static final Map<String, Player> PLAYER_NAME_MAP = new HashMap<>();
 
 	public static Player addPlayer(int id, String name) {
 		Player player = new Player(id, name);
@@ -60,19 +61,7 @@ public final class Tarot {
 		Files.createDirectory("leaderboards");
 		Files.createJsonFile("players");
 
-		File[] gameFiles = new File("data/games").listFiles();
-		if (gameFiles != null) {
-			for (File file : gameFiles) {
-				DateRecord date = Files.getDateFromFile(file);
-				JsonArray games = Files.getJsonArrayFromFile(file);
-				List<Game> gameList = new ArrayList<>();
-				int size = games.size();
-				for (int i = 0; i < size; i++)
-					gameList.add(new Game(games.get(size - i - 1).getAsJsonObject(), date));
-				ALL_GAMES.put(date, gameList);
-			}
-		}
-
+		// Load players before games to allow proper name reordering in games
 		JsonArray players = Files.getJsonArrayFromFile("players");
 		int size = players.size();
 		for (int i = 0; i < size; i++) {
@@ -80,6 +69,20 @@ public final class Tarot {
 			int id = object.get("id").getAsInt();
 			String name = object.get("name").getAsString();
 			addPlayer(id, name);
+		}
+
+		File[] gameFiles = new File("data/games").listFiles();
+		if (gameFiles != null) {
+			for (File file : gameFiles) {
+				DateRecord date = Files.getDateFromFile(file);
+				JsonArray games = Files.getJsonArrayFromFile(file);
+				List<Game> gameList = new ArrayList<>();
+				for (JsonElement gameElement : games)
+					gameList.add(new Game(gameElement.getAsJsonObject(), date));
+				ALL_GAMES.put(date, gameList);
+				for (Player player : ORDERED_PLAYERS)
+					player.createStats(date); // Must be done after games are scanned and before game results are applied
+			}
 		}
 
 		for (DateRecord date : ALL_GAMES.keySet()) {
