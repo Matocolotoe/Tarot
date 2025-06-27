@@ -55,14 +55,13 @@ public final class LocalStats {
 			result.add(" ‣ " + contract.getName() + " : " + (total == 0 ? Tarot.NONE_STRING : successes + "/" + total));
 		}
 
-		int totalSelfCalls = Maps.sum(selfCalls);
+		int selfCallAmount = Maps.sum(selfCalls);
 		result.add(" ");
-		result.add("Appelé·e " + Maps.sum(calledTimes) + " fois"
-				+ (totalSelfCalls == 0 ? "" : ", dont " + totalSelfCalls + " soi-même"));
+		result.add("Appelé·e " + Maps.sum(calledTimes) + " fois" + (selfCallAmount == 0 ? "" : ", dont " + selfCallAmount + " soi-même"));
 		for (Contract contract : Contract.ALL_CONTRACTS) {
-			totalSelfCalls = selfCalls.getOrDefault(contract, 0);
+			selfCallAmount = selfCalls.getOrDefault(contract, 0);
 			result.add(" ‣ " + contract.getName() + " : " + calledTimes.getOrDefault(contract, 0)
-					+ (totalSelfCalls == 0 ? "" : ", dont " + totalSelfCalls + " soi-même"));
+					+ (selfCallAmount == 0 ? "" : ", dont " + selfCallAmount + " soi-même"));
 		}
 
 		result.add(" ");

@@ -426,7 +426,6 @@ class FrameNewGame extends JFrame implements ActionListener {
 			handfulBox.setSelectedIndex(0);
 		for (JComboBox<String> miseryBox : miseryBoxes)
 			miseryBox.setSelectedIndex(0);
-
 		petitAuBoutBox.setSelectedIndex(0);
 		slamBox.setSelectedIndex(0);
 		scoreSlider.setValue(51);

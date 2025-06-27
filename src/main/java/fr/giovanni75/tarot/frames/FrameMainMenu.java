@@ -103,8 +103,8 @@ public class FrameMainMenu extends JFrame {
 				JMenuItem periodicStatsItem = new JMenuItem(dateName);
 				graphItem.addActionListener(event -> new FrameSelection("Évolution des scores", date, players,
 						(displayed, selected) -> new FrameScoreGraphs(displayed, selected, date, players)));
-				globalStatsItem.addActionListener(event -> new FrameGlobalStats(date, players)); // TODO reuse FramePeriodicStats
-				playerStatsItem.addActionListener(event -> new FramePlayerStats(date, players)); // TODO accept game list input
+				globalStatsItem.addActionListener(event -> new FrameGlobalStats(date, players));
+				playerStatsItem.addActionListener(event -> new FramePlayerStats(date, players));
 				periodicStatsItem.addActionListener(event -> new FrameSelection("Statistiques périodiques", date, players,
 						(displayed, selected) -> new FramePeriodicStats(displayed, selected, date, players)));
 				graphMenu.add(graphItem);
