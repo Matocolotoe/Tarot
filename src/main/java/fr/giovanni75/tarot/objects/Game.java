@@ -333,6 +333,8 @@ public class Game implements Serializable {
 		object.addProperty("oudlers", oudlers.ordinal());
 		if (petitAuBout != null)
 			object.addProperty("petit_au_bout", petitAuBout.name());
+		if (slam != null)
+			object.addProperty("slam", slam.name());
 
 		JsonArray playersArray = new JsonArray();
 		for (LocalPlayer player : players)
