@@ -23,6 +23,12 @@ Pour chaque nombre $N$ de joueurs, une rubrique `Tarot à N` propose des statist
 
 _Par défaut, seules les courbes des personnes ayant joué plus de 10 parties sur la période sélectionnée sont affichées._
 
-## Grille des scores
+## Export des données
 
-En cliquant sur `Exporter les données` dans la rubrique `Données` ou en entrant `CTRL+E`, l'application générera un tableur pour chaque année, chacun contenant une grille par mois contenant au moins une partie. Des statistiques individuelles, des classements et des statistiques globales sont affichées pour chaque nombre de joueurs.
+### Grille des scores
+
+Lorsque vous cliquez sur `Exporter les données` dans la rubrique `Données` ou entrez `CTRL+E`, l'application crée un tableur pour chaque année, chacun contenant une grille par mois contenant au moins une partie. Des statistiques individuelles, des classements et des statistiques globales sont affichées pour chaque nombre de joueurs.
+
+### Sauvegardes
+
+Lorsque vous cliquez sur `Créer une sauvegarde` dans la rubrique `Données` ou entrez `CTRL+S`, l'application crée une copie des fichiers des parties et des joueurs dans une archive au format ZIP.
