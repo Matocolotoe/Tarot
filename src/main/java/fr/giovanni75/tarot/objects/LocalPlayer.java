@@ -1,6 +1,8 @@
 package fr.giovanni75.tarot.objects;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import fr.giovanni75.tarot.Tarot;
 import fr.giovanni75.tarot.enums.Handful;
 import fr.giovanni75.tarot.enums.Misery;
 import fr.giovanni75.tarot.enums.Side;
@@ -21,6 +23,17 @@ public final class LocalPlayer implements Serializable {
 		this.misery = misery;
 	}
 
+	LocalPlayer(JsonObject json) {
+		int id = json.get("id").getAsInt();
+		this.player = Tarot.getPlayer(id);
+		JsonElement element = json.get("side");
+		this.side = element == null ? Side.DEFENSE : Side.ALL_SIDES[element.getAsInt()];
+		element = json.get("handful");
+		this.handful = element == null ? null : Handful.ALL_HANDFULS[element.getAsInt() + 1];
+		element = json.get("misery");
+		this.misery = element == null ? null : Misery.ALL_MISERIES[element.getAsInt() + 1];
+	}
+
 	@Override
 	public boolean equals(Object object) {
 		return object instanceof LocalPlayer && getID() == ((LocalPlayer) object).getID();
@@ -35,11 +48,11 @@ public final class LocalPlayer implements Serializable {
 		JsonObject object = new JsonObject();
 		object.addProperty("id", player.getID());
 		if (side != Side.DEFENSE)
-			object.addProperty("side", side.toString());
+			object.addProperty("side", side.ordinal());
 		if (handful != null)
-			object.addProperty("type", handful.name());
+			object.addProperty("type", handful.ordinal());
 		if (misery != null)
-			object.addProperty("type", misery.name());
+			object.addProperty("type", misery.ordinal());
 		return object;
 	}
 

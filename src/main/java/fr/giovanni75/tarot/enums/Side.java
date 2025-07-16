@@ -4,6 +4,8 @@ public enum Side {
 
 	ATTACK,
 	ATTACK_ALLY,
-	DEFENSE,
+	DEFENSE;
+
+	public static final Side[] ALL_SIDES = values();
 
 }

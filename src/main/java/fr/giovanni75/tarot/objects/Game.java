@@ -66,31 +66,21 @@ public class Game implements Serializable {
 		this.dayOfMonth = element == null ? 0 : element.getAsInt();
 		this.date = date; // Pre-calculated using file name
 
-		this.contract = Contract.valueOf(json.get("contract").getAsString());
+		this.contract = Contract.ALL_CONTRACTS[json.get("contract").getAsInt()];
 		this.attackScore = json.get("attack_score").getAsInt();
 		this.oudlers = Oudlers.ALL_OUDLERS[json.get("oudlers").getAsInt()];
 
 		element = json.get("petit_au_bout");
-		this.petitAuBout = element == null ? null : PetitAuBout.valueOf(element.getAsString());
+		this.petitAuBout = element == null ? null : PetitAuBout.ALL_PETITS[element.getAsInt() + 1];
 
 		element = json.get("slam");
-		this.slam = element == null ? null : Slam.valueOf(element.getAsString());
+		this.slam = element == null ? null : Slam.ALL_SLAMS[element.getAsInt() + 1];
 
 		JsonArray playersArray = json.get("players").getAsJsonArray();
 		int size = playersArray.size();
 		this.players = new LocalPlayer[size];
-
-		for (int i = 0; i < size; i++) {
-			JsonObject object = playersArray.get(i).getAsJsonObject();
-			int id = object.get("id").getAsInt();
-			element = object.get("side");
-			Side side = element == null ? Side.DEFENSE : Side.valueOf(element.getAsString());
-			element = object.get("handful");
-			Handful handful = element == null ? null : Handful.valueOf(element.getAsString());
-			element = object.get("misery");
-			Misery misery = element == null ? null : Misery.valueOf(element.getAsString());
-			this.players[i] = new LocalPlayer(Tarot.getPlayer(id), side, handful, misery);
-		}
+		for (int i = 0; i < size; i++)
+			this.players[i] = new LocalPlayer(playersArray.get(i).getAsJsonObject());
 
 		reorderPlayers();
 	}
@@ -328,13 +318,13 @@ public class Game implements Serializable {
 		JsonObject object = new JsonObject();
 		object.addProperty("day", dayOfMonth);
 
-		object.addProperty("contract", contract.name());
+		object.addProperty("contract", contract.ordinal());
 		object.addProperty("attack_score", attackScore);
 		object.addProperty("oudlers", oudlers.ordinal());
 		if (petitAuBout != null)
-			object.addProperty("petit_au_bout", petitAuBout.name());
+			object.addProperty("petit_au_bout", petitAuBout.ordinal());
 		if (slam != null)
-			object.addProperty("slam", slam.name());
+			object.addProperty("slam", slam.ordinal());
 
 		JsonArray playersArray = new JsonArray();
 		for (LocalPlayer player : players)
