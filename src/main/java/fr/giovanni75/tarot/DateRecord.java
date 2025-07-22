@@ -4,6 +4,13 @@ import fr.giovanni75.tarot.enums.Month;
 
 public record DateRecord(Month month, int year) implements Comparable<DateRecord> {
 
+	private static final int START_YEAR = 2025;
+
+	static DateRecord fromHash(int hashCode) {
+		int yearRemainder = hashCode / 12; // Number of months in a year
+		return new DateRecord(Month.ALL_MONTHS[hashCode - yearRemainder], yearRemainder + START_YEAR);
+	}
+
 	@Override
 	public int compareTo(DateRecord other) {
 		if (this.year < other.year)
@@ -20,6 +27,12 @@ public record DateRecord(Month month, int year) implements Comparable<DateRecord
 
 	public String getName() {
 		return month.getName() + " " + year;
+	}
+
+	@Override
+	public int hashCode() {
+		// Number of months elapsed since January 2025
+		return (year - START_YEAR) * 12 + month.ordinal();
 	}
 
 }

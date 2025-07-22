@@ -3,7 +3,6 @@ package fr.giovanni75.tarot;
 import com.formdev.flatlaf.FlatLightLaf;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import fr.giovanni75.tarot.frames.FrameMainMenu;
 import fr.giovanni75.tarot.objects.Game;
 import fr.giovanni75.tarot.objects.Player;
@@ -26,8 +25,8 @@ public final class Tarot {
 	public static final Map<DateRecord, List<Game>> ALL_GAMES = new TreeMap<>();
 	public static final String NONE_STRING = "—";
 
-	public static Player addPlayer(int id, String name) {
-		Player player = new Player(id, name);
+	public static Player addPlayer(int id, String name, Map<DateRecord, String> nicknames) {
+		Player player = new Player(id, name, nicknames);
 		ORDERED_PLAYERS.add(player);
 		PLAYER_NAMES.add(name);
 		PLAYER_ID_MAP.put(id, player);
@@ -63,13 +62,14 @@ public final class Tarot {
 
 		// Load players before games to allow proper name reordering in games
 		JsonArray players = Files.getJsonArrayFromFile("players");
-		int size = players.size();
-		for (int i = 0; i < size; i++) {
-			JsonObject object = players.get(i).getAsJsonObject();
+		Files.forEachJson(players, object -> {
 			int id = object.get("id").getAsInt();
 			String name = object.get("name").getAsString();
-			addPlayer(id, name);
-		}
+			Map<DateRecord, String> nicknames = new HashMap<>();
+			Files.forEachJson(object.get("nicknames"), entry ->
+					nicknames.put(DateRecord.fromHash(entry.get("date").getAsInt()), entry.get("value").getAsString()));
+			addPlayer(id, name, nicknames);
+		});
 
 		File[] gameFiles = new File("data/games").listFiles();
 		if (gameFiles != null) {

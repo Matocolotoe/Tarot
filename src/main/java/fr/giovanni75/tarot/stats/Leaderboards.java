@@ -156,7 +156,7 @@ public final class Leaderboards {
 				entries.add(new StatsPair(player, value));
 			}
 			// Store entries that will be displayed in the left column, sorted by player names
-			entries.sort(Comparator.comparing(individualEntry -> individualEntry.player.getName()));
+			entries.sort(Comparator.comparing(individualEntry -> individualEntry.player.getNickname(date)));
 			unsortedPairs.put(data, entries);
 			// Store entries that will be displayed in the leaderboards on the right, only if needed
 			if (data.leaderboardName != null) {
@@ -210,7 +210,7 @@ public final class Leaderboards {
 		/* Player names */
 		int row = initialRow + 2;
 		for (Player player : playerList) {
-			ws.value(row, 0, player.getName());
+			ws.value(row, 0, player.getNickname(date));
 			row++;
 		}
 
@@ -259,7 +259,7 @@ public final class Leaderboards {
 			row = initialRow + 2;
 			for (StatsPair pair : entry.getValue()) {
 				ws.value(row, column - 1, row - initialRow - 1); // Place in the leaderboard
-				ws.value(row, column, pair.player.getName());
+				ws.value(row, column, pair.player.getNickname(date));
 				ws.value(row, column + 1, data.getDisplay(pair.value));
 				row++;
 			}

@@ -18,6 +18,7 @@ import java.awt.event.MouseEvent;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class FrameMainMenu extends JFrame {
 
@@ -44,7 +45,7 @@ public class FrameMainMenu extends JFrame {
 			return;
 		}
 
-		Player player = Tarot.addPlayer(Tarot.ORDERED_PLAYERS.size() + 1, name);
+		Player player = Tarot.addPlayer(Tarot.ORDERED_PLAYERS.size() + 1, name, null);
 		player.write("players");
 		Components.popup("Joueur ajouté avec succès.");
 	}
