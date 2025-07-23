@@ -4,7 +4,10 @@ import fr.giovanni75.tarot.DateRecord;
 import fr.giovanni75.tarot.Tarot;
 import fr.giovanni75.tarot.objects.Game;
 
-import javax.swing.*;
+import javax.swing.JButton;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import java.awt.Color;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -12,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
 
-class FrameSelection extends JFrame {
+class FrameSelection extends TarotFrame {
 
 	private static final Color LEFT_CLICKED_COLOR = new Color(255, 200, 200);
 
@@ -30,14 +33,9 @@ class FrameSelection extends JFrame {
 			return;
 		}
 
-		setBounds(400, 200, 500, 800);
-		setResizable(false);
-		setTitle(header + " – Choix de parties");
+		create(header + " – Choix de parties", 400, 200, 500, 800);
 
-		JPanel mainPanel = new JPanel();
-		mainPanel.setBorder(Components.getStandardBorder(200));
-		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
-
+		JPanel mainPanel = panel(280, true);
 		mainPanel.add(Components.getSimpleText(date.getName() + " – " + players + " joueurs", 20));
 		mainPanel.add(Components.getSimpleText("Sélectionnez des parties", 20));
 		mainPanel.add(Components.getEmptySpace(18));
@@ -68,7 +66,6 @@ class FrameSelection extends JFrame {
 			mainPanel.add(Components.getEmptySpace(15));
 		}
 
-		add(Components.getStandardScrollPane(mainPanel));
 		setVisible(true);
 	}
 

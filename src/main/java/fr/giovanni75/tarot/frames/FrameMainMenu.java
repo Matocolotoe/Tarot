@@ -18,9 +18,8 @@ import java.awt.event.MouseEvent;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-public class FrameMainMenu extends JFrame {
+public class FrameMainMenu extends TarotFrame {
 
 	static FrameMainMenu MAIN_MENU;
 
@@ -199,19 +198,12 @@ public class FrameMainMenu extends JFrame {
 	public FrameMainMenu() {
 		MAIN_MENU = this;
 
-		setBounds(300, 100, 800, 600);
+		create("Tarot – Compteur de points", 300, 100, 800, 600);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
-		setResizable(false);
-		setTitle("Tarot – Compteur de points");
 
-		mainPanel = new JPanel();
-		mainPanel.setBorder(BorderFactory.createEmptyBorder(30, 30, 0, 280));
-		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
-
+		mainPanel = panel(280, true);
 		initializeMenus();
 		showAllGames();
-
-		add(Components.getStandardScrollPane(mainPanel));
 
 		URL url = ClassLoader.getSystemResource("logo.png");
 		setIconImage(new ImageIcon(url).getImage());

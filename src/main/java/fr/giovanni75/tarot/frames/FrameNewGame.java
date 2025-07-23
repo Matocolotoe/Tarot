@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
-class FrameNewGame extends JFrame implements ActionListener {
+class FrameNewGame extends TarotFrame implements ActionListener {
 
 	private static final int COMBO_BOX_BASE_X = 150;
 	private static final int COMBO_BOX_BASE_Y = 80;
@@ -105,13 +105,10 @@ class FrameNewGame extends JFrame implements ActionListener {
 
 	FrameNewGame(Game baseGame) {
 		this.baseGame = baseGame;
-		setBounds(300, 200, 800, 700);
-		setResizable(false);
-		setTitle(baseGame == null ? "Ajouter une partie" : "Modifier une partie");
 
-		JPanel mainPanel = new JPanel();
-		mainPanel.setLayout(null);
-		add(mainPanel);
+		create(baseGame == null ? "Ajouter une partie" : "Modifier une partie", 300, 200, 800, 700);
+
+		JPanel mainPanel = panel(-1, true);
 
 		final List<String> nameList = new ArrayList<>(Tarot.PLAYER_NAMES);
 		nameList.sort(String::compareTo);

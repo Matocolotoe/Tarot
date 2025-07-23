@@ -8,13 +8,11 @@ import fr.giovanni75.tarot.objects.Game;
 import fr.giovanni75.tarot.objects.Player;
 import fr.giovanni75.tarot.stats.LocalStats;
 
-import javax.swing.BoxLayout;
-import javax.swing.JFrame;
 import javax.swing.JPanel;
 import java.util.*;
 import java.util.function.Function;
 
-class FrameGlobalStats extends JFrame {
+class FrameGlobalStats extends TarotFrame {
 
 	static void displayAll(JPanel panel, DateRecord date, int players, Collection<Game> gameCollection, Collection<Player> playerCollection) {
 		for (GlobalStatistic statistic : GLOBAL_STATS)
@@ -212,21 +210,14 @@ class FrameGlobalStats extends JFrame {
 			return;
 		}
 
-		setBounds(300, 150, 500, 800);
-		setResizable(false);
-		setTitle("Statistiques – " + players + " joueurs – " + date.getName());
+		create("Statistiques – " + players + " joueurs – " + date.getName(), 300, 150, 500, 800);
 
-		JPanel mainPanel = new JPanel();
-		mainPanel.setBorder(Components.getStandardBorder(0));
-		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
-		add(mainPanel);
-
+		JPanel mainPanel = panel(0, true);
 		mainPanel.add(Components.getSimpleText("Statistiques générales", 20));
 		mainPanel.add(Components.getSimpleText(date.getName() + " – " + players + " joueurs", 20));
 		mainPanel.add(Components.getEmptySpace(25));
 
 		displayAll(mainPanel, date, players, games, Tarot.ORDERED_PLAYERS);
-		add(Components.getStandardScrollPane(mainPanel));
 		setVisible(true);
 	}
 
