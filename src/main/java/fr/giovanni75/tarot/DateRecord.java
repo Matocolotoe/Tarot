@@ -6,9 +6,10 @@ public record DateRecord(Month month, int year) implements Comparable<DateRecord
 
 	private static final int START_YEAR = 2025;
 
-	static DateRecord fromHash(int hashCode) {
-		int yearRemainder = hashCode / 12; // Number of months in a year
-		return new DateRecord(Month.ALL_MONTHS[hashCode - yearRemainder], yearRemainder + START_YEAR);
+	static DateRecord fromHash(int totalMonths) {
+		int monthsPerYear = Month.ALL_MONTHS.length;
+		int yearRemainder = totalMonths / monthsPerYear;
+		return new DateRecord(Month.ALL_MONTHS[totalMonths - yearRemainder * monthsPerYear], yearRemainder + START_YEAR);
 	}
 
 	@Override

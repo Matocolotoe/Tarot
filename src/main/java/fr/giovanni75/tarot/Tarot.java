@@ -66,8 +66,8 @@ public final class Tarot {
 			int id = object.get("id").getAsInt();
 			String name = object.get("name").getAsString();
 			Map<DateRecord, String> nicknames = new HashMap<>();
-			Files.forEachJson(object.get("nicknames"), entry ->
-					nicknames.put(DateRecord.fromHash(entry.get("date").getAsInt()), entry.get("value").getAsString()));
+			Files.forEachJson(object.get("nicknames"),
+					entry -> nicknames.put(DateRecord.fromHash(entry.get("date").getAsInt()), entry.get("nick").getAsString()));
 			addPlayer(id, name, nicknames);
 		});
 

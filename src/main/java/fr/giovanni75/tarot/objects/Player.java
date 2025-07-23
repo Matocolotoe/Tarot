@@ -79,7 +79,7 @@ public class Player implements Comparable<Player>, Serializable {
 		JsonArray nicknamesArray = new JsonArray();
 		for (var entry : nicknames.entrySet()) {
 			JsonObject nickname = new JsonObject();
-			nickname.addProperty("date", entry.hashCode());
+			nickname.addProperty("date", entry.getKey().hashCode());
 			nickname.addProperty("nick", entry.getValue());
 			nicknamesArray.add(nickname);
 		}
