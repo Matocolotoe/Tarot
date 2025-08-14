@@ -25,8 +25,8 @@ public final class Tarot {
 	public static final Map<DateRecord, List<Game>> ALL_GAMES = new TreeMap<>();
 	public static final String NONE_STRING = "—";
 
-	public static Player addPlayer(int id, String name, Map<DateRecord, String> nicknames) {
-		Player player = new Player(id, name, nicknames);
+	public static Player addPlayer(int id, String name, Map<DateRecord, String> monthlyNicknames, Map<Integer, String> yearlyNicknames) {
+		Player player = new Player(id, name, monthlyNicknames, yearlyNicknames);
 		ORDERED_PLAYERS.add(player);
 		PLAYER_NAMES.add(name);
 		PLAYER_ID_MAP.put(id, player);
@@ -65,10 +65,13 @@ public final class Tarot {
 		Files.forEachJson(players, object -> {
 			int id = object.get("id").getAsInt();
 			String name = object.get("name").getAsString();
-			Map<DateRecord, String> nicknames = new HashMap<>();
-			Files.forEachJson(object.get("nicknames"),
-					entry -> nicknames.put(DateRecord.fromHash(entry.get("date").getAsInt()), entry.get("nick").getAsString()));
-			addPlayer(id, name, nicknames);
+			Map<DateRecord, String> monthlyNicknames = new HashMap<>();
+			Map<Integer, String> yearlyNicknames = new HashMap<>();
+			Files.forEachJson(object.get("monthNicks"),
+					entry -> monthlyNicknames.put(DateRecord.fromMonths(entry.get("date").getAsInt()), entry.get("nick").getAsString()));
+			Files.forEachJson(object.get("yearNicks"),
+					entry -> yearlyNicknames.put(entry.get("year").getAsInt(), entry.get("nick").getAsString()));
+			addPlayer(id, name, monthlyNicknames, yearlyNicknames);
 		});
 
 		File[] gameFiles = new File("data/games").listFiles();

@@ -13,16 +13,18 @@ public class Player implements Comparable<Player>, Serializable {
 
 	private final int id;
 	private final String name;
-	private final Map<DateRecord, String> nicknames;
+	private final Map<DateRecord, String> monthlyNicknames; // Overriden by yearly nicknames
+	private final Map<Integer, String> yearlyNicknames;
 
 	private final Map<DateRecord, LocalStats> statsFivePlayers = new HashMap<>();
 	private final Map<DateRecord, LocalStats> statsFourPlayers = new HashMap<>();
 	private final Map<DateRecord, LocalStats> statsThreePlayers = new HashMap<>();
 
-	public Player(int id, String name, Map<DateRecord, String> nicknames) {
+	public Player(int id, String name, Map<DateRecord, String> monthlyNicknames, Map<Integer, String> yearlyNicknames) {
 		this.id = id;
 		this.name = name;
-		this.nicknames = nicknames;
+		this.monthlyNicknames = monthlyNicknames;
+		this.yearlyNicknames = yearlyNicknames;
 	}
 
 	@Override
@@ -31,7 +33,7 @@ public class Player implements Comparable<Player>, Serializable {
 	}
 
 	public Player copy() {
-		Player player = new Player(-id, name, null);
+		Player player = new Player(-id, name, null, null);
 		for (DateRecord date : Tarot.ALL_GAMES.keySet())
 			player.createStats(date);
 		return player;
@@ -57,7 +59,7 @@ public class Player implements Comparable<Player>, Serializable {
 	}
 
 	public String getNickname(DateRecord date) {
-		return nicknames.getOrDefault(date, name);
+		return monthlyNicknames.getOrDefault(date, name);
 	}
 
 	public LocalStats getStats(DateRecord date, int players) {
@@ -76,14 +78,23 @@ public class Player implements Comparable<Player>, Serializable {
 		object.addProperty("id", id);
 		object.addProperty("name", name);
 
-		JsonArray nicknamesArray = new JsonArray();
-		for (var entry : nicknames.entrySet()) {
+		JsonArray nicknamesArray = new JsonArray(monthlyNicknames.size());
+		for (var entry : monthlyNicknames.entrySet()) {
 			JsonObject nickname = new JsonObject();
 			nickname.addProperty("date", entry.getKey().hashCode());
 			nickname.addProperty("nick", entry.getValue());
 			nicknamesArray.add(nickname);
 		}
-		object.add("nicknames", nicknamesArray);
+		object.add("monthNicks", nicknamesArray);
+
+		nicknamesArray = new JsonArray(yearlyNicknames.size());
+		for (var entry : yearlyNicknames.entrySet()) {
+			JsonObject nickname = new JsonObject();
+			nickname.addProperty("year", entry.getKey());
+			nickname.addProperty("nick", entry.getValue());
+			nicknamesArray.add(nickname);
+		}
+		object.add("yearNicks", nicknamesArray);
 
 		return object;
 	}

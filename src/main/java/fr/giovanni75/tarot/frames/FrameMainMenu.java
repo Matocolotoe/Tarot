@@ -44,7 +44,7 @@ public class FrameMainMenu extends TarotFrame {
 			return;
 		}
 
-		Player player = Tarot.addPlayer(Tarot.ORDERED_PLAYERS.size() + 1, name, null);
+		Player player = Tarot.addPlayer(Tarot.ORDERED_PLAYERS.size() + 1, name, null, null);
 		player.write("players");
 		Components.popup("Joueur ajouté avec succès.");
 	}

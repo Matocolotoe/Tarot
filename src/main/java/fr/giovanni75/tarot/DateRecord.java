@@ -6,7 +6,7 @@ public record DateRecord(Month month, int year) implements Comparable<DateRecord
 
 	private static final int START_YEAR = 2025;
 
-	static DateRecord fromHash(int totalMonths) {
+	static DateRecord fromMonths(int totalMonths) {
 		int monthsPerYear = Month.ALL_MONTHS.length;
 		int yearRemainder = totalMonths / monthsPerYear;
 		return new DateRecord(Month.ALL_MONTHS[totalMonths - yearRemainder * monthsPerYear], yearRemainder + START_YEAR);
