@@ -50,9 +50,9 @@ public final class LocalPlayer implements Serializable {
 		if (side != Side.DEFENSE)
 			object.addProperty("side", side.ordinal());
 		if (handful != null)
-			object.addProperty("type", handful.ordinal());
+			object.addProperty("handful", handful.ordinal());
 		if (misery != null)
-			object.addProperty("type", misery.ordinal());
+			object.addProperty("misery", misery.ordinal());
 		return object;
 	}
 
