@@ -78,23 +78,28 @@ public class Player implements Comparable<Player>, Serializable {
 		object.addProperty("id", id);
 		object.addProperty("name", name);
 
-		JsonArray nicknamesArray = new JsonArray(monthlyNicknames.size());
-		for (var entry : monthlyNicknames.entrySet()) {
-			JsonObject nickname = new JsonObject();
-			nickname.addProperty("date", entry.getKey().hashCode());
-			nickname.addProperty("nick", entry.getValue());
-			nicknamesArray.add(nickname);
+		JsonArray nicknamesArray;
+		if (!monthlyNicknames.isEmpty()) {
+			nicknamesArray = new JsonArray(monthlyNicknames.size());
+			for (var entry : monthlyNicknames.entrySet()) {
+				JsonObject nickname = new JsonObject();
+				nickname.addProperty("date", entry.getKey().hashCode());
+				nickname.addProperty("nick", entry.getValue());
+				nicknamesArray.add(nickname);
+			}
+			object.add("monthNicks", nicknamesArray);
 		}
-		object.add("monthNicks", nicknamesArray);
 
-		nicknamesArray = new JsonArray(yearlyNicknames.size());
-		for (var entry : yearlyNicknames.entrySet()) {
-			JsonObject nickname = new JsonObject();
-			nickname.addProperty("year", entry.getKey());
-			nickname.addProperty("nick", entry.getValue());
-			nicknamesArray.add(nickname);
+		if (!yearlyNicknames.isEmpty()) {
+			nicknamesArray = new JsonArray(yearlyNicknames.size());
+			for (var entry : yearlyNicknames.entrySet()) {
+				JsonObject nickname = new JsonObject();
+				nickname.addProperty("year", entry.getKey());
+				nickname.addProperty("nick", entry.getValue());
+				nicknamesArray.add(nickname);
+			}
+			object.add("yearNicks", nicknamesArray);
 		}
-		object.add("yearNicks", nicknamesArray);
 
 		return object;
 	}
