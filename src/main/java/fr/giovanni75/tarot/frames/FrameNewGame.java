@@ -404,6 +404,7 @@ class FrameNewGame extends TarotFrame implements ActionListener {
 			if (numberOfPlayers != baseGame.players.length)
 				baseGame.players = new LocalPlayer[numberOfPlayers];
 			System.arraycopy(players, 0, baseGame.players, 0, numberOfPlayers);
+			baseGame.reorderPlayers();
 
 			baseGame.edit();
 			baseGame.applyResults(Game.DEFAULT_CONVERTER, Game.ADD_GAME_DIRECTION);
