@@ -159,8 +159,8 @@ public final class Leaderboards {
 				Number value = data.getValue(date, player, players);
 				entries.add(new StatsPair(player, value));
 			}
-			// Store entries that will be displayed in the left column, sorted by player names/nicknames
-			entries.sort(Comparator.comparing(individualEntry -> individualEntry.player.getDisplayName(date)));
+			// Store entries that will be displayed in the left column, sorted by player names/nicknames (same thing for lowercase)
+			entries.sort(Comparator.comparing(individualEntry -> individualEntry.player.getDisplayName(date).toLowerCase()));
 			unsortedPairs.put(data, entries);
 			// Store entries that will be displayed in the leaderboards on the right, only if needed
 			if (data.leaderboardName != null) {
