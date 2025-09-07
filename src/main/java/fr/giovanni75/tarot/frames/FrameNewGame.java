@@ -108,7 +108,7 @@ class FrameNewGame extends TarotFrame implements ActionListener {
 
 		create(baseGame == null ? "Ajouter une partie" : "Modifier une partie", 300, 200, 800, 700);
 
-		JPanel mainPanel = panel(-1, true);
+		JPanel mainPanel = panel(-1, true, false);
 
 		final List<String> nameList = new ArrayList<>(Tarot.PLAYER_NAMES);
 		nameList.sort(String::compareTo);

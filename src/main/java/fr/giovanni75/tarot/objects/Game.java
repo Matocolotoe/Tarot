@@ -285,13 +285,6 @@ public class Game implements Serializable {
 		return dayOfMonth == 1 ? "1er" : String.valueOf(dayOfMonth);
 	}
 
-	private String getOfWord(String name) {
-		return switch (name.charAt(0)) {
-			case 'A', 'E', 'H', 'I', 'O', 'U', 'Y' -> "d'" + name;
-			default -> "de " + name;
-		};
-	}
-
 	private LocalStats getStats(LocalPlayer local, Function<LocalPlayer, Player> converter) {
 		return converter.apply(local).getStats(date, players.length);
 	}
@@ -382,14 +375,14 @@ public class Game implements Serializable {
 			} else {
 				details.add("Poignée (" + player.getName() + ") : +" + points);
 			}
-			extra.add(handful.getFullName() + " " + getOfWord(player.getName()));
+			extra.add(handful.getFullName() + " " + Utils.getOfWord(player.getName()));
 		}
 
 		for (var entry : miseries.entrySet()) {
 			Player player = DEFAULT_CONVERTER.apply(entry.getKey());
 			Misery misery = entry.getValue();
 			details.add(misery.getFullName() + " (" + player.getName() + ") : ±" + misery.getExtraPoints());
-			extra.add(misery.getFullName() + " " + getOfWord(player.getName()));
+			extra.add(misery.getFullName() + " " + Utils.getOfWord(player.getName()));
 		}
 
 		if (petitAuBout != null) {

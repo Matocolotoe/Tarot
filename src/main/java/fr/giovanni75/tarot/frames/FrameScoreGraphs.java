@@ -155,7 +155,7 @@ class FrameScoreGraphs extends TarotFrame implements ActionListener {
 		leftPanel.setSize(LEFT_PANEL_WIDTH, GLOBAL_PANEL_HEIGHT);
 		leftPanel.setVisible(true);
 
-		JPanel rightPanel = panel(0, false);
+		JPanel rightPanel = panel(0, false, false);
 		rightPanel.setSize(RIGHT_PANEL_WIDTH, GLOBAL_PANEL_HEIGHT);
 		rightPanel.setVisible(true);
 
@@ -216,15 +216,7 @@ class FrameScoreGraphs extends TarotFrame implements ActionListener {
 			showAllButton.setSelected(true);
 		}
 
-		JSplitPane splitPane = new JSplitPane();
-		splitPane.setDividerLocation(LEFT_PANEL_WIDTH);
-		splitPane.setDividerSize(0);
-		splitPane.setOrientation(JSplitPane.HORIZONTAL_SPLIT);
-		splitPane.setSize(LEFT_PANEL_WIDTH + RIGHT_PANEL_WIDTH, GLOBAL_PANEL_HEIGHT);
-
-		splitPane.setLeftComponent(leftPanel);
-		splitPane.setRightComponent(rightPanel);
-
+		JSplitPane splitPane = Components.getSplitPane(leftPanel, rightPanel, LEFT_PANEL_WIDTH, RIGHT_PANEL_WIDTH, GLOBAL_PANEL_HEIGHT);
 		add(splitPane);
 		setVisible(true);
 	}

@@ -1,9 +1,6 @@
 package fr.giovanni75.tarot.frames;
 
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.SwingConstants;
+import javax.swing.*;
 import java.awt.Color;
 import java.awt.Font;
 
@@ -21,6 +18,19 @@ final class Components {
 		button.setFont(getFont(size));
 		button.setHorizontalAlignment(SwingConstants.LEFT);
 		button.setRolloverEnabled(false);
+		return button;
+	}
+
+	static JButton getClickableText(String text, int size, int width, int height) {
+		JButton button = getClickableText(text, size);
+		button.setSize(width, height);
+		return button;
+	}
+
+	static JButton getClickableText(String text, int size, int x, int y, int width, int height) {
+		JButton button = getClickableText(text, size);
+		button.setLocation(x, y);
+		button.setSize(button.getPreferredSize());
 		return button;
 	}
 
@@ -45,6 +55,17 @@ final class Components {
 		return label;
 	}
 
+	static JSplitPane getSplitPane(JPanel leftPanel, JPanel rightPanel, int leftWidth, int rightWidth, int height) {
+		JSplitPane pane = new JSplitPane();
+		pane.setDividerLocation(leftWidth);
+		pane.setDividerSize(0);
+		pane.setLeftComponent(leftPanel);
+		pane.setRightComponent(rightPanel);
+		pane.setOrientation(JSplitPane.HORIZONTAL_SPLIT);
+		pane.setSize(leftWidth + rightWidth, height);
+		return pane;
+	}
+
 	static void popup(String message) {
 		popup(message, "Information");
 	}
@@ -58,7 +79,8 @@ final class Components {
 	}
 
 	static int promptConfirmation(String message, String title) {
-		return JOptionPane.showConfirmDialog(null, message, title, JOptionPane.YES_NO_OPTION);
+		return JOptionPane.showOptionDialog(null, message, title, JOptionPane.YES_NO_OPTION,
+				JOptionPane.QUESTION_MESSAGE, null, new String[] {"Oui", "Non"}, "Oui");
 	}
 
 }

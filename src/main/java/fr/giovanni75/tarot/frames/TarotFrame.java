@@ -13,26 +13,25 @@ class TarotFrame extends JFrame {
 		setTitle(title);
 	}
 
-	JPanel panel(int rightMargin, boolean add) {
+	JPanel panel(int rightMargin, boolean addToFrame, boolean scrollPane) {
 		JPanel panel = new JPanel();
-
 		if (rightMargin == -1) {
 			panel.setLayout(null);
 		} else {
 			panel.setBorder(BorderFactory.createEmptyBorder(BORDER_TOP_LEFT_MARGIN, BORDER_TOP_LEFT_MARGIN, 0, rightMargin));
 			panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 		}
-
-		if (add) {
+		if (addToFrame)
 			add(panel);
-			if (rightMargin != -1) {
-				JScrollPane pane = new JScrollPane(panel);
-				pane.getVerticalScrollBar().setUnitIncrement(SCROLL_VERTICAL_INCREMENT);
-				add(pane);
-			}
-		}
-
+		if (scrollPane)
+			add(scrollPane(panel));
 		return panel;
+	}
+
+	JScrollPane scrollPane(JPanel panel) {
+		JScrollPane pane = new JScrollPane(panel);
+		pane.getVerticalScrollBar().setUnitIncrement(SCROLL_VERTICAL_INCREMENT);
+		return pane;
 	}
 
 }

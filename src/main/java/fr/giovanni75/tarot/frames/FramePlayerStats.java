@@ -26,7 +26,7 @@ class FramePlayerStats extends TarotFrame {
 
 		create("Statistiques individiuelles – " + players + " joueurs – " + date.getName(), 300, 150, 500, 800);
 
-		JPanel mainPanel = panel(0, true);
+		JPanel mainPanel = panel(0, true, true);
 		mainPanel.add(Components.getSimpleText("Statistiques individuelles", 20));
 		mainPanel.add(Components.getSimpleText(date.getName() + " – " + players + " joueurs", 20));
 		mainPanel.add(Components.getEmptySpace(25));

@@ -147,6 +147,10 @@ public final class Leaderboards {
 			return;
 		}
 
+		// Compare against names that will actually be shown in the left column
+		// Convert to lowercase to avoid capitalized names being put first
+		playerList.sort(Comparator.comparing(player -> player.getDisplayName(date).toLowerCase()));
+
 		Map<PlayerData, List<StatsPair>> unsortedPairs = new EnumMap<>(PlayerData.class);
 		Map<PlayerData, List<StatsPair>> sortedPairs = new EnumMap<>(PlayerData.class);
 		for (PlayerData data : PLAYER_DATA) {
@@ -155,8 +159,8 @@ public final class Leaderboards {
 				Number value = data.getValue(date, player, players);
 				entries.add(new StatsPair(player, value));
 			}
-			// Store entries that will be displayed in the left column, sorted by player names
-			entries.sort(Comparator.comparing(individualEntry -> individualEntry.player.getNickname(date)));
+			// Store entries that will be displayed in the left column, sorted by player names/nicknames
+			entries.sort(Comparator.comparing(individualEntry -> individualEntry.player.getDisplayName(date)));
 			unsortedPairs.put(data, entries);
 			// Store entries that will be displayed in the leaderboards on the right, only if needed
 			if (data.leaderboardName != null) {
@@ -210,7 +214,7 @@ public final class Leaderboards {
 		/* Player names */
 		int row = initialRow + 2;
 		for (Player player : playerList) {
-			ws.value(row, 0, player.getNickname(date));
+			ws.value(row, 0, player.getDisplayName(date));
 			row++;
 		}
 
@@ -259,7 +263,7 @@ public final class Leaderboards {
 			row = initialRow + 2;
 			for (StatsPair pair : entry.getValue()) {
 				ws.value(row, column - 1, row - initialRow - 1); // Place in the leaderboard
-				ws.value(row, column, pair.player.getNickname(date));
+				ws.value(row, column, pair.player.getDisplayName(date));
 				ws.value(row, column + 1, data.getDisplay(pair.value));
 				row++;
 			}

@@ -45,6 +45,13 @@ public final class Utils {
 		return local -> profiles.get(local.player.getID());
 	}
 
+	public static String getOfWord(String name) {
+		return switch (name.charAt(0)) {
+			case 'A', 'E', 'H', 'I', 'O', 'U', 'Y' -> "d'" + name;
+			default -> "de " + name;
+		};
+	}
+
 	public static String getTitle(List<Game> selectedGames, DateRecord date) {
 		Game first = selectedGames.getFirst();
 		Game last = selectedGames.getLast();
@@ -54,6 +61,7 @@ public final class Utils {
 		} else {
 			text = "du " + first.getFormattedDayName() + " au " + last.getFormattedDayName();
 		}
+		// Always plural here since two distinct games have to be selected
 		return selectedGames.size() + " parties, " + text + " " + date.getName().toLowerCase();
 	}
 

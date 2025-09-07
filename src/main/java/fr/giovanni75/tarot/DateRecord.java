@@ -4,7 +4,7 @@ import fr.giovanni75.tarot.enums.Month;
 
 public record DateRecord(Month month, int year) implements Comparable<DateRecord> {
 
-	private static final int START_YEAR = 2025;
+	public static final int START_YEAR = 2025;
 
 	static DateRecord fromMonths(int totalMonths) {
 		int monthsPerYear = Month.ALL_MONTHS.length;

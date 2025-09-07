@@ -45,7 +45,7 @@ class FramePeriodicStats extends TarotFrame {
 				orderedEvolutions.put(player, diff);
 		}
 
-		JPanel mainPanel = panel(0, true);
+		JPanel mainPanel = panel(0, true, true);
 		mainPanel.add(Components.getSimpleText("Statistiques périodiques – " + players + " joueurs", 20));
 		mainPanel.add(Components.getSimpleText(Utils.getTitle(selectedGames, date), 20));
 		mainPanel.add(Components.getEmptySpace(18));
