@@ -296,7 +296,7 @@ public class Game implements Serializable {
 		return converter.apply(local).getStats(date, players.length);
 	}
 
-	private void reorderPlayers() {
+	public void reorderPlayers() {
 		for (int i = 0; i < players.length; i++)
 			if (players[i].side == Side.ATTACK)
 				Utils.swap(players, i, 0);
