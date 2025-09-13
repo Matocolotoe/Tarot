@@ -38,6 +38,8 @@ class FramePlayerStats extends TarotFrame {
 				mainPanel.add(Components.getSimpleText(line, 15));
 			mainPanel.add(Components.getEmptySpace(35));
 		}
+		
+		setVisible(true);
 	}
 
 }
