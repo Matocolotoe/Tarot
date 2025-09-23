@@ -249,6 +249,11 @@ public class Game implements Serializable {
 		List<Game> games = Tarot.ALL_GAMES.get(date);
 		int index = games.indexOf(this);
 		games.remove(this);
+
+		// Last game in the month was cleared
+		if (games.isEmpty())
+			Tarot.ALL_GAMES.remove(date);
+
 		String fileName = date.getFileName();
 		JsonArray array = Files.getJsonArrayFromFile(fileName);
 		array.remove(index);
