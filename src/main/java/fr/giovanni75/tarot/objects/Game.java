@@ -212,7 +212,7 @@ public class Game implements Serializable {
 
 		if (selfCalled()) {
 			Maps.increment(contract, stats.selfCalls, 1, direction);
-		} else {
+		} else if (players.length == 5) {
 			stats = getStats(getAlly(), converter);
 			Maps.increment(contract, stats.calledTimes, 1, direction);
 			Maps.increment(contract, stats.playedGames, 1, direction);
