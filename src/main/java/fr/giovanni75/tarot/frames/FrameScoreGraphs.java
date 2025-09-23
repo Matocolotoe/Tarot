@@ -1,7 +1,6 @@
 package fr.giovanni75.tarot.frames;
 
 import fr.giovanni75.tarot.DateRecord;
-import fr.giovanni75.tarot.Maps;
 import fr.giovanni75.tarot.Utils;
 import fr.giovanni75.tarot.objects.Game;
 import fr.giovanni75.tarot.objects.LocalPlayer;
@@ -123,7 +122,7 @@ class FrameScoreGraphs extends TarotFrame implements ActionListener {
 			String name = player.getName();
 			temporaryProfiles.put(player.getID(), copy);
 			temporaryProfilesByName.put(name, copy);
-			if (filterGames && Maps.sum(player.getStats(date, players).playedGames) >= MINIMUM_PLAYED_GAMES)
+			if (filterGames && player.getPlayedGames(date, players) >= MINIMUM_PLAYED_GAMES)
 				minimumPlayedNames.add(name);
 		}
 

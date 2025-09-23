@@ -79,6 +79,11 @@ public class Player implements Comparable<Player>, Serializable {
 		return yearlyNicknames.getOrDefault(year, defaultValue);
 	}
 
+	public int getPlayedGames(DateRecord date, int players) {
+		LocalStats stats = getStats(date, players);
+		return Maps.sum(stats.playedGames);
+	}
+
 	public LocalStats getStats(DateRecord date, int players) {
 		Map<DateRecord, LocalStats> stats = switch (players) {
 			case 3 -> statsThreePlayers;

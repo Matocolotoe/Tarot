@@ -136,9 +136,9 @@ public final class Leaderboards {
 		if (players < 3)
 			return;
 
-		final List<Player> playerList = new ArrayList<>();
+		List<Player> playerList = new ArrayList<>();
 		for (Player player : Tarot.ORDERED_PLAYERS)
-			if (Maps.sum(player.getStats(date, players).playedGames) != 0)
+			if (player.getPlayedGames(date, players) > 0)
 				playerList.add(player);
 
 		// No stats recorded, just skip
@@ -255,9 +255,9 @@ public final class Leaderboards {
 			ws.value(initialRow + 1, column, data.leaderboardName);
 			ws.range(initialRow + 1, column, initialRow + 1, column + 1).style()
 					.bold()
+					.borderStyle(BorderStyle.THIN)
 					.horizontalAlignment("center")
 					.verticalAlignment("center")
-					.borderStyle(BorderStyle.THIN)
 					.merge().set();
 
 			row = initialRow + 2;
