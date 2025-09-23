@@ -70,7 +70,7 @@ public final class Leaderboards {
 				stats -> {
 					int successes = Maps.sum(stats.successfulTakes);
 					int total = successes + Maps.sum(stats.failedTakes);
-					return total < WINRATE_MINIMUM_TAKES ? -1 : (double) successes / total;
+					return total < WINRATE_MINIMUM_TAKES ? -1 : new Fraction(successes, total);
 				},
 				value -> value.intValue() == -1 ? "" : PERCENTAGE_DECIMAL_FORMAT.format(value));
 
