@@ -171,7 +171,8 @@ public class FrameMainMenu extends JFrame {
 			if (total == MAX_GAMES_DISPLAYED)
 				break;
 			List<Game> games = entry.getValue();
-			components.add(Components.getSimpleText(entry.getKey().getName() + " – " + games.size() + " parties", 20));
+			int size = games.size();
+			components.add(Components.getSimpleText(entry.getKey().getName() + " – " + size + (size == 1 ? " partie " : " parties"), 20));
 			components.add(Components.getEmptySpace(18));
 			for (Game game : games.reversed()) {
 				total++;
