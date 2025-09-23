@@ -35,6 +35,11 @@ public final class LocalPlayer implements Serializable {
 	}
 
 	@Override
+	public void edit() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public boolean equals(Object object) {
 		return object instanceof LocalPlayer && getID() == ((LocalPlayer) object).getID();
 	}

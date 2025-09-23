@@ -255,6 +255,7 @@ public class Game implements Serializable {
 		Files.write(fileName, array);
 	}
 
+	@Override
 	public void edit() {
 		List<Game> games = Tarot.ALL_GAMES.get(date);
 		int index = games.indexOf(this);
