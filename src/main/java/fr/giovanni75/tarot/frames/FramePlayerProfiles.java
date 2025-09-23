@@ -26,6 +26,12 @@ class FramePlayerProfiles extends TarotFrame {
 	private static final int LEFT_PANEL_WIDTH = 200;
 	private static final int RIGHT_PANEL_WIDTH = 500;
 
+	private static final int EDIT_BUTTON_X = 350;
+	private static final int INITIAL_Y = 105;
+	private static final int LEFT_TEXT_X = 25;
+	private static final int RIGHT_TEXT_X = 150;
+	private static final int Y_OFFSET = 30;
+
 	private static int getMaxPlayedYear() {
 		int year = DateRecord.START_YEAR;
 		for (DateRecord date : Tarot.ALL_GAMES.keySet())
@@ -34,7 +40,6 @@ class FramePlayerProfiles extends TarotFrame {
 		return year;
 	}
 
-	// TODO cache with integer
 	private static List<Month> getMonthsPlayed(Player player, int year) {
 		Set<Month> months = EnumSet.noneOf(Month.class);
 		for (var entry : Tarot.ALL_GAMES.entrySet())
@@ -51,21 +56,56 @@ class FramePlayerProfiles extends TarotFrame {
 	private JButton currentPlayerButton;
 	private int currentYear = getMaxPlayedYear();
 
-	private final Map<Month, JLabel> monthLabels = new EnumMap<>(Month.class);
-	private final Map<Month, JLabel> nickLabels = new EnumMap<>(Month.class);
-	private JLabel genericNickLabel;
-	private JLabel nameLabel;
-
 	private final List<Component> tempComponents = new ArrayList<>();
 	private final JComboBox<Integer> yearBox = new JComboBox<>();
+	private final Map<Month, JLabel> monthLabels = new EnumMap<>(Month.class);
+	private final Map<Month, JLabel> nickLabels = new EnumMap<>(Month.class);
+
+	private JLabel genericNickLabel;
+	private JLabel nameLabel;
 
 	private void addTempComponent(JPanel panel, Component component) {
 		tempComponents.add(component);
 		panel.add(component);
 	}
 
-	private JButton getEditNicknameButton(Month month, Player player, int x, int y, Consumer<String> action) {
-		JButton editButton = Components.getClickableText("Modifier", 12, x, y, 0, 0);
+	private void createYearBox(JPanel panel, Player player, List<Month> monthsPlayed) {
+		for (int year = getMaxPlayedYear(); year >= DateRecord.START_YEAR; year--)
+			yearBox.addItem(year);
+
+		yearBox.addActionListener(event -> {
+			Object selectedYear = yearBox.getSelectedItem();
+			if (selectedYear == null)
+				return;
+			if (currentYear != (int) selectedYear) {
+				currentYear = (int) selectedYear;
+				onPlayerClick(player, Source.YEAR_UPDATED, currentPlayerButton, panel);
+			}
+		});
+
+		yearBox.setLocation(EDIT_BUTTON_X, 25);
+		yearBox.setSize(100, 22);
+		panel.add(yearBox);
+
+		int y = INITIAL_Y;
+		panel.add(Components.getSimpleText("Mois", 18, LEFT_TEXT_X, 75, 100, 20));
+		panel.add(Components.getSimpleText("Surnom", 18, RIGHT_TEXT_X, 75, 100, 20));
+		panel.add(Components.getSimpleText("Surnom générique", 18, LEFT_TEXT_X,  500, 200, 20));
+		for (Month month : Month.ALL_MONTHS) {
+			JLabel label = Components.getSimpleText(month.getName(), 16, LEFT_TEXT_X, y, 100, 20);
+			if (!monthsPlayed.contains(month))
+				label.setForeground(Color.LIGHT_GRAY);
+			monthLabels.put(month, label);
+			panel.add(label);
+			y += Y_OFFSET;
+		}
+
+		nameLabel = Components.getSimpleText(player.getName(), 20, LEFT_TEXT_X, 25, 200, 20);
+		panel.add(nameLabel);
+	}
+
+	private JButton getEditNicknameButton(Month month, Player player, int y, Consumer<String> action) {
+		JButton editButton = Components.getClickableText("Modifier", 12, EDIT_BUTTON_X, y, 0, 0);
 		editButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -97,37 +137,9 @@ class FramePlayerProfiles extends TarotFrame {
 
 		List<Month> monthsPlayed = getMonthsPlayed(player, currentYear);
 
-		// Create year component when no player button has been clicked before
+		// No player button has been clicked before
 		if (currentPlayerButton == null) {
-			for (int year = getMaxPlayedYear(); year >= DateRecord.START_YEAR; year--)
-				yearBox.addItem(year);
-			yearBox.addActionListener(event -> {
-				Object selectedYear = yearBox.getSelectedItem();
-				if (selectedYear == null)
-					return;
-				if (currentYear != (int) selectedYear) {
-					currentYear = (int) selectedYear;
-					onPlayerClick(player, Source.YEAR_UPDATED, currentPlayerButton, panel);
-				}
-			});
-			yearBox.setLocation(325, 25);
-			yearBox.setSize(100, 22);
-			panel.add(yearBox);
-			int y = 105;
-			panel.add(Components.getSimpleText("Mois", 18, 25, 75, 100, 20));
-			panel.add(Components.getSimpleText("Surnom", 18, 150, 75, 100, 20));
-			panel.add(Components.getSimpleText("Surnom générique", 18, 25,  500, 200, 20));
-			for (Month month : Month.ALL_MONTHS) {
-				JLabel label = Components.getSimpleText(month.getName(), 16, 25, y, 100, 20);
-				if (!monthsPlayed.contains(month))
-					label.setForeground(Color.LIGHT_GRAY);
-				monthLabels.put(month, label);
-				panel.add(label);
-				y += 30;
-			}
-			nameLabel = Components.getSimpleText(player.getName(), 20, 25, 25, 200, 20);
-			panel.add(nameLabel);
-			//FIXME rename button
+			createYearBox(panel, player, monthsPlayed);
 		} else if (source == Source.PLAYER_BUTTON_CLICK) {
 			currentPlayerButton.setBackground(Components.DEFAULT_BUTTON_COLOR);
 			if (nameLabel != null)
@@ -146,9 +158,10 @@ class FramePlayerProfiles extends TarotFrame {
 
 		// Player was changed or year was updated, refresh months and related nicks and create new edit buttons
 		if (source == Source.PLAYER_BUTTON_CLICK || source == Source.YEAR_UPDATED) {
+			genericNickLabel = Components.getSimpleText(player.getNickname(currentYear, Tarot.NONE_STRING), 16, LEFT_TEXT_X, 530, 200, 20);
 			refreshNicknames(panel, player, monthsPlayed);
-			addTempComponent(panel, genericNickLabel = Components.getSimpleText(player.getNickname(currentYear, Tarot.NONE_STRING), 16, 25, 530, 200, 20));
-			addTempComponent(panel, getEditNicknameButton(null, player, 325,  500, name -> player.setNickname(currentYear, name)));
+			addTempComponent(panel, genericNickLabel);
+			addTempComponent(panel, getEditNicknameButton(null, player, 500, name -> player.setNickname(currentYear, name)));
 		}
 
 		panel.revalidate();
@@ -156,7 +169,7 @@ class FramePlayerProfiles extends TarotFrame {
 	}
 
 	private void refreshNicknames(JPanel panel, Player player, Collection<Month> monthsPlayed) {
-		int y = 105;
+		int y = INITIAL_Y;
 		for (var entry : monthLabels.entrySet()) {
 			Month month = entry.getKey();
 			JLabel monthLabel = entry.getValue();
@@ -165,13 +178,13 @@ class FramePlayerProfiles extends TarotFrame {
 				DateRecord date = new DateRecord(month, currentYear);
 				monthLabel.setForeground(Color.BLACK);
 				if (nickLabel == null) {
-					nickLabel = Components.getSimpleText(player.getNickname(date, Tarot.NONE_STRING), 16, 150, y, 400, 20);
+					nickLabel = Components.getSimpleText(player.getNickname(date, Tarot.NONE_STRING), 16, RIGHT_TEXT_X, y, 400, 20);
 					nickLabels.put(month, nickLabel);
 					panel.add(nickLabel);
 				} else {
 					nickLabel.setText(player.getNickname(date, Tarot.NONE_STRING));
 				}
-				addTempComponent(panel, getEditNicknameButton(month, player, 325, y, name -> player.setNickname(date, name)));
+				addTempComponent(panel, getEditNicknameButton(month, player, y, name -> player.setNickname(date, name)));
 			} else {
 				monthLabel.setForeground(Color.GRAY);
 				if (nickLabel != null) {
@@ -179,7 +192,7 @@ class FramePlayerProfiles extends TarotFrame {
 					panel.remove(nickLabel);
 				}
 			}
-			y += 30;
+			y += Y_OFFSET;
 		}
 	}
 
@@ -191,7 +204,7 @@ class FramePlayerProfiles extends TarotFrame {
 		leftPanel.setVisible(true);
 
 		leftPanel.add(Components.getSimpleText(Tarot.ORDERED_PLAYERS.size() + " joueurs", 18, 10, 10, 120, 20));
-		leftPanel.add(Components.getEmptySpace(15));
+		leftPanel.add(Components.getEmptySpace(10));
 
 		// TODO reload menu when doing this
 		JButton newPlayerButton = Components.getClickableText("Ajouter", 15);
@@ -222,7 +235,6 @@ class FramePlayerProfiles extends TarotFrame {
 			leftPanel.add(button);
 			leftPanel.add(Components.getEmptySpace(15));
 		}
-
 
 		JSplitPane splitPane = Components.getSplitPane(leftPanel, rightPanel, LEFT_PANEL_WIDTH, RIGHT_PANEL_WIDTH, GLOBAL_PANEL_HEIGHT);
 		splitPane.add(scrollPane(leftPanel));
