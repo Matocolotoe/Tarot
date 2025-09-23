@@ -93,7 +93,13 @@ class FrameScoreGraphs extends JFrame implements ActionListener {
 				for (JCheckBox box : checkBoxes.values())
 					box.setSelected(false);
 				for (String name : minimumPlayedNames) {
-					chart.addSeries(name, xData, yDataMap.get(temporaryProfilesByName.get(name)));
+					Player player = temporaryProfilesByName.get(name);
+					if (player == null)
+						continue;
+					double[] yData = yDataMap.get(player);
+					if (yData == null)
+						continue;
+					chart.addSeries(name, xData, yData);
 					checkBoxes.get(name).setSelected(true);
 					displayedPlayerNames.add(name);
 				}
