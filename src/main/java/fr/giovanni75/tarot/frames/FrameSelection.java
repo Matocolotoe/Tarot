@@ -4,10 +4,7 @@ import fr.giovanni75.tarot.DateRecord;
 import fr.giovanni75.tarot.Tarot;
 import fr.giovanni75.tarot.objects.Game;
 
-import javax.swing.JButton;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import java.awt.Color;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -40,7 +37,12 @@ class FrameSelection extends TarotFrame {
 		mainPanel.add(Components.getSimpleText("Sélectionnez des parties", 20));
 		mainPanel.add(Components.getEmptySpace(18));
 
+		int day = displayed.getFirst().dayOfMonth;
 		for (Game game : displayed) {
+			if (day != game.dayOfMonth) {
+				mainPanel.add(new JSeparator(SwingConstants.HORIZONTAL));
+				mainPanel.add(Components.getEmptySpace(15));
+			}
 			JButton button = Components.getClickableText(game.getDescription(), 15);
 			button.addMouseListener(new MouseAdapter() {
 				@Override
@@ -64,6 +66,7 @@ class FrameSelection extends TarotFrame {
 			button.setBackground(Components.DEFAULT_BUTTON_COLOR);
 			mainPanel.add(button);
 			mainPanel.add(Components.getEmptySpace(15));
+			day = game.dayOfMonth;
 		}
 
 		setVisible(true);
