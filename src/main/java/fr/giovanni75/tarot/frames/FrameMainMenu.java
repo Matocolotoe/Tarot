@@ -4,7 +4,6 @@ import fr.giovanni75.tarot.DateRecord;
 import fr.giovanni75.tarot.Files;
 import fr.giovanni75.tarot.Tarot;
 import fr.giovanni75.tarot.objects.Game;
-import fr.giovanni75.tarot.objects.Player;
 
 import javax.swing.*;
 import javax.swing.event.PopupMenuEvent;

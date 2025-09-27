@@ -16,8 +16,8 @@ public class Player implements Comparable<Player>, Serializable {
 	private final int id;
 	private final String name;
 
-	public final Map<DateRecord, String> monthlyNicknames;
-	public final Map<Integer, String> yearlyNicknames; // Overriden by monthly nicknames if they are present
+	private final Map<DateRecord, String> monthlyNicknames;
+	private final Map<Integer, String> yearlyNicknames; // Overriden by monthly nicknames if they are present
 
 	private final Map<DateRecord, LocalStats> statsFivePlayers = new HashMap<>();
 	private final Map<DateRecord, LocalStats> statsFourPlayers = new HashMap<>();

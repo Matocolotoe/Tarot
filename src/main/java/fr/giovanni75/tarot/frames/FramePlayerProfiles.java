@@ -206,7 +206,6 @@ class FramePlayerProfiles extends TarotFrame {
 		leftPanel.add(Components.getSimpleText(Tarot.ORDERED_PLAYERS.size() + " joueurs", 18, 10, 10, 120, 20));
 		leftPanel.add(Components.getEmptySpace(10));
 
-		// TODO reload menu when doing this
 		JButton newPlayerButton = Components.getClickableText("Ajouter", 15);
 		newPlayerButton.addMouseListener(new MouseAdapter() {
 			@Override
