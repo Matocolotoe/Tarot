@@ -17,6 +17,9 @@ public class Game implements Serializable {
 	private static final int BASE_SCORE = 25;
 	private static final int SLAM_SCORE = 200;
 
+	private static final int ATTACKER_INDEX = 0;
+	private static final int ALLY_INDEX = 1;
+
 	public static final Function<LocalPlayer, Player> DEFAULT_CONVERTER = local -> local.player;
 
 	public static final int ADD_GAME_DIRECTION = 1;
@@ -97,32 +100,36 @@ public class Game implements Serializable {
 		int diff = attackScore - oudlers.getRequiredScore();
 		int absoluteDiff = BASE_SCORE + Math.abs(diff);
 
-		Map<LocalPlayer, Handful> handfuls = new HashMap<>(players.length);
-		Map<LocalPlayer, Misery> miseries = new HashMap<>(players.length);
-		for (LocalPlayer local : players) {
-			Handful handful = local.handful;
-			if (handful != null)
-				handfuls.put(local, handful);
-			Misery misery = local.misery;
-			if (misery != null)
-				miseries.put(local, misery);
+		// Assuming players are reordered (otherwise wtf)
+		int numberOfPlayers = players.length;
+		Handful[] handfuls = new Handful[numberOfPlayers];
+		Misery[] miseries = new Misery[numberOfPlayers];
+		for (int i = 0; i < numberOfPlayers; i++) {
+			handfuls[i] = players[i].handful;
+			miseries[i] = players[i].misery;
 		}
 
+		// Makes at most 5 stats queries instead of 15
+		LocalStats[] stats = new LocalStats[numberOfPlayers];
+		if (((flags >> 2) & 1) == 1 || ((flags >> 3) & 1) == 1)
+			for (int i = 0; i < numberOfPlayers; i++)
+				stats[i] = converter.apply(players[i]).getStats(date, numberOfPlayers);
+
 		if ((flags & 1) == 1)
-			calculateAttackScore(diff, absoluteDiff, handfuls.values(), miseries);
+			calculateAttackScore(diff, absoluteDiff, handfuls, miseries);
 		if (((flags >> 1) & 1) == 1)
-			calculateGlobalStats(handfuls.values(), miseries.values(), direction);
+			calculateGlobalStats(handfuls, miseries, direction);
 		if (((flags >> 2) & 1) == 1)
-			calculatePlayerScores(converter, direction);
+			calculatePlayerScores(stats, direction);
 		if (((flags >> 3) & 1) == 1) {
-			calculatePlayerStats(diff, converter, handfuls.keySet(), miseries.keySet(), direction);
-			computeBestTurns();
+			calculatePlayerStats(diff, handfuls, miseries, stats, direction);
+			computeBestTurns(stats);
 		}
 		if (direction == ADD_GAME_DIRECTION && ((flags >> 4) & 1) == 1)
 			writeInformation(diff, absoluteDiff, handfuls, miseries);
 	}
 
-	private void calculateAttackScore(int diff, int absoluteDiff, Collection<Handful> handfuls, Map<LocalPlayer, Misery> miseries) {
+	private void calculateAttackScore(int diff, int absoluteDiff, Handful[] handfuls, Misery[] miseries) {
 		attackFinalScore = absoluteDiff * contract.getMultiplier();
 		if (diff < 0)
 			attackFinalScore *= -1;
@@ -131,6 +138,8 @@ public class Game implements Serializable {
 		attackBaseScore = attackFinalScore;
 
 		for (Handful handful : handfuls) {
+			if (handful == null)
+				continue;
 			int points = handful.getExtraPoints();
 			if (diff < 0) {
 				attackFinalScore -= points;
@@ -172,9 +181,11 @@ public class Game implements Serializable {
 			if (local.side == Side.DEFENSE)
 				local.score -= attackFinalScore;
 
-		for (var entry : miseries.entrySet()) {
-			LocalPlayer owner = entry.getKey();
-			Misery misery = entry.getValue();
+		for (int i = 0; i < miseries.length; i++) {
+			Misery misery = miseries[i];
+			if (misery == null)
+				continue;
+			LocalPlayer owner = players[i];
 			int points = misery.getExtraPoints();
 			owner.score += (length - 1) * points;
 			for (LocalPlayer other : players)
@@ -183,65 +194,58 @@ public class Game implements Serializable {
 		}
 	}
 
-	private void calculateGlobalStats(Collection<Handful> handfuls, Collection<Misery> miseries, int direction) {
+	private void calculateGlobalStats(Handful[] handfuls, Misery[] miseries, int direction) {
 		GlobalStats stats = Tarot.getGlobalStats(date, players.length);
 		Maps.increment(contract, stats.contracts, 1, direction);
 		Maps.increment(contract, stats.oudlers, oudlers.ordinal(), direction);
 		if (selfCalled())
 			Maps.increment(contract, stats.selfCalls, 1, direction);
 		for (Handful handful : handfuls)
-			Maps.increment(handful, stats.handfuls, 1, direction);
+			if (handful != null)
+				Maps.increment(handful, stats.handfuls, 1, direction);
 		for (Misery misery : miseries)
-			Maps.increment(misery, stats.miseries, 1, direction);
+			if (misery != null)
+				Maps.increment(misery, stats.miseries, 1, direction);
 		if (petitAuBout != null)
 			Maps.increment(petitAuBout, stats.petits, 1, direction);
 	}
 
-	private void calculatePlayerScores(Function<LocalPlayer, Player> converter, int direction) {
-		for (LocalPlayer local : players) {
-			LocalStats stats = getStats(local, converter);
-			stats.totalScore += direction * local.score;
-		}
+	private void calculatePlayerScores(LocalStats[] stats, int direction) {
+		for (int i = 0; i < players.length; i++)
+			stats[i].totalScore += direction * players[i].score;
 	}
 
-	private void calculatePlayerStats(int diff, Function<LocalPlayer, Player> converter, Collection<LocalPlayer> handfulOwners,
-									  Collection<LocalPlayer> miseryOwners, int direction) {
-		LocalStats stats = getStats(getAttacker(), converter);
-		Maps.increment(contract, diff >= 0 ? stats.successfulTakes : stats.failedTakes, 1, direction);
-		Maps.increment(contract, stats.playedGames, 1, direction);
+	private void calculatePlayerStats(int diff, Handful[] handfuls, Misery[] miseries, LocalStats[] stats, int direction) {
+		LocalStats attackerStats = stats[ATTACKER_INDEX];
+		Maps.increment(contract, diff >= 0 ? attackerStats.successfulTakes : attackerStats.failedTakes, 1, direction);
+		Maps.increment(contract, attackerStats.playedGames, 1, direction);
 
 		if (selfCalled()) {
-			Maps.increment(contract, stats.selfCalls, 1, direction);
+			Maps.increment(contract, attackerStats.selfCalls, 1, direction);
 		} else if (players.length == 5) {
-			stats = getStats(getAlly(), converter);
-			Maps.increment(contract, stats.calledTimes, 1, direction);
-			Maps.increment(contract, stats.playedGames, 1, direction);
+			LocalStats allyStats = stats[ALLY_INDEX];
+			Maps.increment(contract, allyStats.calledTimes, 1, direction);
+			Maps.increment(contract, allyStats.playedGames, 1, direction);
 		}
 
-		for (LocalPlayer local : players) {
-			if (local.side == Side.DEFENSE) {
-				stats = getStats(local, converter);
-				Maps.increment(contract, stats.playedGames, 1, direction);
-			}
+		for (int i = getDefenseIndex(); i < players.length; i++) {
+			LocalStats defenderStats = stats[i];
+			Maps.increment(contract, defenderStats.playedGames, 1, direction);
 		}
 
-		for (LocalPlayer local : handfulOwners) {
-			stats = getStats(local, converter);
-			Maps.increment(contract, stats.handfuls, 1, direction);
-		}
+		for (int i = 0; i < handfuls.length; i++)
+			if (handfuls[i] != null)
+				Maps.increment(contract, stats[i].handfuls, 1, direction);
 
-		for (LocalPlayer local : miseryOwners) {
-			stats = getStats(local, converter);
-			Maps.increment(contract, stats.miseries, 1, direction);
-		}
+		for (int i = 0; i < miseries.length; i++)
+			if (miseries[i] != null)
+				Maps.increment(contract, stats[i].miseries, 1, direction);
 	}
 
-	private void computeBestTurns() {
-		int length = players.length;
-		for (LocalPlayer local : players) {
-			LocalStats stats = local.player.getStats(date, length);
-			Maps.computeIfHigher(contract, local.score, stats.bestTurns, 1);
-			Maps.computeIfHigher(contract, local.score, stats.worstTurns, -1);
+	private void computeBestTurns(LocalStats[] stats) {
+		for (int i = 0; i < players.length; i++) {
+			Maps.computeIfHigher(contract, players[i].score, stats[i].bestTurns, 1);
+			Maps.computeIfHigher(contract, players[i].score, stats[i].worstTurns, -1);
 		}
 	}
 
@@ -271,11 +275,15 @@ public class Game implements Serializable {
 	}
 
 	private LocalPlayer getAlly() {
-		return players[1];
+		return players[ALLY_INDEX];
 	}
 
 	private LocalPlayer getAttacker() {
-		return players[0];
+		return players[ATTACKER_INDEX];
+	}
+
+	private int getDefenseIndex() {
+		return players.length < 5 || selfCalled() ? ALLY_INDEX : ALLY_INDEX + 1;
 	}
 
 	public String getDescription() {
@@ -296,20 +304,19 @@ public class Game implements Serializable {
 	}
 
 	public void reorderPlayers() {
-		for (int i = 0; i < players.length; i++)
+		for (int i = ATTACKER_INDEX; i < players.length; i++)
 			if (players[i].side == Side.ATTACK)
 				Utils.swap(players, i, 0);
-		// Index 0 is attacker, we can start at 1
-		for (int i = 1; i < players.length; i++)
+		// Index 0 is attacker, we can now start at 1
+		for (int i = ALLY_INDEX; i < players.length; i++)
 			if (players[i].side == Side.ATTACK_ALLY)
 				Utils.swap(players, i, 1);
 		// Order defenders by name
-		int minIndex = players.length < 5 || selfCalled() ? 1 : 2;
-		Arrays.sort(players, minIndex, players.length, Comparator.comparing(local -> DEFAULT_CONVERTER.apply(local).getName()));
+		Arrays.sort(players, getDefenseIndex(), players.length, Comparator.comparing(local -> DEFAULT_CONVERTER.apply(local).getName()));
 	}
 
 	private boolean selfCalled() {
-		return players.length == 5 && players[1].side == Side.DEFENSE;
+		return players.length == 5 && players[ALLY_INDEX].side == Side.DEFENSE;
 	}
 
 	@Override
@@ -333,7 +340,7 @@ public class Game implements Serializable {
 		return object;
 	}
 
-	private void writeInformation(int diff, int absoluteDiff, Map<LocalPlayer, Handful> handfuls, Map<LocalPlayer, Misery> miseries) {
+	private void writeInformation(int diff, int absoluteDiff, Handful[] handfuls, Misery[] miseries) {
 		// Game might have been edited
 		description.clear();
 		details.clear();
@@ -372,9 +379,11 @@ public class Game implements Serializable {
 		details.add("Total des points : " + attackBaseScore);
 
 		StringJoiner extra = new StringJoiner(" – ");
-		for (var entry : handfuls.entrySet()) {
-			Player player = DEFAULT_CONVERTER.apply(entry.getKey());
-			Handful handful = entry.getValue();
+		for (int i = 0; i < handfuls.length; i++) {
+			Handful handful = handfuls[i];
+			if (handful == null)
+				continue;
+			Player player = DEFAULT_CONVERTER.apply(players[i]);
 			int points = handful.getExtraPoints();
 			if (diff < 0) {
 				details.add(handful.getFullName() + " (" + player.getName() + ") : -" + points);
@@ -384,9 +393,11 @@ public class Game implements Serializable {
 			extra.add(handful.getFullName() + " " + Utils.getOfWord(player.getName()));
 		}
 
-		for (var entry : miseries.entrySet()) {
-			Player player = DEFAULT_CONVERTER.apply(entry.getKey());
-			Misery misery = entry.getValue();
+		for (int i = 0; i < miseries.length; i++) {
+			Misery misery = miseries[i];
+			if (misery == null)
+				continue;
+			Player player = DEFAULT_CONVERTER.apply(players[i]);
 			details.add(misery.getFullName() + " (" + player.getName() + ") : ±" + misery.getExtraPoints());
 			extra.add(misery.getFullName() + " " + Utils.getOfWord(player.getName()));
 		}
