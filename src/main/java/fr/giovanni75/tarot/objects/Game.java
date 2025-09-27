@@ -377,9 +377,9 @@ public class Game implements Serializable {
 			Handful handful = entry.getValue();
 			int points = handful.getExtraPoints();
 			if (diff < 0) {
-				details.add("Poignée (" + player.getName() + ") : -" + points);
+				details.add(handful.getFullName() + " (" + player.getName() + ") : -" + points);
 			} else {
-				details.add("Poignée (" + player.getName() + ") : +" + points);
+				details.add(handful.getFullName() + " (" + player.getName() + ") : +" + points);
 			}
 			extra.add(handful.getFullName() + " " + Utils.getOfWord(player.getName()));
 		}
