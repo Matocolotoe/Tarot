@@ -221,7 +221,11 @@ class FrameScoreGraphs extends TarotFrame implements ActionListener {
 			showAllButton.setSelected(true);
 		}
 
+		// Only actually used when the right panel size exceeds the given height
+		rightPanel.add(Components.getEmptySpace(30));
+
 		JSplitPane splitPane = Components.getSplitPane(leftPanel, rightPanel, LEFT_PANEL_WIDTH, RIGHT_PANEL_WIDTH, GLOBAL_PANEL_HEIGHT);
+		splitPane.add(scrollPane(rightPanel));
 		add(splitPane);
 		setVisible(true);
 	}
