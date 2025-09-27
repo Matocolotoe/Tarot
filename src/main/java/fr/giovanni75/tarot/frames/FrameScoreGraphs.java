@@ -1,7 +1,6 @@
 package fr.giovanni75.tarot.frames;
 
 import fr.giovanni75.tarot.DateRecord;
-import fr.giovanni75.tarot.Maps;
 import fr.giovanni75.tarot.Utils;
 import fr.giovanni75.tarot.objects.Game;
 import fr.giovanni75.tarot.objects.LocalPlayer;
@@ -21,7 +20,7 @@ import java.awt.event.ActionListener;
 import java.util.*;
 import java.util.function.Function;
 
-class FrameScoreGraphs extends JFrame implements ActionListener {
+class FrameScoreGraphs extends TarotFrame implements ActionListener {
 
 	private static final int GLOBAL_PANEL_HEIGHT = 800;
 	private static final int LEFT_PANEL_WIDTH = 1050;
@@ -117,9 +116,8 @@ class FrameScoreGraphs extends JFrame implements ActionListener {
 	}
 
 	FrameScoreGraphs(List<Game> displayedGames, List<Game> selectedGames, DateRecord date, int players) {
-		setBounds(300, 150, LEFT_PANEL_WIDTH + RIGHT_PANEL_WIDTH, GLOBAL_PANEL_HEIGHT);
-		setResizable(false);
-		setTitle("Évolution des scores – " + players + " joueurs – " + Utils.getTitle(selectedGames, date));
+		create("Évolution des scores – " + players + " joueurs – " + Utils.getTitle(selectedGames, date),
+				300, 150, LEFT_PANEL_WIDTH + RIGHT_PANEL_WIDTH, GLOBAL_PANEL_HEIGHT);
 
 		boolean filterGames = players == 5 && selectedGames.size() >= MINIMUM_PLAYED_GAMES;
 
@@ -130,7 +128,7 @@ class FrameScoreGraphs extends JFrame implements ActionListener {
 			String name = player.getName();
 			temporaryProfiles.put(player.getID(), copy);
 			temporaryProfilesByName.put(name, copy);
-			if (filterGames && Maps.sum(player.getStats(date, players).playedGames) >= MINIMUM_PLAYED_GAMES)
+			if (filterGames && player.getPlayedGames(date, players) >= MINIMUM_PLAYED_GAMES)
 				minimumPlayedNames.add(name);
 		}
 
@@ -162,9 +160,7 @@ class FrameScoreGraphs extends JFrame implements ActionListener {
 		leftPanel.setSize(LEFT_PANEL_WIDTH, GLOBAL_PANEL_HEIGHT);
 		leftPanel.setVisible(true);
 
-		JPanel rightPanel = new JPanel();
-		rightPanel.setBorder(Components.getStandardBorder(0));
-		rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));
+		JPanel rightPanel = panel(0, false, false);
 		rightPanel.setSize(RIGHT_PANEL_WIDTH, GLOBAL_PANEL_HEIGHT);
 		rightPanel.setVisible(true);
 
@@ -225,15 +221,7 @@ class FrameScoreGraphs extends JFrame implements ActionListener {
 			showAllButton.setSelected(true);
 		}
 
-		JSplitPane splitPane = new JSplitPane();
-		splitPane.setDividerLocation(LEFT_PANEL_WIDTH);
-		splitPane.setDividerSize(0);
-		splitPane.setOrientation(JSplitPane.HORIZONTAL_SPLIT);
-		splitPane.setSize(LEFT_PANEL_WIDTH + RIGHT_PANEL_WIDTH, GLOBAL_PANEL_HEIGHT);
-
-		splitPane.setLeftComponent(leftPanel);
-		splitPane.setRightComponent(rightPanel);
-
+		JSplitPane splitPane = Components.getSplitPane(leftPanel, rightPanel, LEFT_PANEL_WIDTH, RIGHT_PANEL_WIDTH, GLOBAL_PANEL_HEIGHT);
 		add(splitPane);
 		setVisible(true);
 	}

@@ -1,6 +1,8 @@
 package fr.giovanni75.tarot;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import fr.giovanni75.tarot.enums.Month;
 import fr.giovanni75.tarot.stats.Leaderboards;
@@ -11,6 +13,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -114,6 +117,17 @@ public final class Files {
 
 	private static String getJsonPath(String fileName) {
 		return "data/" + fileName + ".json";
+	}
+
+	static void forEachJson(JsonArray array, Consumer<JsonObject> consumer) {
+		int size = array.size();
+		for (int i = 0; i < size; i++)
+			consumer.accept(array.get(i).getAsJsonObject());
+	}
+
+	static void forEachJson(JsonElement element, Consumer<JsonObject> consumer) {
+		if (element != null)
+			forEachJson(element.getAsJsonArray(), consumer);
 	}
 
 	public static void write(String fileName, JsonArray array) {

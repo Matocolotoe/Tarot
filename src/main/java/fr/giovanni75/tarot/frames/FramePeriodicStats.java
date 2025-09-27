@@ -6,18 +6,14 @@ import fr.giovanni75.tarot.objects.Game;
 import fr.giovanni75.tarot.objects.LocalPlayer;
 import fr.giovanni75.tarot.objects.Player;
 
-import javax.swing.BoxLayout;
-import javax.swing.JFrame;
 import javax.swing.JPanel;
 import java.util.*;
 import java.util.function.Function;
 
-class FramePeriodicStats extends JFrame {
+class FramePeriodicStats extends TarotFrame {
 
 	FramePeriodicStats(List<Game> displayedGames, List<Game> selectedGames, DateRecord date, int players) {
-		setBounds(300, 150, 500, 800);
-		setResizable(false);
-		setTitle("Statistiques périodiques – " + players + " joueurs – " + selectedGames.size() + " parties");
+		create("Statistiques périodiques – " + players + " joueurs – " + selectedGames.size() + " parties", 300, 150, 500, 800);
 
 		// Create a temporary profile for each player to track score evolution
 		Set<Player> playerSet = Utils.getAllPlayers(displayedGames);
@@ -49,11 +45,7 @@ class FramePeriodicStats extends JFrame {
 				orderedEvolutions.put(player, diff);
 		}
 
-		JPanel mainPanel = new JPanel();
-		mainPanel.setBorder(Components.getStandardBorder(0));
-		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
-		add(mainPanel);
-
+		JPanel mainPanel = panel(0, true, true);
 		mainPanel.add(Components.getSimpleText("Statistiques périodiques – " + players + " joueurs", 20));
 		mainPanel.add(Components.getSimpleText(Utils.getTitle(selectedGames, date), 20));
 		mainPanel.add(Components.getEmptySpace(18));
@@ -66,7 +58,6 @@ class FramePeriodicStats extends JFrame {
 		mainPanel.add(Components.getEmptySpace(20));
 
 		FrameGlobalStats.displayAll(mainPanel, date, players, selectedGames, temporaryProfiles.values());
-		add(Components.getStandardScrollPane(mainPanel));
 		setVisible(true);
 	}
 

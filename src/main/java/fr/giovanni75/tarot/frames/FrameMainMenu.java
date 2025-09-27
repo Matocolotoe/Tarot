@@ -4,7 +4,6 @@ import fr.giovanni75.tarot.DateRecord;
 import fr.giovanni75.tarot.Files;
 import fr.giovanni75.tarot.Tarot;
 import fr.giovanni75.tarot.objects.Game;
-import fr.giovanni75.tarot.objects.Player;
 
 import javax.swing.*;
 import javax.swing.event.PopupMenuEvent;
@@ -19,35 +18,13 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FrameMainMenu extends JFrame {
+public class FrameMainMenu extends TarotFrame {
 
 	static FrameMainMenu MAIN_MENU;
 
 	private static final Color RIGHT_CLICKED_COLOR = new Color(235, 245, 255);
 
 	private static final int MAX_GAMES_DISPLAYED = 100;
-
-	private static void inputPlayer() {
-		String name = Components.prompt("Nom du joueur ?", "Ajouter un joueur");
-		if (name == null) // Window was just closed
-			return;
-
-		if (name.isBlank()) {
-			Components.popup("Veuillez entrer un nom valide.");
-			inputPlayer();
-			return;
-		}
-
-		if (Tarot.getPlayer(name) != null) {
-			Components.popup("Il existe déjà un joueur à ce nom.");
-			inputPlayer();
-			return;
-		}
-
-		Player player = Tarot.addPlayer(Tarot.ORDERED_PLAYERS.size() + 1, name);
-		player.write("players");
-		Components.popup("Joueur ajouté avec succès.");
-	}
 
 	private final JPanel mainPanel;
 	private final List<Component> components = new ArrayList<>();
@@ -56,20 +33,18 @@ public class FrameMainMenu extends JFrame {
 		JMenuBar menuBar = new JMenuBar();
 		setJMenuBar(menuBar);
 
-		JMenu addMenu = new JMenu("Ajouter");
-		JMenuItem addGameItem = new JMenuItem("Ajouter une partie...");
-		JMenuItem addPlayerItem = new JMenuItem("Ajouter un joueur...");
-		addGameItem.addActionListener(event -> new FrameNewGame(null));
-		addPlayerItem.addActionListener(event -> inputPlayer());
-		addMenu.add(addGameItem);
-		addMenu.add(addPlayerItem);
-		menuBar.add(addMenu);
-
 		JMenu dataMenu = new JMenu("Données");
-		JMenuItem backupItem = new JMenuItem("Créer une sauvegarde...");
-		JMenuItem exportItem = new JMenuItem("Exporter les données...");
+		JMenuItem addGameItem = new JMenuItem("Ajouter une partie");
+		JMenuItem backupItem = new JMenuItem("Créer une sauvegarde");
+		JMenuItem exportItem = new JMenuItem("Exporter les données");
+		JMenuItem playersItem = new JMenuItem("Menu des joueurs");
+		dataMenu.add(addGameItem);
 		dataMenu.add(backupItem);
 		dataMenu.add(exportItem);
+		dataMenu.add(playersItem);
+
+		addGameItem.addActionListener(event -> new FrameNewGame(null));
+		playersItem.addActionListener(event -> new FramePlayerProfiles());
 		menuBar.add(dataMenu);
 
 		backupItem.addActionListener(event -> {
@@ -83,8 +58,10 @@ public class FrameMainMenu extends JFrame {
 		});
 
 		int mask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
+		addGameItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, mask));
 		backupItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, mask));
 		exportItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E, mask));
+		playersItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_J, mask));
 
 		List<DateRecord> dates = new ArrayList<>(Tarot.ALL_GAMES.keySet());
 		dates.sort(DateRecord::compareTo);
@@ -199,19 +176,12 @@ public class FrameMainMenu extends JFrame {
 	public FrameMainMenu() {
 		MAIN_MENU = this;
 
-		setBounds(300, 100, 800, 600);
+		create("Tarot – Compteur de points", 300, 100, 800, 600);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
-		setResizable(false);
-		setTitle("Tarot – Compteur de points");
 
-		mainPanel = new JPanel();
-		mainPanel.setBorder(BorderFactory.createEmptyBorder(30, 30, 0, 280));
-		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
-
+		mainPanel = panel(280, true, true);
 		initializeMenus();
 		showAllGames();
-
-		add(Components.getStandardScrollPane(mainPanel));
 
 		URL url = ClassLoader.getSystemResource("logo.png");
 		setIconImage(new ImageIcon(url).getImage());

@@ -6,6 +6,8 @@ import fr.giovanni75.tarot.Files;
 
 interface Serializable {
 
+	void edit();
+
 	JsonObject toJson();
 
 	default void write(String fileName) {

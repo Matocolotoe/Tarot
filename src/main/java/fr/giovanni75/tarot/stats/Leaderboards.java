@@ -136,9 +136,9 @@ public final class Leaderboards {
 		if (players < 3)
 			return;
 
-		final List<Player> playerList = new ArrayList<>();
+		List<Player> playerList = new ArrayList<>();
 		for (Player player : Tarot.ORDERED_PLAYERS)
-			if (Maps.sum(player.getStats(date, players).playedGames) != 0)
+			if (player.getPlayedGames(date, players) > 0)
 				playerList.add(player);
 
 		// No stats recorded, just skip
@@ -146,6 +146,10 @@ public final class Leaderboards {
 			createLeaderboards(date, players - 1, ws, initialRow);
 			return;
 		}
+
+		// Compare against names that will actually be shown in the left column
+		// Convert to lowercase to avoid capitalized names being put first
+		playerList.sort(Comparator.comparing(player -> player.getDisplayName(date).toLowerCase()));
 
 		Map<PlayerData, List<StatsPair>> unsortedPairs = new EnumMap<>(PlayerData.class);
 		Map<PlayerData, List<StatsPair>> sortedPairs = new EnumMap<>(PlayerData.class);
@@ -155,8 +159,8 @@ public final class Leaderboards {
 				Number value = data.getValue(date, player, players);
 				entries.add(new StatsPair(player, value));
 			}
-			// Store entries that will be displayed in the left column, sorted by player names
-			entries.sort(Comparator.comparing(individualEntry -> individualEntry.player.getName()));
+			// Store entries that will be displayed in the left column, sorted by player names/nicknames (same thing for lowercase)
+			entries.sort(Comparator.comparing(individualEntry -> individualEntry.player.getDisplayName(date).toLowerCase()));
 			unsortedPairs.put(data, entries);
 			// Store entries that will be displayed in the leaderboards on the right, only if needed
 			if (data.leaderboardName != null) {
@@ -210,7 +214,7 @@ public final class Leaderboards {
 		/* Player names */
 		int row = initialRow + 2;
 		for (Player player : playerList) {
-			ws.value(row, 0, player.getName());
+			ws.value(row, 0, player.getDisplayName(date));
 			row++;
 		}
 
@@ -251,15 +255,15 @@ public final class Leaderboards {
 			ws.value(initialRow + 1, column, data.leaderboardName);
 			ws.range(initialRow + 1, column, initialRow + 1, column + 1).style()
 					.bold()
+					.borderStyle(BorderStyle.THIN)
 					.horizontalAlignment("center")
 					.verticalAlignment("center")
-					.borderStyle(BorderStyle.THIN)
 					.merge().set();
 
 			row = initialRow + 2;
 			for (StatsPair pair : entry.getValue()) {
 				ws.value(row, column - 1, row - initialRow - 1); // Place in the leaderboard
-				ws.value(row, column, pair.player.getName());
+				ws.value(row, column, pair.player.getDisplayName(date));
 				ws.value(row, column + 1, data.getDisplay(pair.value));
 				row++;
 			}
