@@ -19,6 +19,8 @@ import java.util.zip.ZipOutputStream;
 
 public final class Files {
 
+	private static final int BUFFER_SIZE = 1024;
+
 	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd-MM-yyyy");
 
 	private static void addZipEntry(ZipOutputStream zip, String path) {
@@ -27,7 +29,7 @@ public final class Files {
 		try (FileInputStream is = new FileInputStream(target)) {
 			ZipEntry entry = new ZipEntry(target.getName()); // Avoid messing up paths
 			zip.putNextEntry(entry);
-			byte[] buffer = new byte[1024];
+			byte[] buffer = new byte[BUFFER_SIZE];
 			int read;
 			while ((read = is.read(buffer)) >= 0)
 				zip.write(buffer, 0, read);
