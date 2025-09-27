@@ -85,15 +85,15 @@ public final class Files {
 
 		// Expected format :
 		// split[0] = "games"
-		// split[1] = month
-		// split[2] = year.json
+		// split[1] = YYYY
+		// split[2] = MM.json
 		String[] split = name.split("_");
 		if (split.length != 3 || !split[0].equals("games"))
 			throw new IllegalArgumentException("Invalid format for game file " + name + " (regex check failed)");
 
 		try {
-			int month = Integer.parseInt(split[1]);
-			int year = Integer.parseInt(split[2].substring(0, 4));
+			int year = Integer.parseInt(split[1]);
+			int month = Integer.parseInt(split[2].substring(0, 2));
 			return new DateRecord(Month.ALL_MONTHS[month - 1], year);
 		} catch (NumberFormatException e) {
 			throw new IllegalArgumentException("Invalid format for game file " + name + " (number parsing failed)");
@@ -101,13 +101,11 @@ public final class Files {
 	}
 
 	static JsonArray getJsonArrayFromFile(File file) {
-		JsonArray array;
 		try (FileInputStream is = new FileInputStream(file)) {
-			array = (JsonArray) JsonParser.parseReader(new InputStreamReader(is, StandardCharsets.UTF_8));
+			return (JsonArray) JsonParser.parseReader(new InputStreamReader(is, StandardCharsets.UTF_8));
 		} catch (IOException e) {
 			throw new RuntimeException("Could not read array from " + file.getName(), e);
 		}
-		return array;
 	}
 
 	public static JsonArray getJsonArrayFromFile(String fileName) {

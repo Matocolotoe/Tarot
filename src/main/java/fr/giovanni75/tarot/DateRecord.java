@@ -23,7 +23,7 @@ public record DateRecord(Month month, int year) implements Comparable<DateRecord
 
 	public String getFileName() {
 		int month = this.month.ordinal() + 1;
-		return "games/games_" + (month < 10 ? "0" + month : month) + "_" + year;
+		return "games/games_" + year + "_" + (month < 10 ? "0" + month : month);
 	}
 
 	public String getName() {
