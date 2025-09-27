@@ -29,10 +29,10 @@ class FrameSelection extends TarotFrame {
 			Components.popup(Components.NO_GAME_AVAILABLE);
 			return;
 		}
+		
+		create(header + " – Choix de parties", 400, 200, 550, 800);
 
-		create(header + " – Choix de parties", 400, 200, 500, 800);
-
-		JPanel mainPanel = panel(280, true, true);
+		JPanel mainPanel = panel(30, true, true);
 		mainPanel.add(Components.getSimpleText(date.getName() + " – " + players + " joueurs", 20));
 		mainPanel.add(Components.getSimpleText("Sélectionnez des parties", 20));
 		mainPanel.add(Components.getEmptySpace(18));
