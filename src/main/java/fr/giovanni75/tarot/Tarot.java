@@ -82,6 +82,9 @@ public final class Tarot {
 				List<Game> gameList = new ArrayList<>();
 				for (JsonElement gameElement : games)
 					gameList.add(new Game(gameElement.getAsJsonObject(), date));
+				// File exists, but no games within
+				if (gameList.isEmpty())
+					continue;
 				ALL_GAMES.put(date, gameList);
 				for (Player player : ORDERED_PLAYERS)
 					player.createStats(date); // Must be done after games are scanned and before game results are applied
