@@ -130,7 +130,6 @@ public class FrameMainMenu extends TarotFrame {
 			game.applyResults(Game.DEFAULT_CONVERTER, Game.REMOVE_GAME_DIRECTION);
 			game.delete();
 			reloadGames();
-			Components.popup("Partie supprimée avec succès.");
 		}
 	}
 
