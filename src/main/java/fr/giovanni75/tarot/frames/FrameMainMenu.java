@@ -73,7 +73,7 @@ public class FrameMainMenu extends TarotFrame {
 			JMenu invidiualStatsMenu = new JMenu("Stats individuelles");
 			JMenu periodicStatsMenu = new JMenu("Stats périodiques");
 			for (DateRecord date : dates) {
-				String dateName = date.getName();
+				String dateName = date.month().getShortName() + " " + date.year();
 				JMenuItem graphItem = new JMenuItem(dateName);
 				JMenuItem globalStatsItem = new JMenuItem(dateName);
 				JMenuItem playerStatsItem = new JMenuItem(dateName);
