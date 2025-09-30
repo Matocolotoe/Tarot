@@ -16,6 +16,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class FrameMainMenu extends TarotFrame {
@@ -64,7 +65,8 @@ public class FrameMainMenu extends TarotFrame {
 		playersItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_J, mask));
 
 		List<DateRecord> dates = new ArrayList<>(Tarot.ALL_GAMES.keySet());
-		dates.sort(DateRecord::compareTo);
+		dates.sort(Comparator.reverseOrder());
+
 		for (int i = 5; i > 2; i--) {
 			final int players = i; // Must be final for constructors below
 			JMenu statsMenu = new JMenu("Tarot à " + players);
