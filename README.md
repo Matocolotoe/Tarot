@@ -11,7 +11,7 @@ Cliquez [ici](RULES.md) pour consulter les règles détaillées du jeu suivies p
 
 ## Ajout d'une partie
 
-L'interface suivante permet de comptabiliser une partie en fonction des joueurs existants via la rubrique `Données` ou par le raccourci `CTRL+P`. Chaque partie peut ensuite être modifiée ou supprimée dans le menu principal.
+L'interface suivante permet de comptabiliser une partie en fonction des joueurs existants via la rubrique `Données` ou par le raccourci `CTRL+P`. Chaque partie peut ensuite être modifiée ou supprimée dans le menu principal, et les détails du calcul des scores peuvent être affichés.
 
 ![plot](./src/main/resources/new_game.png)
 
