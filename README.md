@@ -19,6 +19,8 @@ L'interface suivante permet de comptabiliser une partie en fonction des joueurs 
 
 Un menu accessible via la rubrique `Données` ou par le raccourci `CTRL+J`, permet de modifier les surnoms des joueurs.
 
+![plot](./src/main/resources/nicknames.png)
+
 ## Statistiques et graphiques
 
 Pour $N = 3$, $4$, $5$, une rubrique `Tarot à N` propose des statistiques individuelles, des statistiques globales sur un mois ou entre deux parties précises de ce mois, ainsi que des graphiques représentant l'évolution des scores entre deux parties. Nous utilisons pour ce faire la bibliothèque [XChart](https://github.com/knowm/XChart).
@@ -32,6 +34,8 @@ _Par défaut, seules les courbes des personnes ayant joué plus de 10 parties su
 ### Grille des scores
 
 Lorsque vous cliquez sur `Exporter les données` dans la rubrique `Données` ou entrez `CTRL+E`, l'application crée un tableur pour chaque année, chacun contenant une grille par mois contenant au moins une partie. Des statistiques individuelles, des classements et des statistiques globales sont affichées pour chaque nombre de joueurs. Nous utilisons pour ce faire la bibliothèque [fastexcel](https://github.com/dhatim/fastexcel).
+
+![plot](./src/main/resources/leaderboard.png)
 
 ### Sauvegardes
 
