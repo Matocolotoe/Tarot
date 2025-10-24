@@ -401,8 +401,15 @@ class FrameNewGame extends TarotFrame implements ActionListener {
 			baseGame.slam = slam;
 
 			// Number of players might have changed
-			if (numberOfPlayers != baseGame.players.length)
+			int playerDiff = numberOfPlayers - baseGame.players.length;
+			if (playerDiff != 0) {
 				baseGame.players = new LocalPlayer[numberOfPlayers];
+				// If the number of players is smaller, LAST_SELECTED_NAMES will have uncleared extra data
+				if (playerDiff < 0)
+					for (int i = 4 + playerDiff; i < 5; i++)
+						LAST_SELECTED_NAMES[i] = Tarot.NONE_STRING;
+			}
+
 			System.arraycopy(players, 0, baseGame.players, 0, numberOfPlayers);
 			baseGame.reorderPlayers();
 
