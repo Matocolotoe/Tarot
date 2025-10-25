@@ -128,7 +128,7 @@ class FrameScoreGraphs extends TarotFrame implements ActionListener {
 			String name = player.getName();
 			temporaryProfiles.put(player.getID(), copy);
 			temporaryProfilesByName.put(name, copy);
-			if (filterGames && player.getPlayedGames(date, players) >= MINIMUM_PLAYED_GAMES)
+			if (!filterGames || player.getPlayedGames(date, players) >= MINIMUM_PLAYED_GAMES)
 				minimumPlayedNames.add(name);
 		}
 
