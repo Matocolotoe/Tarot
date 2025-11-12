@@ -259,7 +259,7 @@ class FramePlayerProfiles extends TarotFrame {
 			return;
 		}
 
-		Player player = Tarot.addPlayer(Tarot.ORDERED_PLAYERS.size() + 1, name, null, null);
+		Player player = Tarot.addPlayer(Tarot.ORDERED_PLAYERS.size() + 1, name, new HashMap<>(), new HashMap<>());
 		player.write("players");
 		Components.popup("Joueur ajouté avec succès.");
 	}
