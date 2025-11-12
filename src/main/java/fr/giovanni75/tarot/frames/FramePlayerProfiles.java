@@ -192,7 +192,7 @@ class FramePlayerProfiles extends TarotFrame {
 				}
 				addTempComponent(panel, getEditNicknameButton(month, player, y, name -> player.setNickname(date, name)));
 			} else {
-				monthLabel.setForeground(Color.GRAY);
+				monthLabel.setForeground(Color.LIGHT_GRAY);
 				if (nickLabel != null) {
 					nickLabels.remove(month);
 					panel.remove(nickLabel);
