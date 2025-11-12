@@ -17,7 +17,7 @@ L'interface suivante permet de comptabiliser une partie en fonction des joueurs 
 
 ## Menu des joueurs
 
-Un menu accessible via la rubrique `Données` ou par le raccourci `CTRL+J`, permet de modifier les surnoms des joueurs.
+Un menu accessible via la rubrique `Données` ou par le raccourci `CTRL+J`, permet de modifier les surnoms des joueurs. Ceux-ci apparaissent uniquement dans la [grille des scores](#grille-des-scores). Les surnoms mensuels ont la priorité sur les surnoms génériques (annuels).
 
 ![plot](./src/main/resources/nicknames.png)
 
