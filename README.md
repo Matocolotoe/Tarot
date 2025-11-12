@@ -15,6 +15,8 @@ L'interface suivante permet de comptabiliser une partie en fonction des joueurs 
 
 ![plot](./src/main/resources/new_game.png)
 
+_La possibilité de sélectionner une personne appelée apparaît lorsque 5 joueurs sont sélectionnés._
+
 ## Menu des joueurs
 
 Un menu accessible via la rubrique `Données` ou par le raccourci `CTRL+J`, permet de modifier les surnoms des joueurs. Ceux-ci apparaissent uniquement dans la [grille des scores](#grille-des-scores). Les surnoms mensuels ont la priorité sur les surnoms génériques (annuels).
@@ -36,6 +38,8 @@ _Par défaut, seules les courbes des personnes ayant joué plus de 10 parties su
 Lorsque vous cliquez sur `Exporter les données` dans la rubrique `Données` ou entrez `CTRL+E`, l'application crée un tableur pour chaque année, chacun contenant une grille par mois contenant au moins une partie. Des statistiques individuelles, des classements et des statistiques globales sont affichées pour chaque nombre de joueurs. Nous utilisons pour ce faire la bibliothèque [fastexcel](https://github.com/dhatim/fastexcel).
 
 ![plot](./src/main/resources/leaderboard.png)
+
+_Seuls les taux de réussite des personnes ayant pris plus de 3 fois apparaissent dans la grille._
 
 ### Sauvegardes
 
