@@ -53,6 +53,8 @@ class FramePlayerProfiles extends TarotFrame {
 		return month;
 	}
 
+	private final Map<Player, List<Month>> calculatedMonthsPlayed = new HashMap<>();
+
 	private JButton currentPlayerButton;
 	private int currentYear = getMaxPlayedYear();
 
@@ -135,7 +137,11 @@ class FramePlayerProfiles extends TarotFrame {
 		if (source == Source.PLAYER_BUTTON_CLICK && currentPlayerButton == button)
 			return;
 
-		List<Month> monthsPlayed = getMonthsPlayed(player, currentYear);
+		List<Month> monthsPlayed = calculatedMonthsPlayed.get(player);
+		if (monthsPlayed == null) {
+			monthsPlayed = getMonthsPlayed(player, currentYear);
+			calculatedMonthsPlayed.put(player, monthsPlayed);
+		}
 
 		// No player button has been clicked before
 		if (currentPlayerButton == null) {
