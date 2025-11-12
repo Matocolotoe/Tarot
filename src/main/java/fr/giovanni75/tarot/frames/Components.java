@@ -2,6 +2,7 @@ package fr.giovanni75.tarot.frames;
 
 import javax.swing.*;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Font;
 
 final class Components {
@@ -34,8 +35,8 @@ final class Components {
 		return button;
 	}
 
-	static JLabel getEmptySpace(int size) {
-		return getSimpleText(" ", size);
+	static Component getEmptySpace(int height) {
+		return Box.createVerticalStrut(height);
 	}
 
 	static Font getFont(int size) {
