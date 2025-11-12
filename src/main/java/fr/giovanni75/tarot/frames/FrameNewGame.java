@@ -114,9 +114,9 @@ class FrameNewGame extends TarotFrame implements ActionListener {
 		nameList.sort(String::compareTo);
 		nameList.addFirst(Tarot.NONE_STRING);
 
-		mainPanel.add(Components.getSimpleText("Joueurs", 18, COMBO_BOX_BASE_X - 80, COMBO_BOX_BASE_Y - 20, LARGE_TEXT_WIDTH, TEXT_HEIGHT));
-		mainPanel.add(Components.getSimpleText("Misères", 18, COMBO_BOX_BASE_X - 80, COMBO_BOX_BASE_Y + 20, LARGE_TEXT_WIDTH, TEXT_HEIGHT));
-		mainPanel.add(Components.getSimpleText("Poignées", 18, COMBO_BOX_BASE_X - 92, COMBO_BOX_BASE_Y + 60, LARGE_TEXT_WIDTH, TEXT_HEIGHT));
+		mainPanel.add(Components.getSimpleText("Joueurs", 18, SwingConstants.RIGHT, COMBO_BOX_BASE_X - 120, COMBO_BOX_BASE_Y - 20, SMALL_TEXT_WIDTH, TEXT_HEIGHT));
+		mainPanel.add(Components.getSimpleText("Misères", 18, SwingConstants.RIGHT, COMBO_BOX_BASE_X - 120, COMBO_BOX_BASE_Y + 20, SMALL_TEXT_WIDTH, TEXT_HEIGHT));
+		mainPanel.add(Components.getSimpleText("Poignées", 18, SwingConstants.RIGHT, COMBO_BOX_BASE_X - 120, COMBO_BOX_BASE_Y + 60, SMALL_TEXT_WIDTH, TEXT_HEIGHT));
 
 		String[] names = nameList.toArray(new String[0]);
 		for (int i = 0; i < 5; i++) {
@@ -135,7 +135,7 @@ class FrameNewGame extends TarotFrame implements ActionListener {
 		final ButtonGroup contractButtonGroup = new ButtonGroup();
 		final ButtonGroup oudlersButtonGroup = new ButtonGroup();
 
-		mainPanel.add(Components.getSimpleText("Preneur", 18, COMBO_BOX_BASE_X - 80, COMBO_BOX_BASE_Y + 110, SMALL_TEXT_WIDTH, TEXT_HEIGHT));
+		mainPanel.add(Components.getSimpleText("Preneur", 18, SwingConstants.RIGHT, COMBO_BOX_BASE_X - 120, COMBO_BOX_BASE_Y + 110, SMALL_TEXT_WIDTH, TEXT_HEIGHT));
 		for (int i = 0; i < 5; i++) {
 			JRadioButton button = new JRadioButton();
 			attackerButtons[i] = button;
@@ -145,7 +145,7 @@ class FrameNewGame extends TarotFrame implements ActionListener {
 			mainPanel.add(button);
 		}
 
-		calledLabel = Components.getSimpleText("Appelé", 18, COMBO_BOX_BASE_X - 80, COMBO_BOX_BASE_Y + 140, SMALL_TEXT_WIDTH, TEXT_HEIGHT);
+		calledLabel = Components.getSimpleText("Appelé", 18, SwingConstants.RIGHT, COMBO_BOX_BASE_X - 120, COMBO_BOX_BASE_Y + 140, SMALL_TEXT_WIDTH, TEXT_HEIGHT);
 		mainPanel.add(calledLabel);
 
 		boolean hideCalledButtons = (baseGame == null || baseGame.players.length < 5) && exists(LAST_SELECTED_NAMES, Tarot.NONE_STRING::equals);

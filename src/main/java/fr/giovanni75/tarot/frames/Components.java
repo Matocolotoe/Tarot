@@ -50,7 +50,12 @@ final class Components {
 	}
 
 	static JLabel getSimpleText(String text, int size, int x, int y, int width, int height) {
+		return getSimpleText(text, size, SwingConstants.LEFT, x, y, width, height);
+	}
+
+	static JLabel getSimpleText(String text, int size, int alignment, int x, int y, int width, int height) {
 		JLabel label = getSimpleText(text, size);
+		label.setHorizontalAlignment(alignment);
 		label.setLocation(x, y);
 		label.setSize(width, height);
 		return label;
