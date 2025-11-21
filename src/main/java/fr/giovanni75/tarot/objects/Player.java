@@ -91,7 +91,13 @@ public class Player implements Comparable<Player>, Serializable {
 			case 5 -> statsFivePlayers;
 			default -> throw new IllegalArgumentException("Local stats are unavailable for " + players + " players");
 		};
-		return stats.getOrDefault(date, new LocalStats());
+		// This one is tricky : when stats of a certain date are being queried for the first time, don't just return
+		// a dummy LocalStats object. Save it first and then return ! Otherwise stats will only be properly taken into
+		// account on the next app launch (for example when the first game of a month is created).
+		LocalStats localStats = stats.get(date);
+		if (localStats == null)
+			stats.put(date, localStats = new LocalStats());
+		return localStats;
 	}
 
 	public void setNickname(DateRecord date, String nickname) {
