@@ -19,7 +19,6 @@ class FrameNewGame extends TarotFrame implements ActionListener {
 
 	private static final int COMBO_BOX_BASE_X = 150;
 	private static final int COMBO_BOX_BASE_Y = 80;
-	private static final int LARGE_TEXT_WIDTH = 140;
 	private static final int PLAYER_BUTTON_BASE_X = 190;
 	private static final int PLAYER_X_SPACING = 110;
 	private static final int SECONDARY_BUTTON_BASE_X = 200;

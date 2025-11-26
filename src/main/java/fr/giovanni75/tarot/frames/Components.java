@@ -4,6 +4,8 @@ import javax.swing.*;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 final class Components {
 
@@ -22,13 +24,7 @@ final class Components {
 		return button;
 	}
 
-	static JButton getClickableText(String text, int size, int width, int height) {
-		JButton button = getClickableText(text, size);
-		button.setSize(width, height);
-		return button;
-	}
-
-	static JButton getClickableText(String text, int size, int x, int y, int width, int height) {
+	static JButton getClickableText(String text, int size, int x, int y) {
 		JButton button = getClickableText(text, size);
 		button.setLocation(x, y);
 		button.setSize(button.getPreferredSize());
@@ -41,6 +37,16 @@ final class Components {
 
 	static Font getFont(int size) {
 		return new Font(FONT_NAME, Font.PLAIN, size);
+	}
+
+	static MouseAdapter getLeftClickAdapter(Runnable action) {
+		return new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (SwingUtilities.isLeftMouseButton(e))
+					action.run();
+			}
+		};
 	}
 
 	static JLabel getSimpleText(String text, int size) {

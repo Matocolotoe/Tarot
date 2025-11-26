@@ -19,9 +19,9 @@ _La possibilité de sélectionner une personne appelée apparaît lorsque 5 joue
 
 ## Menu des joueurs
 
-Un menu accessible via la rubrique `Données` ou par le raccourci `CTRL+J`, permet de modifier les surnoms des joueurs. Ceux-ci apparaissent uniquement dans la [grille des scores](#grille-des-scores). Les surnoms mensuels ont la priorité sur les surnoms génériques (annuels).
+Un menu accessible via la rubrique `Données` ou par le raccourci `CTRL+J`, permet de visualiser les statistiques par mois et par nombre de joueurs de chaque personne, mais également de modifier leurs surnoms. Ceux-ci apparaissent uniquement dans la [grille des scores](#grille-des-scores). Les surnoms mensuels ont la priorité sur les surnoms génériques (annuels).
 
-![plot](./src/main/resources/nicknames.png)
+![plot](./src/main/resources/player_menu.png)
 
 ## Statistiques et graphiques
 

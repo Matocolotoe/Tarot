@@ -6,8 +6,6 @@ import fr.giovanni75.tarot.objects.Game;
 
 import javax.swing.*;
 import java.awt.Color;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -44,25 +42,20 @@ class FrameSelection extends TarotFrame {
 				mainPanel.add(Components.getEmptySpace(15));
 			}
 			JButton button = Components.getClickableText(game.getDescription(), 15);
-			button.addMouseListener(new MouseAdapter() {
-				@Override
-				public void mouseClicked(MouseEvent e) {
-					if (SwingUtilities.isLeftMouseButton(e)) {
-						if (firstGame == null) {
-							firstButton = button;
-							firstGame = game;
-							button.setBackground(LEFT_CLICKED_COLOR);
-						} else if (firstGame == game) {
-							firstButton.setBackground(Components.DEFAULT_BUTTON_COLOR);
-							firstButton = null;
-							firstGame = null;
-						} else {
-							button.setBackground(LEFT_CLICKED_COLOR);
-							execute(displayed, game, button, header, action);
-						}
-					}
+			button.addMouseListener(Components.getLeftClickAdapter(() -> {
+				if (firstGame == null) {
+					firstButton = button;
+					firstGame = game;
+					button.setBackground(LEFT_CLICKED_COLOR);
+				} else if (firstGame == game) {
+					firstButton.setBackground(Components.DEFAULT_BUTTON_COLOR);
+					firstButton = null;
+					firstGame = null;
+				} else {
+					button.setBackground(LEFT_CLICKED_COLOR);
+					execute(displayed, game, button, header, action);
 				}
-			});
+			}));
 			button.setBackground(Components.DEFAULT_BUTTON_COLOR);
 			mainPanel.add(button);
 			mainPanel.add(Components.getEmptySpace(15));

@@ -72,28 +72,23 @@ public class FrameMainMenu extends TarotFrame {
 			JMenu statsMenu = new JMenu("Tarot à " + players);
 			JMenu graphMenu = new JMenu("Graphiques");
 			JMenu globalStatsMenu = new JMenu("Stats générales");
-			JMenu invidiualStatsMenu = new JMenu("Stats individuelles");
 			JMenu periodicStatsMenu = new JMenu("Stats périodiques");
 			for (DateRecord date : dates) {
 				String dateName = date.month().getShortName() + " " + date.year();
 				JMenuItem graphItem = new JMenuItem(dateName);
 				JMenuItem globalStatsItem = new JMenuItem(dateName);
-				JMenuItem playerStatsItem = new JMenuItem(dateName);
 				JMenuItem periodicStatsItem = new JMenuItem(dateName);
 				graphItem.addActionListener(event -> new FrameSelection("Évolution des scores", date, players,
 						(displayed, selected) -> new FrameScoreGraphs(displayed, selected, date, players)));
 				globalStatsItem.addActionListener(event -> new FrameGlobalStats(date, players));
-				playerStatsItem.addActionListener(event -> new FramePlayerStats(date, players));
 				periodicStatsItem.addActionListener(event -> new FrameSelection("Statistiques périodiques", date, players,
 						(displayed, selected) -> new FramePeriodicStats(displayed, selected, date, players)));
 				graphMenu.add(graphItem);
 				globalStatsMenu.add(globalStatsItem);
-				invidiualStatsMenu.add(playerStatsItem);
 				periodicStatsMenu.add(periodicStatsItem);
 			}
 			statsMenu.add(graphMenu);
 			statsMenu.add(globalStatsMenu);
-			statsMenu.add(invidiualStatsMenu);
 			statsMenu.add(periodicStatsMenu);
 			menuBar.add(statsMenu);
 		}

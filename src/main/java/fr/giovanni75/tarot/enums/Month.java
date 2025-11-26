@@ -1,5 +1,8 @@
 package fr.giovanni75.tarot.enums;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public enum Month implements Nameable {
 
 	JANUARY("Janvier", "Janv."),
@@ -33,5 +36,11 @@ public enum Month implements Nameable {
 	}
 
 	public static final Month[] ALL_MONTHS = Month.values();
+	public static final Map<String, Month> BY_NAME = new HashMap<>();
+
+	static {
+		for (Month month : ALL_MONTHS)
+			BY_NAME.put(month.getName(), month);
+	}
 
 }
