@@ -211,6 +211,11 @@ public class Game implements Serializable {
 	}
 
 	private void calculatePlayerScores(LocalStats[] stats, int direction) {
+		stats[ATTACKER_INDEX].takeScore += direction * players[ATTACKER_INDEX].score;
+		if (players.length == 5 && !selfCalled())
+			stats[ALLY_INDEX].callScore += direction * players[ALLY_INDEX].score;
+		for (int i = getDefenseIndex(); i < players.length; i++)
+			stats[i].defScore += direction * players[i].score;
 		for (int i = 0; i < players.length; i++)
 			stats[i].totalScore += direction * players[i].score;
 	}
@@ -404,7 +409,7 @@ public class Game implements Serializable {
 
 		if (petitAuBout != null) {
 			int points = petitAuBout.getAttackPoints() * contract.getMultiplier();
-			details.add(petitAuBout.getFullName() + " : " + (points > 0 ? "+" : "") + points);
+			details.add(petitAuBout.getFullName() + " : " + Utils.formatSign(points));
 			extra.add(petitAuBout.getFullName());
 		}
 

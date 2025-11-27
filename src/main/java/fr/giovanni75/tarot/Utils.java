@@ -33,6 +33,10 @@ public final class Utils {
 		return DOUBLE_DECIMAL_FORMAT.format(value);
 	}
 
+	public static String formatSign(int value) {
+		return value > 0 ? "+" + value : String.valueOf(value);
+	}
+
 	public static Set<Player> getAllPlayers(Collection<Game> games) {
 		Set<Player> players = new HashSet<>();
 		for (Game game : games)

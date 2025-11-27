@@ -51,10 +51,8 @@ class FramePeriodicStats extends TarotFrame {
 		mainPanel.add(Components.getEmptySpace(18));
 
 		mainPanel.add(Components.getSimpleText("Évolution des scores :", 15));
-		for (var entry : orderedEvolutions.entrySet()) {
-			int diff = entry.getValue();
-			mainPanel.add(Components.getSimpleText(" ‣ " + entry.getKey().getName() + " : " + (diff >= 0 ? "+" : "") + diff, 15));
-		}
+		for (var entry : orderedEvolutions.entrySet())
+			mainPanel.add(Components.getSimpleText(" ‣ " + entry.getKey().getName() + " : " + Utils.formatSign(entry.getValue()), 15));
 		mainPanel.add(Components.getEmptySpace(20));
 
 		FrameGlobalStats.displayAll(mainPanel, date, players, selectedGames, temporaryProfiles.values());

@@ -306,7 +306,7 @@ class FramePlayerProfiles extends TarotFrame {
 		playerStats.clear();
 
 		DateRecord date = new DateRecord(currentMonth, currentYear);
-		List<String> display = player.getStats(date, currentPlayerCount).getDisplay();
+		List<String> display = player.getStats(date, currentPlayerCount).getDisplay(currentPlayerCount);
 		int y = INITIAL_PLAYERS_Y + 40;
 		if (display.isEmpty()) {
 			addStatsComponent(rightPanel, Components.getSimpleText("Pas de stats ce mois-ci.", 16, LEFT_TEXT_X, y, LARGE_TEXT_WIDTH, BUTTON_HEIGHT));

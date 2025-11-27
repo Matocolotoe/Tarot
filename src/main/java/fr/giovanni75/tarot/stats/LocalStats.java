@@ -2,6 +2,7 @@ package fr.giovanni75.tarot.stats;
 
 import fr.giovanni75.tarot.Maps;
 import fr.giovanni75.tarot.Tarot;
+import fr.giovanni75.tarot.Utils;
 import fr.giovanni75.tarot.enums.Contract;
 
 import java.util.ArrayList;
@@ -11,6 +12,9 @@ import java.util.Map;
 
 public final class LocalStats {
 
+	public int callScore;
+	public int defScore;
+	public int takeScore;
 	public int totalScore;
 
 	public final Map<Contract, Integer> bestTurns = new EnumMap<>(Contract.class);
@@ -23,7 +27,7 @@ public final class LocalStats {
 	public final Map<Contract, Integer> successfulTakes = new EnumMap<>(Contract.class);
 	public final Map<Contract, Integer> worstTurns = new EnumMap<>(Contract.class);
 
-	public List<String> getDisplay() {
+	public List<String> getDisplay(int players) {
 		boolean hasNeverPlayed = true;
 		for (Contract contract : Contract.ALL_CONTRACTS) {
 			if (playedGames.getOrDefault(contract, 0) != 0) {
@@ -37,22 +41,24 @@ public final class LocalStats {
 
 		List<String> result = new ArrayList<>();
 		result.add("Score total : " + totalScore);
-		result.add("Poignées : " + Maps.sum(handfuls));
-		result.add("Misères : " + Maps.sum(miseries));
+		result.add(" ‣ Prises : " + Utils.formatSign(takeScore));
+		if (players == 5)
+			result.add(" ‣ Appels : " + Utils.formatSign(callScore));
+		result.add(" ‣ Défense : " + Utils.formatSign(defScore));
 
 		result.add(" ");
 		result.add("Parties jouées : " + Maps.sum(playedGames));
-		for (Contract contract : Contract.ALL_CONTRACTS)
-			result.add(" ‣ " + contract.getName() + " : " + playedGames.getOrDefault(contract, 0));
+		result.add("Poignées : " + Maps.sum(handfuls));
+		result.add("Misères : " + Maps.sum(miseries));
 
 		int successes = Maps.sum(successfulTakes);
-		int total = successes + Maps.sum(failedTakes);
+		int totalTakes = successes + Maps.sum(failedTakes);
 		result.add(" ");
-		result.add("Prises réussies : " + (total == 0 ? Tarot.NONE_STRING : successes + "/" + total));
+		result.add("Prises réussies : " + (totalTakes == 0 ? Tarot.NONE_STRING : successes + "/" + totalTakes));
 		for (Contract contract : Contract.ALL_CONTRACTS) {
 			successes = successfulTakes.getOrDefault(contract, 0);
-			total = successes + failedTakes.getOrDefault(contract, 0);
-			result.add(" ‣ " + contract.getName() + " : " + (total == 0 ? Tarot.NONE_STRING : successes + "/" + total));
+			totalTakes = successes + failedTakes.getOrDefault(contract, 0);
+			result.add(" ‣ " + contract.getName() + " : " + (totalTakes == 0 ? Tarot.NONE_STRING : successes + "/" + totalTakes));
 		}
 
 		int selfCallAmount = Maps.sum(selfCalls);
@@ -61,7 +67,9 @@ public final class LocalStats {
 		for (Contract contract : Contract.ALL_CONTRACTS) {
 			selfCallAmount = selfCalls.getOrDefault(contract, 0);
 			result.add(" ‣ " + contract.getName() + " : " + calledTimes.getOrDefault(contract, 0)
-					+ (selfCallAmount == 0 ? "" : ", dont " + selfCallAmount + " soi-même"));
+					+ "/" + (playedGames.getOrDefault(contract, 0) - (successfulTakes.getOrDefault(contract, 0)
+			+ failedTakes.getOrDefault(contract, 0)))
+					+ (selfCallAmount == 0 ? "" : " + " + selfCallAmount + " solo"));
 		}
 
 		result.add(" ");
