@@ -5,7 +5,7 @@ import javax.swing.*;
 class TarotFrame extends JFrame {
 
 	private static final int BORDER_TOP_LEFT_MARGIN = 30;
-	private static final int SCROLL_VERTICAL_INCREMENT = 18;
+	private static final int SCROLL_UNIT_INCREMENT = 18;
 
 	void create(String title, int x, int y, int width, int height) {
 		setBounds(x, y, width, height);
@@ -30,7 +30,8 @@ class TarotFrame extends JFrame {
 
 	JScrollPane scrollPane(JPanel panel) {
 		JScrollPane pane = new JScrollPane(panel);
-		pane.getVerticalScrollBar().setUnitIncrement(SCROLL_VERTICAL_INCREMENT);
+		pane.getHorizontalScrollBar().setUnitIncrement(SCROLL_UNIT_INCREMENT);
+		pane.getVerticalScrollBar().setUnitIncrement(SCROLL_UNIT_INCREMENT);
 		return pane;
 	}
 
