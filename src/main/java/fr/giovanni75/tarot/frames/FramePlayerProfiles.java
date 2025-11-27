@@ -20,7 +20,7 @@ class FramePlayerProfiles extends TarotFrame {
 	private static final int MINIMUM_NICK_LENGTH = 2;
 	private static final int MAXIMUM_NICK_LENGTH = 30;
 
-	private static final int GLOBAL_PANEL_HEIGHT = 675;
+	private static final int GLOBAL_PANEL_HEIGHT = 650;
 	private static final int LEFT_PANEL_WIDTH = 200;
 	private static final int RIGHT_PANEL_WIDTH = 850;
 
@@ -69,6 +69,7 @@ class FramePlayerProfiles extends TarotFrame {
 	private final JPanel leftPanel;
 	private final JPanel rightPanel;
 
+	private final JLabel playerCountLabel;
 	private final List<Component> editButtons = new ArrayList<>();
 	private final List<Component> playerComponents = new ArrayList<>();
 	private final List<Component> playerStats = new ArrayList<>();
@@ -83,7 +84,7 @@ class FramePlayerProfiles extends TarotFrame {
 
 	private JLabel genericNickLabel;
 	private JLabel nameLabel;
-	private final JLabel playerCountLabel;
+	private JLabel statsLabel;
 
 	private void addEditButton(JPanel panel, Month month, Player player, int y, Consumer<String> action) {
 		JButton button = Components.getClickableText("Modifier", 12, EDIT_BUTTON_X, y);
@@ -157,7 +158,7 @@ class FramePlayerProfiles extends TarotFrame {
 
 	private void initializeRightPanel(JPanel panel, Player player, List<Month> monthsPlayed) {
 		int y = INITIAL_LABELS_Y;
-		panel.add(Components.getSimpleText("Stats – " + currentMonth.getName() + " " + currentYear, 18, LEFT_TEXT_X, INITIAL_PLAYERS_Y, HUGE_TEXT_WIDTH, BUTTON_HEIGHT));
+		panel.add(statsLabel);
 		panel.add(Components.getSimpleText("Mois", 18, MID_TEXT_X, INITIAL_PLAYERS_Y, SMALL_TEXT_WIDTH, BUTTON_HEIGHT));
 		panel.add(Components.getSimpleText("Surnom", 18, RIGHT_TEXT_X, INITIAL_PLAYERS_Y, SMALL_TEXT_WIDTH, BUTTON_HEIGHT));
 		panel.add(Components.getSimpleText("Surnom générique", 18, MID_TEXT_X,  500, LARGE_TEXT_WIDTH, BUTTON_HEIGHT));
@@ -169,8 +170,9 @@ class FramePlayerProfiles extends TarotFrame {
 			panel.add(label);
 			y += Y_OFFSET;
 		}
-		nameLabel = Components.getSimpleText(player.getName(), 20, LEFT_TEXT_X, 25, LARGE_TEXT_WIDTH, BUTTON_HEIGHT);
+		nameLabel = Components.getSimpleText(player.getName(), 25, LEFT_TEXT_X, 25, LARGE_TEXT_WIDTH, 30);
 		panel.add(nameLabel);
+		refreshStatsHeader();
 	}
 
 	private void onPlayerClick(Player player, Source source, JButton button) {
@@ -208,6 +210,7 @@ class FramePlayerProfiles extends TarotFrame {
 
 		if (source == Source.MONTH_UPDATED || source == Source.PLAYER_COUNT_UPDATED || source == Source.YEAR_UPDATED) {
 			refreshPlayerStats(player);
+			refreshStatsHeader();
 			if (source == Source.YEAR_UPDATED) {
 				monthBox.removeAllItems();
 				refreshMonthBoxItems();
@@ -343,6 +346,15 @@ class FramePlayerProfiles extends TarotFrame {
 				}
 			}
 			y += Y_OFFSET;
+		}
+	}
+
+	private void refreshStatsHeader() {
+		String header = "Stats – " + currentMonth.getShortName() + " " + currentYear + " – " + currentPlayerCount + " joueurs";
+		if (statsLabel == null) {
+			statsLabel = Components.getSimpleText(header, 18, LEFT_TEXT_X, INITIAL_PLAYERS_Y, HUGE_TEXT_WIDTH, BUTTON_HEIGHT);
+		} else {
+			statsLabel.setText(header);
 		}
 	}
 
