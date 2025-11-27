@@ -158,7 +158,6 @@ class FramePlayerProfiles extends TarotFrame {
 
 	private void initializeRightPanel(JPanel panel, Player player, List<Month> monthsPlayed) {
 		int y = INITIAL_LABELS_Y;
-		panel.add(statsLabel);
 		panel.add(Components.getSimpleText("Mois", 18, MID_TEXT_X, INITIAL_PLAYERS_Y, SMALL_TEXT_WIDTH, BUTTON_HEIGHT));
 		panel.add(Components.getSimpleText("Surnom", 18, RIGHT_TEXT_X, INITIAL_PLAYERS_Y, SMALL_TEXT_WIDTH, BUTTON_HEIGHT));
 		panel.add(Components.getSimpleText("Surnom générique", 18, MID_TEXT_X,  500, LARGE_TEXT_WIDTH, BUTTON_HEIGHT));
@@ -353,6 +352,7 @@ class FramePlayerProfiles extends TarotFrame {
 		String header = "Stats – " + currentMonth.getShortName() + " " + currentYear + " – " + currentPlayerCount + " joueurs";
 		if (statsLabel == null) {
 			statsLabel = Components.getSimpleText(header, 18, LEFT_TEXT_X, INITIAL_PLAYERS_Y, HUGE_TEXT_WIDTH, BUTTON_HEIGHT);
+			rightPanel.add(statsLabel);
 		} else {
 			statsLabel.setText(header);
 		}
