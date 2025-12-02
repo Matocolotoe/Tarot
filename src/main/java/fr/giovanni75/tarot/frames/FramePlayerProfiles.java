@@ -121,8 +121,7 @@ class FramePlayerProfiles extends TarotFrame {
 		playerCountBox.setSize(120, 22);
 		panel.add(playerCountBox);
 
-		refreshMonthBoxItems();
-		currentMonth = Month.NOVEMBER;
+		currentMonth = refreshMonthBoxItems();
 		monthBox.addActionListener(event -> {
 			Object selectedMonth = monthBox.getSelectedItem();
 			if (selectedMonth == null)
@@ -283,11 +282,17 @@ class FramePlayerProfiles extends TarotFrame {
 			previousLabel.setText(name == null ? Tarot.NONE_STRING : name);
 	}
 
-	private void refreshMonthBoxItems() {
+	private Month refreshMonthBoxItems() {
+		Month lastMonthPlayed = null;
 		// Insert all months played during the year
-		for (DateRecord date : Tarot.ALL_GAMES.keySet())
-			if (date.year() == currentYear)
+		for (DateRecord date : Tarot.ALL_GAMES.keySet()) {
+			if (date.year() == currentYear) {
+				if (lastMonthPlayed == null)
+					lastMonthPlayed = date.month();
 				monthBox.addItem(date.month().getName());
+			}
+		}
+		return lastMonthPlayed;
 	}
 
 	private void refreshPlayerComponents() {
