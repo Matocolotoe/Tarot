@@ -21,7 +21,7 @@ public final class Files {
 
 	private static final int BUFFER_SIZE = 1024;
 
-	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd-MM-yyyy");
+	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
 	private static void addZipEntry(ZipOutputStream zip, String path) {
 		path = getJsonPath(path);
