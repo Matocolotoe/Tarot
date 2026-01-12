@@ -15,6 +15,8 @@ import java.util.function.Function;
 public class Game implements Serializable {
 
 	private static final int BASE_SCORE = 25;
+	private static final int MAX_SCORE = 91;
+	private static final int MIN_SCORE = 0;
 	private static final int SLAM_SCORE = 200;
 
 	private static final int ATTACKER_INDEX = 0;
@@ -151,13 +153,13 @@ public class Game implements Serializable {
 		if (petitAuBout != null)
 			attackFinalScore += petitAuBout.getAttackPoints() * contract.getMultiplier();
 
-		if (attackScore == 91) {
+		if (attackScore == MAX_SCORE) {
 			if (slam == Slam.ATTACK) {
 				attackFinalScore += 2 * SLAM_SCORE;
 			} else {
 				attackFinalScore += SLAM_SCORE;
 			}
-		} else if (attackScore == 0) {
+		} else if (attackScore == MIN_SCORE) {
 			if (slam == Slam.DEFENSE) {
 				attackFinalScore -= 2 * SLAM_SCORE;
 			} else {
@@ -304,10 +306,6 @@ public class Game implements Serializable {
 		return dayOfMonth == 1 ? "1er" : String.valueOf(dayOfMonth);
 	}
 
-	private LocalStats getStats(LocalPlayer local, Function<LocalPlayer, Player> converter) {
-		return converter.apply(local).getStats(date, players.length);
-	}
-
 	public void reorderPlayers() {
 		for (int i = ATTACKER_INDEX; i < players.length; i++)
 			if (players[i].side == Side.ATTACK)
@@ -419,13 +417,13 @@ public class Game implements Serializable {
 		if (slam != null)
 			description.add("Chelem " + slam.getName().toLowerCase());
 
-		if (attackScore == 91) {
+		if (attackScore == MAX_SCORE) {
 			if (slam == Slam.ATTACK) {
 				details.add("Chelem (annoncé) : +" + 2 * SLAM_SCORE);
 			} else {
 				details.add("Chelem (non annoncé) : +" + SLAM_SCORE);
 			}
-		} else if (attackScore == 0) {
+		} else if (attackScore == MIN_SCORE) {
 			if (slam == Slam.DEFENSE) {
 				details.add("Chelem (annoncé) : -" + 2 * SLAM_SCORE);
 			} else {
