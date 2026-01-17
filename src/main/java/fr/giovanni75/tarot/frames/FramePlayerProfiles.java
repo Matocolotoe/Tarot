@@ -44,20 +44,20 @@ class FramePlayerProfiles extends TarotFrame {
 		return year;
 	}
 
-	private static List<Month> getMonthsPlayed(Player player, int year) {
-		Set<Month> months = EnumSet.noneOf(Month.class);
+	private static List<DateRecord> getMonthsPlayed(Player player) {
+		Set<DateRecord> months = new HashSet<>();
 		for (var entry : Tarot.ALL_GAMES.entrySet())
-			if (entry.getKey().year() == year)
-				for (Game game : entry.getValue())
-					for (LocalPlayer local : game.players)
-						if (local.player == player)
-							months.add(entry.getKey().month());
-		List<Month> month = new ArrayList<>(months);
-		month.sort(Month::compareTo);
-		return month;
+            for (Game game : entry.getValue())
+                for (LocalPlayer local : game.players)
+                    if (local.player == player)
+                        months.add(entry.getKey());
+		List<DateRecord> list = new ArrayList<>(months);
+		list.sort((d1, d2) -> -d1.compareTo(d2)); // Put least recent months first
+		return list;
 	}
 
-	private final Map<Player, List<Month>> calculatedMonthsPlayed = new HashMap<>();
+	// Use DateRecord instead of Month as list type to allow distinct years
+	private final Map<Player, List<DateRecord>> calculatedMonthsPlayed = new HashMap<>();
 
 	private JButton currentPlayerButton;
 	private Player currentPlayer;
@@ -155,14 +155,14 @@ class FramePlayerProfiles extends TarotFrame {
 		panel.add(yearBox);
 	}
 
-	private void initializeRightPanel(JPanel panel, Player player, List<Month> monthsPlayed) {
+	private void initializeRightPanel(JPanel panel, Player player, List<DateRecord> monthsPlayed) {
 		int y = INITIAL_LABELS_Y;
 		panel.add(Components.getSimpleText("Mois", 18, MID_TEXT_X, INITIAL_PLAYERS_Y, SMALL_TEXT_WIDTH, BUTTON_HEIGHT));
 		panel.add(Components.getSimpleText("Surnom", 18, RIGHT_TEXT_X, INITIAL_PLAYERS_Y, SMALL_TEXT_WIDTH, BUTTON_HEIGHT));
 		panel.add(Components.getSimpleText("Surnom générique", 18, MID_TEXT_X,  500, LARGE_TEXT_WIDTH, BUTTON_HEIGHT));
 		for (Month month : Month.ALL_MONTHS) {
 			JLabel label = Components.getSimpleText(month.getName(), 16, MID_TEXT_X, y, SMALL_TEXT_WIDTH, BUTTON_HEIGHT);
-			if (!monthsPlayed.contains(month))
+			if (!monthsPlayed.contains(new DateRecord(month, currentYear)))
 				label.setForeground(Color.LIGHT_GRAY);
 			monthLabels.put(month, label);
 			panel.add(label);
@@ -178,9 +178,9 @@ class FramePlayerProfiles extends TarotFrame {
 		if (source == Source.PLAYER_BUTTON_CLICK && currentPlayerButton == button)
 			return;
 
-		List<Month> monthsPlayed = calculatedMonthsPlayed.get(player);
+		List<DateRecord> monthsPlayed = calculatedMonthsPlayed.get(player);
 		if (monthsPlayed == null) {
-			monthsPlayed = getMonthsPlayed(player, currentYear);
+			monthsPlayed = getMonthsPlayed(player);
 			calculatedMonthsPlayed.put(player, monthsPlayed);
 		}
 
@@ -325,14 +325,14 @@ class FramePlayerProfiles extends TarotFrame {
 		}
 	}
 
-	private void refreshNicknames(JPanel panel, Player player, Collection<Month> monthsPlayed) {
+	private void refreshNicknames(JPanel panel, Player player, Collection<DateRecord> monthsPlayed) {
 		int y = INITIAL_LABELS_Y;
 		for (var entry : monthLabels.entrySet()) {
 			Month month = entry.getKey();
 			JLabel monthLabel = entry.getValue();
 			JLabel nickLabel = nickLabels.get(month);
-			if (monthsPlayed.contains(month)) {
-				DateRecord date = new DateRecord(month, currentYear);
+			DateRecord date = new DateRecord(month, currentYear);
+			if (monthsPlayed.contains(date)) {
 				monthLabel.setForeground(Color.BLACK);
 				if (nickLabel == null) {
 					nickLabel = Components.getSimpleText(player.getNickname(date, Tarot.NONE_STRING), 16, RIGHT_TEXT_X, y, 180, BUTTON_HEIGHT);
