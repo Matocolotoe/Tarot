@@ -24,22 +24,24 @@ public final class Leaderboards {
 
 	private enum GlobalData {
 
-		TAKES("Prises", false, false, stats -> stats.contracts),
-		OUDLERS("Bouts en moyenne", true, false, stats -> stats.oudlers),
-		SELF_CALLS("Appels à soi-même", false, false, stats -> stats.selfCalls),
-		HANDFULS("Poignées", false, true, stats -> stats.handfuls),
-		MISERIES("Misères", false, true, stats -> stats.miseries),
-		PETITS("Petits au bout", false, false, stats -> stats.petits);
+		TAKES("Prises", false, false, false, stats -> stats.contracts),
+		OUDLERS("Bouts en moyenne", true, false, false, stats -> stats.oudlers),
+		SELF_CALLS("Appels à soi-même", false, false, true, stats -> stats.selfCalls),
+		HANDFULS("Poignées", false, true, false, stats -> stats.handfuls),
+		MISERIES("Misères", false, true, false, stats -> stats.miseries),
+		PETITS("Petits au bout", false, false, false, stats -> stats.petits);
 
 		private final String header;
 		private final boolean averaged;
 		private final boolean pluralizeKey;
+		private final boolean fivePlayersOnly;
 		private final Function<GlobalStats, Map<? extends Nameable, Integer>> resolver;
 
-		GlobalData(String header, boolean averaged, boolean pluralizeKey, Function<GlobalStats, Map<? extends Nameable, Integer>> resolver) {
+		GlobalData(String header, boolean averaged, boolean pluralizeKey, boolean fivePlayersOnly, Function<GlobalStats, Map<? extends Nameable, Integer>> resolver) {
 			this.header = header;
 			this.averaged = averaged;
 			this.pluralizeKey = pluralizeKey;
+			this.fivePlayersOnly = fivePlayersOnly;
 			this.resolver = resolver;
 		}
 
@@ -47,26 +49,26 @@ public final class Leaderboards {
 
 	private enum PlayerData {
 
-		TOTAL_SCORE("Score", "Score total", stats -> stats.totalScore, Object::toString),
+		TOTAL_SCORE("Score", "Score total", false, stats -> stats.totalScore, Object::toString),
 
-		PLAYED_GAMES("Jouées", "Parties jouées", stats -> Maps.sum(stats.playedGames), Object::toString),
+		PLAYED_GAMES("Jouées", "Parties jouées", false, stats -> Maps.sum(stats.playedGames), Object::toString),
 
-		CALLED_TIMES("Appelé·e", null,
+		CALLED_TIMES("Appelé·e", null, true,
 				stats -> Maps.sum(stats.calledTimes),
 				value -> value.intValue() == 0 ? NONE_STRING : value + " fois"),
 
-		SELF_CALLED_TIMES("Seul·e", null,
+		SELF_CALLED_TIMES("Seul·e", null, true,
 				stats -> Maps.sum(stats.selfCalls),
 				value -> value.intValue() == 0 ? NONE_STRING : value + " fois"),
 
-		TAKES("Prises", null,
+		TAKES("Prises", null, false,
 				stats -> {
 					int successes = Maps.sum(stats.successfulTakes);
 					int total = successes + Maps.sum(stats.failedTakes);
 					return total == 0 ? -1 : new Fraction(successes, total);
 				}, value -> value.intValue() == -1 ? NONE_STRING : value.toString()),
 
-		WIN_RATE("Réussite", "Taux de réussite",
+		WIN_RATE("Réussite", "Taux de réussite", false,
 				stats -> {
 					int successes = Maps.sum(stats.successfulTakes);
 					int total = successes + Maps.sum(stats.failedTakes);
@@ -76,12 +78,14 @@ public final class Leaderboards {
 
 		private final String name;
 		private final String leaderboardName;
+		private final boolean fivePlayersOnly;
 		private final Function<LocalStats, Number> valueResolver;
 		private final Function<Number, String> valueDisplayer;
 
-		PlayerData(String name, String leaderboardName, Function<LocalStats, Number> valueResolver, Function<Number, String> valueDisplayer) {
+		PlayerData(String name, String leaderboardName, boolean fivePlayersOnly, Function<LocalStats, Number> valueResolver, Function<Number, String> valueDisplayer) {
 			this.name = name;
 			this.leaderboardName = leaderboardName;
+			this.fivePlayersOnly = fivePlayersOnly;
 			this.valueResolver = valueResolver;
 			this.valueDisplayer = valueDisplayer;
 		}
@@ -119,16 +123,22 @@ public final class Leaderboards {
 	private static final double HEADER_HEIGHT = 20.5;
 
 	private static final int GLOBAL_DATA_ORIGIN = 0;
-	private static final int MAX_COLUMN_NUMBER;
+	private static final int MAX_COLUMN_NUMBER_FIVE;
+	private static final int MAX_COLUMN_NUMBER_FOUR_THREE;
 	private static final int STRUCTURE_COLUMN_MARGIN = 3;
 
 	static {
 		// Player names (starts at 0) + Individiual data + Margin with leaderboards
 		int column = PLAYER_DATA.length + 1;
-		for (PlayerData data : PLAYER_DATA)
+		int fivePlayersOnlyStats = 0;
+		for (PlayerData data : PLAYER_DATA) {
 			if (data.leaderboardName != null)
 				column += STRUCTURE_COLUMN_MARGIN;
-		MAX_COLUMN_NUMBER = column;
+			if (data.fivePlayersOnly)
+				fivePlayersOnlyStats++;
+		}
+		MAX_COLUMN_NUMBER_FIVE = column;
+		MAX_COLUMN_NUMBER_FOUR_THREE = column - fivePlayersOnlyStats;
 	}
 
 	private static void createLeaderboards(DateRecord date, int players, Worksheet ws, int initialRow) {
@@ -199,13 +209,14 @@ public final class Leaderboards {
 										 Worksheet ws, int initialRow) {
 		/* Global column width */
 		int column;
-		for (column = 0; column <= MAX_COLUMN_NUMBER; column++)
+		int maxColumn = players == 5 ? MAX_COLUMN_NUMBER_FIVE : MAX_COLUMN_NUMBER_FOUR_THREE;
+		for (column = 0; column <= maxColumn; column++)
 			ws.width(column, COLUMN_WIDTH);
 
 		/* Header */
 		ws.rowHeight(initialRow, HEADER_HEIGHT);
 		ws.value(initialRow, 0, "Tarot à " + players + " – " + date.getName());
-		ws.range(initialRow, 0, initialRow, MAX_COLUMN_NUMBER).style()
+		ws.range(initialRow, 0, initialRow, maxColumn).style()
 				.bold().fontColor(Color.RED).fontSize(13)
 				.horizontalAlignment("center")
 				.verticalAlignment("center")
@@ -227,6 +238,9 @@ public final class Leaderboards {
 		column = 1;
 		for (var entry : unsortedPairs.entrySet()) {
 			PlayerData data = entry.getKey();
+			if (players < 5 && data.fivePlayersOnly)
+				continue;
+
 			ws.value(initialRow + 1, column, data.name);
 			ws.style(initialRow + 1, column).bold()
 					.horizontalAlignment("center")
@@ -252,6 +266,9 @@ public final class Leaderboards {
 		row = initialRow + 1;
 		for (var entry : sortedPairs.entrySet()) {
 			PlayerData data = entry.getKey();
+			if (players < 5 && data.fivePlayersOnly)
+				continue;
+
 			ws.value(initialRow + 1, column, data.leaderboardName);
 			ws.range(initialRow + 1, column, initialRow + 1, column + 1).style()
 					.bold()
@@ -295,6 +312,9 @@ public final class Leaderboards {
 		column = GLOBAL_DATA_ORIGIN;
 		int globalDataMargin = 0;
 		for (GlobalData data : GLOBAL_DATA) {
+			if (players < 5 && data.fivePlayersOnly)
+				continue;
+
 			ws.value(row + 2, column, data.header);
 			ws.range(row + 2, column, row + 2, column + 1).style()
 					.bold()
