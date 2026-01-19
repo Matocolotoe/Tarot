@@ -19,7 +19,7 @@ public final class Leaderboards {
 
 	private static final DecimalFormat PERCENTAGE_DECIMAL_FORMAT = new DecimalFormat("#0.0%");
 
-	private static final int WINRATE_MINIMUM_TAKES = 3;
+	private static final int WINRATE_MINIMUM_WEIGHTED_TAKES = 2;
 	private static final String NONE_STRING = "–";
 
 	private enum GlobalData {
@@ -70,9 +70,10 @@ public final class Leaderboards {
 
 		WIN_RATE("Réussite", "Taux de réussite", false,
 				stats -> {
+					if (stats.getWeightedTakes() < WINRATE_MINIMUM_WEIGHTED_TAKES)
+						return -1;
 					int successes = Maps.sum(stats.successfulTakes);
-					int total = successes + Maps.sum(stats.failedTakes);
-					return total < WINRATE_MINIMUM_TAKES ? -1 : new Fraction(successes, total);
+					return new Fraction(successes, successes + Maps.sum(stats.failedTakes));
 				},
 				value -> value.intValue() == -1 ? "" : PERCENTAGE_DECIMAL_FORMAT.format(value));
 

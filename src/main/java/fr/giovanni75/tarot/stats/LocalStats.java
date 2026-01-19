@@ -79,4 +79,13 @@ public final class LocalStats {
 		return result;
 	}
 
+	public int getWeightedTakes() {
+		int takes = 0;
+		for (Contract contract : Contract.ALL_CONTRACTS) {
+			int successes = successfulTakes.getOrDefault(contract, 0);
+			takes += (successes + failedTakes.getOrDefault(contract, 0)) / contract.getInverseWeight();
+		}
+		return takes;
+	}
+
 }
