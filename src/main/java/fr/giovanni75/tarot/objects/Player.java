@@ -100,6 +100,11 @@ public class Player implements Comparable<Player>, Serializable {
 		return localStats;
 	}
 
+	@Override
+	public int hashCode() {
+		return id;
+	}
+
 	public void setNickname(DateRecord date, String nickname) {
 		if (nickname == null) {
 			monthlyNicknames.remove(date);
