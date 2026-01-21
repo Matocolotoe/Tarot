@@ -411,9 +411,10 @@ class FrameNewGame extends TarotFrame implements ActionListener {
 
 			System.arraycopy(players, 0, baseGame.players, 0, numberOfPlayers);
 			baseGame.reorderPlayers();
-
 			baseGame.edit();
 			baseGame.applyResults(Game.DEFAULT_CONVERTER, Game.ADD_GAME_DIRECTION);
+
+			Game.recomputeBestTurns(baseGame.date, numberOfPlayers);
 			Components.popup("Partie modifiée avec succès.");
 			dispose();
 			FrameMainMenu.MAIN_MENU.reloadGames();

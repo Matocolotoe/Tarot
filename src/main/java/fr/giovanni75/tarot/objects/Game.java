@@ -33,6 +33,31 @@ public class Game implements Serializable {
 	public static final int PLAYER_STATS = 8;
 	public static final int WRITE_INFO = 16;
 
+	public static void recomputeBestTurns(DateRecord date, int players) {
+		for (Game game : Tarot.ALL_GAMES.get(date)) {
+			if (game.players.length == players) {
+				for (LocalPlayer local : game.players) {
+					LocalStats stats = local.player.getStats(date, players);
+					for (Contract contract : Contract.ALL_CONTRACTS) {
+						stats.bestTurns.put(contract, 0);
+						stats.worstTurns.put(contract, 0);
+					}
+				}
+			}
+		}
+		for (Game game : Tarot.ALL_GAMES.get(date)) {
+			if (game.players.length == players) {
+				for (LocalPlayer local : game.players) {
+					LocalStats stats = local.player.getStats(date, players);
+					if (local.score > stats.bestTurns.get(game.contract))
+						stats.bestTurns.put(game.contract, local.score);
+					if (local.score < stats.worstTurns.get(game.contract))
+						stats.worstTurns.put(game.contract, local.score);
+				}
+			}
+		}
+	}
+
 	private final List<String> description = new ArrayList<>();
 	private final List<String> details = new ArrayList<>();
 
@@ -260,6 +285,7 @@ public class Game implements Serializable {
 		List<Game> games = Tarot.ALL_GAMES.get(date);
 		int index = games.indexOf(this);
 		games.remove(this);
+		recomputeBestTurns(date, players.length);
 
 		// Last game in the month was cleared
 		if (games.isEmpty())
