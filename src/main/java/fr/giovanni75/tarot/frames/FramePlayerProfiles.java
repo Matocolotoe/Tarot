@@ -250,6 +250,7 @@ class FramePlayerProfiles extends TarotFrame {
 		int lastPlayerID = Tarot.ORDERED_PLAYERS.size() + 1;
 		Player player = Tarot.addPlayer(lastPlayerID, name, new HashMap<>(), new HashMap<>());
 		player.write("players");
+		Tarot.ORDERED_PLAYERS.sort(Player::compareTo);
 		Components.popup("Joueur ajouté avec succès.");
 
 		playerCountLabel.setText(lastPlayerID + " joueurs");
