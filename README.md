@@ -39,7 +39,7 @@ Lorsque vous cliquez sur `Exporter les données` dans la rubrique `Données` ou 
 
 ![plot](./src/main/resources/leaderboard.png)
 
-_Seuls les taux de réussite des personnes ayant pris plus de 3 fois apparaissent dans la grille._
+_Seuls les taux de réussite des personnes ayant pris suffisamment de fois apparaissent dans la grille._
 
 ### Sauvegardes
 

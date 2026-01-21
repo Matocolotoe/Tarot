@@ -79,7 +79,7 @@ public final class LocalStats {
 		return result;
 	}
 
-	public int getWeightedTakes() {
+	int getWeightedTakes() {
 		int takes = 0;
 		for (Contract contract : Contract.ALL_CONTRACTS) {
 			int successes = successfulTakes.getOrDefault(contract, 0);
