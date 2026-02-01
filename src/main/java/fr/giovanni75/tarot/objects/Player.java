@@ -60,7 +60,7 @@ public class Player implements Comparable<Player>, Serializable {
 	}
 
 	public String getDisplayName(DateRecord date) {
-		return getNickname(date, yearlyNicknames.getOrDefault(date.year(), name));
+		return date.month() == null ? name : getNickname(date, yearlyNicknames.getOrDefault(date.year(), name));
 	}
 
 	public int getID() {

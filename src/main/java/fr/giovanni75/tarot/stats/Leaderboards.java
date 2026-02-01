@@ -1,8 +1,9 @@
 package fr.giovanni75.tarot.stats;
 
 import fr.giovanni75.tarot.*;
-import fr.giovanni75.tarot.enums.Contract;
-import fr.giovanni75.tarot.enums.Nameable;
+import fr.giovanni75.tarot.enums.*;
+import fr.giovanni75.tarot.objects.Game;
+import fr.giovanni75.tarot.objects.LocalPlayer;
 import fr.giovanni75.tarot.objects.Player;
 import org.dhatim.fastexcel.BorderStyle;
 import org.dhatim.fastexcel.Color;
@@ -147,10 +148,20 @@ public final class Leaderboards {
 		if (players < 3)
 			return;
 
+		int year = date.year();
+
 		List<Player> playerList = new ArrayList<>();
-		for (Player player : Tarot.ORDERED_PLAYERS)
-			if (player.getPlayedGames(date, players) > 0)
+		for (Player player : Tarot.ORDERED_PLAYERS) {
+			int count = 0;
+			if (date.month() == null) {
+				for (Month month : Month.ALL_MONTHS)
+					count += player.getPlayedGames(new DateRecord(month, year), players);
+			} else {
+				count = player.getPlayedGames(date, players);
+			}
+			if (count > 0)
 				playerList.add(player);
+		}
 
 		// No stats recorded, just skip
 		if (playerList.isEmpty()) {
@@ -167,7 +178,27 @@ public final class Leaderboards {
 		for (PlayerData data : PLAYER_DATA) {
 			List<StatsPair> entries = new ArrayList<>();
 			for (Player player : playerList) {
-				Number value = data.getValue(date, player, players);
+				Number value;
+				if (date.month() == null) {
+					// Special cases, need to be treated separately
+					if (data == PlayerData.TAKES || data == PlayerData.WIN_RATE) {
+						int wins = 0;
+						int total = 0;
+						for (Month month : Month.ALL_MONTHS) {
+							int successes = Maps.sum(player.getStats(new DateRecord(month, year), players).successfulTakes);
+							wins += successes;
+							total += successes + Maps.sum(player.getStats(new DateRecord(month, year), players).failedTakes);
+						}
+						value = total > 0 ? new Fraction(wins, total) : -1;
+					} else {
+						int total = 0;
+						for (Month month : Month.ALL_MONTHS)
+							total += data.getValue(new DateRecord(month, year), player, players).intValue();
+						value = total;
+					}
+				} else {
+					value = data.getValue(date, player, players);
+				}
 				entries.add(new StatsPair(player, value));
 			}
 			// Store entries that will be displayed in the left column, sorted by player names/nicknames (same thing for lowercase)
@@ -196,6 +227,9 @@ public final class Leaderboards {
 		try (FileOutputStream os = new FileOutputStream("data/leaderboards/Score tarot " + year + ".xlsx");
 			 Workbook wb = new Workbook(os, "Tarot", null)) {
 			wb.setGlobalDefaultFont(FONT_NAME, FONT_SIZE);
+			// Put annual stats first if year has ended
+			if (Calendar.getInstance().get(Calendar.YEAR) > year)
+				createLeaderboards(new DateRecord(null, year), 5, wb.newWorksheet("Total " + year), 0);
 			for (DateRecord date : dates)
 				// Start at 5 players, then recursive calls will follow for 4 and 3 players
 				createLeaderboards(date, 5, wb.newWorksheet(date.month().getName()), 0);
@@ -215,8 +249,10 @@ public final class Leaderboards {
 			ws.width(column, COLUMN_WIDTH);
 
 		/* Header */
+		boolean isAnnualStats = date.month() == null;
+		int year = date.year();
 		ws.rowHeight(initialRow, HEADER_HEIGHT);
-		ws.value(initialRow, 0, "Tarot à " + players + " – " + date.getName());
+		ws.value(initialRow, 0, "Tarot à " + players + " – " + (isAnnualStats ? "Statistiques annuelles " + year : date.getName()));
 		ws.range(initialRow, 0, initialRow, maxColumn).style()
 				.bold().fontColor(Color.RED).fontSize(13)
 				.horizontalAlignment("center")
@@ -309,7 +345,7 @@ public final class Leaderboards {
 		}
 
 		/* Global entries */
-		GlobalStats stats = Tarot.getGlobalStats(date, players);
+		GlobalStats stats = isAnnualStats ? null : Tarot.getGlobalStats(date, players);
 		column = GLOBAL_DATA_ORIGIN;
 		int globalDataMargin = 0;
 		for (GlobalData data : GLOBAL_DATA) {
@@ -324,7 +360,18 @@ public final class Leaderboards {
 					.merge().set();
 
 			int i = 3;
-			var map = data.resolver.apply(stats);
+			Map<Nameable, Integer> map = new LinkedHashMap<>(); // Use LinkedHashMap to preserve order of enum entries
+			if (stats == null) {
+				for (Month month : Month.ALL_MONTHS) {
+					var monthDataMap = data.resolver.apply(Tarot.getGlobalStats(new DateRecord(month, year), players));
+					for (var entry : monthDataMap.entrySet()) {
+						Nameable key = entry.getKey();
+						map.put(key, map.getOrDefault(key, 0) + monthDataMap.get(key));
+					}
+				}
+			} else {
+				map.putAll(data.resolver.apply(stats));
+			}
 			if (map.size() > globalDataMargin)
 				globalDataMargin = map.size();
 
@@ -340,7 +387,15 @@ public final class Leaderboards {
 						if (value == 0) {
 							ws.value(row + i, column + 1, NONE_STRING);
 						} else {
-							ws.value(row + i, column + 1, Utils.format(value / stats.contracts.get(contract)));
+							int total;
+							if (stats == null) {
+								total = 0;
+								for (Month month : Month.ALL_MONTHS)
+									total += Tarot.getGlobalStats(new DateRecord(month, year), players).contracts.get(contract);
+							} else {
+								total = stats.contracts.get(contract);
+							}
+							ws.value(row + i, column + 1, Utils.format(value / total));
 						}
 					} else {
 						throw new IllegalArgumentException("Keys need to extend Contract for averaged data");
@@ -355,7 +410,15 @@ public final class Leaderboards {
 			ws.style(row + i, column).bold().verticalAlignment("center").set();
 
 			if (data.averaged) {
-				ws.value(row + i, column + 1, Utils.format((double) Maps.sum(map) / Maps.sum(stats.contracts)));
+				int total;
+				if (stats == null) {
+					total = 0;
+					for (Month month : Month.ALL_MONTHS)
+						total += Maps.sum(Tarot.getGlobalStats(new DateRecord(month, year), players).contracts);
+				} else {
+					total = Maps.sum(stats.contracts);
+				}
+				ws.value(row + i, column + 1, Utils.format((double) Maps.sum(map) / total));
 			} else {
 				ws.value(row + i, column + 1, Maps.sum(map));
 			}
