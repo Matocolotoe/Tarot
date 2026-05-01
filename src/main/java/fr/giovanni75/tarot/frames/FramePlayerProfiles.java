@@ -168,7 +168,7 @@ class FramePlayerProfiles extends TarotFrame {
 			panel.add(label);
 			y += Y_OFFSET;
 		}
-		nameLabel = Components.getSimpleText(player.getName(), 25, LEFT_TEXT_X, 25, LARGE_TEXT_WIDTH, 30);
+		nameLabel = Components.getSimpleText(player.getName(), 25, LEFT_TEXT_X, 25, LARGE_TEXT_WIDTH, 35);
 		panel.add(nameLabel);
 		refreshStatsHeader();
 	}
