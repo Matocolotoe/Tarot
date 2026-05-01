@@ -22,7 +22,7 @@ public final class GlobalStats {
 		// Always populate fields with contracts to make global data display look more uniform
 		for (Contract contract : Contract.ALL_CONTRACTS) {
 			contracts.put(contract, 0);
-			oudlers.put(contract, 0);
+			oudlers.put(contract, -1); // Averaged so filled with -1 to display 0 instead of NONE_STRING when there is indeed 0 as average
 			selfCalls.put(contract, 0);
 		}
 	}

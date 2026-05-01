@@ -384,7 +384,7 @@ public final class Leaderboards {
 					Nameable nameable = entry.getKey();
 					if (nameable instanceof Contract contract) {
 						double value = (double) entry.getValue();
-						if (value == 0) {
+						if (value == -1) {
 							ws.value(row + i, column + 1, NONE_STRING);
 						} else {
 							int total;
